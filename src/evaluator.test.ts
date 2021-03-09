@@ -12,7 +12,7 @@ describe(evaluate, () => {
     expect(parseAndEval("false")).toBe(false);
   });
 
-  test("arithmetic operatoin", () => {
+  test("arithmetic operation", () => {
     expect(parseAndEval("1+1")).toBe(2);
     expect(parseAndEval("1-1")).toBe(0);
     expect(parseAndEval("2*3")).toBe(6);
