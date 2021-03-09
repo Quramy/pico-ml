@@ -23,6 +23,18 @@ const exampleExpressions: Record<string, () => ExpressionNode> = {
       kind: "NumberLiteral",
       value: 3
     }
+  }),
+  "let x = 1 + 2 in x": () => ({
+    kind: "LetExpression",
+    identifier: {
+      kind: "Identifier",
+      name: "x"
+    },
+    binding: exampleExpressions["1+2"](),
+    exp: {
+      kind: "Identifier",
+      name: "x"
+    }
   })
 };
 
@@ -31,6 +43,9 @@ describe(parse, () => {
     expect(parse("1 + 2")).toEqual<ExpressionNode>(exampleExpressions["1+2"]());
     expect(parse("(1 + 2) * 3")).toEqual<ExpressionNode>(
       exampleExpressions["(1+2)*3"]()
+    );
+    expect(parse("let x = 1 + 2 in x")).toEqual<ExpressionNode>(
+      exampleExpressions["let x = 1 + 2 in x"]()
     );
   });
 });

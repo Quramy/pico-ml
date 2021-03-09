@@ -25,6 +25,14 @@ describe(tokenize, () => {
       { tokenKind: "Else" },
       { tokenKind: "Boolean", value: false }
     ]);
-    expect(() => tokenize("truefalse")).toThrowError();
+    expect(tokenize("let x = 1 in x")).toEqual<Tokens>([
+      { tokenKind: "Let" },
+      { tokenKind: "Variable", value: "x" },
+      { tokenKind: "Equal" },
+      { tokenKind: "Number", value: 1 },
+      { tokenKind: "In" },
+      { tokenKind: "Variable", value: "x" }
+    ]);
+    expect(() => tokenize("#")).toThrowError();
   });
 });

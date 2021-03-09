@@ -1,29 +1,67 @@
-import { ExpressionNode } from "./ast";
+import { ExpressionNode, IdentifierNode } from "./ast";
 
-type EvaluetionResult = number | boolean | { falure: true };
+type RHS = number | boolean;
+
+type EvaluationFailure = { failure: true };
+type EvaluationResult = RHS | EvaluationFailure;
+
+function isFailed(result: EvaluationResult): result is EvaluationFailure {
+  return typeof result === "object" && result.failure === true;
+}
 
 function tryNumber(
-  left: EvaluetionResult,
-  right: EvaluetionResult,
-  cb: (a: number, b: number) => EvaluetionResult
-): EvaluetionResult {
+  left: EvaluationResult,
+  right: EvaluationResult,
+  cb: (a: number, b: number) => EvaluationResult
+): EvaluationResult {
   if (typeof left === "number" && typeof right === "number") {
     return cb(left, right);
   } else {
     return {
-      falure: true
+      failure: true
     };
   }
 }
 
-export function evaluate(expression: ExpressionNode): EvaluetionResult {
+interface Environment {
+  get(identifier: IdentifierNode): RHS | undefined;
+}
+
+class RootEnvironment implements Environment {
+  get(identifier: IdentifierNode) {
+    return undefined;
+  }
+}
+
+class ChildEnvironment implements Environment {
+  constructor(
+    private identifier: IdentifierNode,
+    private value: RHS,
+    private parent: Environment
+  ) {}
+  get(identifier: IdentifierNode) {
+    if (this.identifier?.name === identifier.name) {
+      return this.value;
+    }
+    return this.parent.get(identifier);
+  }
+}
+
+function evaluateWithEnv(
+  expression: ExpressionNode,
+  env: Environment
+): EvaluationResult {
   if (expression.kind === "BoolLiteral") {
     return expression.value;
   } else if (expression.kind === "NumberLiteral") {
     return expression.value;
+  } else if (expression.kind === "Identifier") {
+    const v = env.get(expression);
+    if (!v) return { failure: true };
+    return v;
   } else if (expression.kind === "BinaryExpression") {
-    const resultLeft = evaluate(expression.left);
-    const resultRight = evaluate(expression.right);
+    const resultLeft = evaluateWithEnv(expression.left, env);
+    const resultRight = evaluateWithEnv(expression.right, env);
     if (expression.op === "Add") {
       return tryNumber(resultLeft, resultRight, (l, r) => l + r);
     } else if (expression.op === "Multiply") {
@@ -34,16 +72,26 @@ export function evaluate(expression: ExpressionNode): EvaluetionResult {
       return tryNumber(resultLeft, resultRight, (l, r) => l < r);
     }
   } else if (expression.kind === "IfExpression") {
-    const condition = evaluate(expression.cond);
+    const condition = evaluateWithEnv(expression.cond, env);
     if (typeof condition === "boolean") {
       if (condition) {
-        return evaluate(expression.then);
+        return evaluateWithEnv(expression.then, env);
       } else {
-        return evaluate(expression.else);
+        return evaluateWithEnv(expression.else, env);
       }
     } else {
-      return { falure: true };
+      return { failure: true };
     }
+  } else if (expression.kind === "LetExpression") {
+    const { identifier, binding, exp } = expression;
+    const boundValue = evaluateWithEnv(binding, env);
+    if (isFailed(boundValue)) return { failure: true };
+    const childEnv = new ChildEnvironment(identifier, boundValue, env);
+    return evaluateWithEnv(exp, childEnv);
   }
   throw new Error("invalid node");
+}
+
+export function evaluate(expression: ExpressionNode) {
+  return evaluateWithEnv(expression, new RootEnvironment());
 }

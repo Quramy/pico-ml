@@ -32,6 +32,10 @@ export interface LessThanToken {
   tokenKind: "LessThan";
 }
 
+export interface EqualToken {
+  tokenKind: "Equal";
+}
+
 export interface IfToken {
   tokenKind: "If";
 }
@@ -44,6 +48,19 @@ export interface ElseToken {
   tokenKind: "Else";
 }
 
+export interface LetToken {
+  tokenKind: "Let";
+}
+
+export interface InToken {
+  tokenKind: "In";
+}
+
+export interface VariableToken {
+  tokenKind: "Variable";
+  value: string;
+}
+
 export type Token =
   | NumberToken
   | BoolToken
@@ -53,9 +70,13 @@ export type Token =
   | MinusToken
   | TimesToken
   | LessThanToken
+  | EqualToken
   | IfToken
   | ThenToken
-  | ElseToken;
+  | ElseToken
+  | LetToken
+  | InToken
+  | VariableToken;
 
 export type TokenKind = Token["tokenKind"];
 export type Tokens = Token[];
@@ -101,10 +122,16 @@ function reservedWord(input: string, word: string) {
 }
 
 function integer(input: string) {
-  const hit = input.match(/(\d+)/);
+  const hit = input.match(/^(\d+)/);
   if (!hit) return false;
   const v = Number.parseInt(hit[1], 10);
   return [v, hit[1]] as const;
+}
+
+function variable(input: string) {
+  const hit = input.match(/^([a-zA-Z\$_][a-zA-Z\$_0-9]*)/);
+  if (!hit) return false;
+  return hit[1];
 }
 
 export function tokenize(input: string) {
@@ -112,8 +139,29 @@ export function tokenize(input: string) {
 
   const matcher = new Matcher()
     .match(
-      () => input.startsWith(" "),
+      () => input.startsWith("\r\n"),
+      () => (input = input.slice(2))
+    )
+    .match(
+      () =>
+        input.startsWith(" ") ||
+        input.startsWith("\n") ||
+        input.startsWith("\t"),
       () => (input = input.slice(1))
+    )
+    .match(
+      () => reservedWord(input, "let"),
+      v => {
+        tokens.push({ tokenKind: "Let" });
+        input = input.slice(v);
+      }
+    )
+    .match(
+      () => reservedWord(input, "in"),
+      v => {
+        tokens.push({ tokenKind: "In" });
+        input = input.slice(v);
+      }
     )
     .match(
       () => reservedWord(input, "true"),
@@ -193,10 +241,24 @@ export function tokenize(input: string) {
       }
     )
     .match(
+      () => input.startsWith("="),
+      () => {
+        tokens.push({ tokenKind: "Equal" });
+        input = input.slice(1);
+      }
+    )
+    .match(
       () => integer(input),
       ([value, strValue]) => {
         tokens.push({ tokenKind: "Number", value });
         input = input.slice(strValue.length);
+      }
+    )
+    .match(
+      () => variable(input),
+      value => {
+        tokens.push({ tokenKind: "Variable", value });
+        input = input.slice(value.length);
       }
     )
     .default(() => {
