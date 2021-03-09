@@ -71,7 +71,7 @@ function consume<T extends Token, K extends TokenKind = T["tokenKind"]>(
     const t = tokens.shift() as T;
     return t;
   }
-  throw new Error("");
+  throw new Error(`Expected ${kind}, but ${tokens[0]?.tokenKind} found.`);
 }
 
 function expect(tokens: Tokens, kind: TokenKind) {
