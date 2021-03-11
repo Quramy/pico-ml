@@ -78,6 +78,21 @@ const fixture = {
       param: id("x"),
       body: num(1)
     }),
+  "fun x -> if true then 0 else 1": () => expr({
+    kind: "FunctionDefinition",
+    param: id("x"),
+    body: fixture["if true then 0 else 1"](),
+  }),
+  "fun f -> if true then fun x -> 1 else fun x -> 1": () => expr({
+    kind: "FunctionDefinition",
+    param: id("f"),
+    body: {
+      kind: "IfExpression",
+      cond: bool(true),
+      then: fixture["fun x -> 1"](),
+      else: fixture["fun x -> 1"](),
+    },
+  }),
   "f x": () =>
     expr({
       kind: "FunctionApplication",
