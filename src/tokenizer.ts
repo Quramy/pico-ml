@@ -36,6 +36,10 @@ export interface EqualToken {
   tokenKind: "Equal";
 }
 
+export interface RightArrowToken {
+  tokenKind: "RightArrow";
+}
+
 export interface IfToken {
   tokenKind: "If";
 }
@@ -56,6 +60,10 @@ export interface InToken {
   tokenKind: "In";
 }
 
+export interface FunToken {
+  tokenKind: "Fun";
+}
+
 export interface VariableToken {
   tokenKind: "Variable";
   value: string;
@@ -71,11 +79,13 @@ export type Token =
   | TimesToken
   | LessThanToken
   | EqualToken
+  | RightArrowToken
   | IfToken
   | ThenToken
   | ElseToken
   | LetToken
   | InToken
+  | FunToken
   | VariableToken;
 
 export type TokenKind = Token["tokenKind"];
@@ -139,15 +149,22 @@ export function tokenize(input: string) {
 
   const matcher = new Matcher()
     .match(
-      () => input.startsWith("\r\n"),
-      () => (input = input.slice(2))
-    )
-    .match(
       () =>
         input.startsWith(" ") ||
         input.startsWith("\n") ||
         input.startsWith("\t"),
       () => (input = input.slice(1))
+    )
+    .match(
+      () => input.startsWith("\r\n"),
+      () => (input = input.slice(2))
+    )
+    .match(
+      () => reservedWord(input, "fun"),
+      v => {
+        tokens.push({ tokenKind: "Fun" });
+        input = input.slice(v);
+      }
     )
     .match(
       () => reservedWord(input, "let"),
@@ -196,6 +213,13 @@ export function tokenize(input: string) {
       v => {
         tokens.push({ tokenKind: "Else" });
         input = input.slice(v);
+      }
+    )
+    .match(
+      () => input.startsWith("->"),
+      () => {
+        tokens.push({ tokenKind: "RightArrow" });
+        input = input.slice(2);
       }
     )
     .match(

@@ -16,7 +16,10 @@ import {
   LetToken,
   EqualToken,
   InToken,
-  VariableToken
+  VariableToken,
+  FunToken,
+  RightArrowToken,
+  tokenize
 } from "./tokenizer";
 
 export interface NumberLiteralNode {
@@ -55,15 +58,29 @@ export interface LetExpressionNode {
   exp: ExpressionNode;
 }
 
+export interface FunctionDefinitionNode {
+  kind: "FunctionDefinition";
+  param: IdentifierNode;
+  body: ExpressionNode;
+}
+
+export interface FunctionApplicationNode {
+  kind: "FunctionApplication";
+  callee: ExpressionNode;
+  argument: ExpressionNode;
+}
+
 export type ExpressionNode =
   | NumberLiteralNode
   | BoolLiteralNode
   | BinaryExpressionNode
   | IfExpressionNode
   | IdentifierNode
-  | LetExpressionNode;
+  | LetExpressionNode
+  | FunctionDefinitionNode
+  | FunctionApplicationNode;
 
-function consume<T extends Token, K extends TokenKind = T["tokenKind"]>(
+function consume<T extends Token = Token, K extends TokenKind = T["tokenKind"]>(
   tokens: Tokens,
   kind: K
 ) {
@@ -74,32 +91,42 @@ function consume<T extends Token, K extends TokenKind = T["tokenKind"]>(
   throw new Error(`Expected ${kind}, but ${tokens[0]?.tokenKind} found.`);
 }
 
-function expect(tokens: Tokens, kind: TokenKind) {
+function expect(tokens: Tokens, ...kinds: TokenKind[]) {
   if (!tokens.length) return false;
-  return tokens[0].tokenKind === kind;
+  return kinds.some(kind => tokens[0].tokenKind === kind);
 }
 
 /**
  *
- * expr   := cond | "if" expr "then" expr "else" expr | "let" id "=" expr "in" expr
- * cond   := add("<" add)*
- * add    := mul("+" mul | "-" mul)*
- * mul    := prim("*" prim)*
- * prim   := "(" expr ")" | number | bool | id
- * number := "-"? nat
- * id     := regExp([a-zA-Z$_][a-zA-Z$_0-9]*)
- * nat    := "0" | "1" | "2" |  ...
- * bool   := "true" | "false"
+ * expr   ::= comp | "if" expr "then" expr "else" expr | "let" id "=" expr "in" expr | "fun" id "->" expr
+ * comp   ::= add("<" expr)*
+ * add    ::= mul("+" expr | "-" expr)*
+ * mul    ::= app("*" expr)*
+ * app    ::= prim(prim)*
+ * prim   ::= id | bool | number | "(" expr ")"
+ * number ::= "0" | "1" | "2" |  ...
+ * id     ::= regExp([a-zA-Z$_][a-zA-Z$_0-9]*)
+ * bool   ::= "true" | "false"
  *
  */
 export function createTree(tokens: Tokens): ExpressionNode {
   const expr = (): ExpressionNode => {
-    if (expect(tokens, "Let")) {
-      consume<LetToken>(tokens, "Let");
+    if (expect(tokens, "Fun")) {
+      consume(tokens, "Fun");
       const id = identifier();
-      consume<EqualToken>(tokens, "Equal");
+      consume(tokens, "RightArrow");
+      const body = expr();
+      return {
+        kind: "FunctionDefinition",
+        param: id,
+        body
+      } as FunctionDefinitionNode;
+    } else if (expect(tokens, "Let")) {
+      consume(tokens, "Let");
+      const id = identifier();
+      consume(tokens, "Equal");
       const binding = expr();
-      consume<InToken>(tokens, "In");
+      consume(tokens, "In");
       const exp = expr();
       return {
         kind: "LetExpression",
@@ -108,11 +135,11 @@ export function createTree(tokens: Tokens): ExpressionNode {
         exp
       } as LetExpressionNode;
     } else if (expect(tokens, "If")) {
-      consume<IfToken>(tokens, "If");
+      consume(tokens, "If");
       const condition = expr();
-      consume<ThenToken>(tokens, "Then");
+      consume(tokens, "Then");
       const thenNode = expr();
-      consume<ElseToken>(tokens, "Else");
+      consume(tokens, "Else");
       const elseNode = expr();
       return {
         kind: "IfExpression",
@@ -121,18 +148,18 @@ export function createTree(tokens: Tokens): ExpressionNode {
         else: elseNode
       } as IfExpressionNode;
     }
-    return cond();
+    return comp();
   };
 
-  const cond = (): ExpressionNode => {
+  const comp = (): ExpressionNode => {
     let node: ExpressionNode = add();
     while (expect(tokens, "LessThan")) {
-      consume<LessThanToken>(tokens, "LessThan");
+      consume(tokens, "LessThan");
       node = {
         kind: "BinaryExpression",
         op: "LessThan",
         left: node,
-        right: add()
+        right: expr()
       } as BinaryExpressionNode;
     }
     return node;
@@ -141,51 +168,67 @@ export function createTree(tokens: Tokens): ExpressionNode {
   const add = (): ExpressionNode => {
     let node: ExpressionNode = mul();
     while (expect(tokens, "Plus")) {
-      consume<PlusToken>(tokens, "Plus");
+      consume(tokens, "Plus");
       node = {
         kind: "BinaryExpression",
         op: "Add",
         left: node,
-        right: mul()
+        right: expr()
       } as BinaryExpressionNode;
     }
     while (expect(tokens, "Minus")) {
-      consume<MinusToken>(tokens, "Minus");
+      consume(tokens, "Minus");
       node = {
         kind: "BinaryExpression",
         op: "Sub",
         left: node,
-        right: mul()
+        right: expr()
       } as BinaryExpressionNode;
     }
     return node;
   };
 
   const mul = (): ExpressionNode => {
-    let node: ExpressionNode = prim();
+    let node: ExpressionNode = app();
     while (expect(tokens, "Times")) {
-      consume<TimesToken>(tokens, "Times");
+      consume(tokens, "Times");
       node = {
         kind: "BinaryExpression",
         op: "Multiply",
         left: node,
-        right: prim()
+        right: expr()
       } as BinaryExpressionNode;
     }
     return node;
   };
 
+  const app = (): ExpressionNode => {
+    let node: ExpressionNode = prim();
+    while (expectPrim()) {
+      node = {
+        kind: "FunctionApplication",
+        callee: node,
+        argument: prim()
+      } as FunctionApplicationNode;
+    }
+    return node;
+  };
+
+  const expectPrim = () => {
+    return expect(tokens, "LeftParenthesis", "Boolean", "Variable", "Number");
+  };
+
   const prim = (): ExpressionNode => {
     if (expect(tokens, "LeftParenthesis")) {
-      consume<LeftParenthesisToken>(tokens, "LeftParenthesis");
+      consume(tokens, "LeftParenthesis");
       const node = expr();
-      consume<RightParenthesisToken>(tokens, "RightParenthesis");
+      consume(tokens, "RightParenthesis");
       return node;
     }
     if (expect(tokens, "Boolean")) {
       return bool();
     }
-    if (expect(tokens, "Number") || expect(tokens, "Minus")) {
+    if (expect(tokens, "Number")) {
       return number();
     }
     if (expect(tokens, "Variable")) {
@@ -196,18 +239,6 @@ export function createTree(tokens: Tokens): ExpressionNode {
   };
 
   const number = () => {
-    if (expect(tokens, "Minus")) {
-      consume<MinusToken>(tokens, "Minus");
-      const n = nat();
-      return {
-        kind: "NumberLiteral",
-        value: -1 * n.value
-      } as NumberLiteralNode;
-    }
-    return nat();
-  };
-
-  const nat = () => {
     const t = consume<NumberToken>(tokens, "Number");
     return {
       kind: "NumberLiteral",

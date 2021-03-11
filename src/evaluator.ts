@@ -1,11 +1,12 @@
-import { ExpressionNode, IdentifierNode } from "./ast";
+import { ExpressionNode, IdentifierNode, FunctionDefinitionNode } from "./ast";
 
-type RHS = number | boolean;
+type RHS = number | boolean | Closure;
 
 type EvaluationFailure = { failure: true };
 type EvaluationResult = RHS | EvaluationFailure;
 
 function isFailed(result: EvaluationResult): result is EvaluationFailure {
+  if (result instanceof Closure) return false;
   return typeof result === "object" && result.failure === true;
 }
 
@@ -35,9 +36,9 @@ class RootEnvironment implements Environment {
 
 class ChildEnvironment implements Environment {
   constructor(
-    private identifier: IdentifierNode,
-    private value: RHS,
-    private parent: Environment
+    private readonly identifier: IdentifierNode,
+    private readonly value: RHS,
+    private readonly parent: Environment
   ) {}
   get(identifier: IdentifierNode) {
     if (this.identifier?.name === identifier.name) {
@@ -45,6 +46,13 @@ class ChildEnvironment implements Environment {
     }
     return this.parent.get(identifier);
   }
+}
+
+class Closure {
+  constructor(
+    public readonly functionDefinition: FunctionDefinitionNode,
+    public readonly env: Environment
+  ) {}
 }
 
 function evaluateWithEnv(
@@ -59,6 +67,8 @@ function evaluateWithEnv(
     const v = env.get(expression);
     if (!v) return { failure: true };
     return v;
+  } else if (expression.kind === "FunctionDefinition") {
+    return new Closure(expression, env);
   } else if (expression.kind === "BinaryExpression") {
     const resultLeft = evaluateWithEnv(expression.left, env);
     const resultRight = evaluateWithEnv(expression.right, env);
@@ -88,6 +98,23 @@ function evaluateWithEnv(
     if (isFailed(boundValue)) return { failure: true };
     const childEnv = new ChildEnvironment(identifier, boundValue, env);
     return evaluateWithEnv(exp, childEnv);
+  } else if (expression.kind === "FunctionApplication") {
+    const callee = evaluateWithEnv(expression.callee, env);
+    if (!(callee instanceof Closure)) {
+      return { failure: true };
+    }
+    const argument = evaluateWithEnv(expression.argument, env);
+    if (isFailed(argument)) {
+      return { failure: true };
+    }
+    return evaluateWithEnv(
+      callee.functionDefinition.body,
+      new ChildEnvironment(
+        callee.functionDefinition.param,
+        argument,
+        callee.env
+      )
+    );
   }
   throw new Error("invalid node");
 }

@@ -33,6 +33,12 @@ describe(tokenize, () => {
       { tokenKind: "In" },
       { tokenKind: "Variable", value: "x" }
     ]);
+    expect(tokenize("fun x -> x")).toEqual<Tokens>([
+      { tokenKind: "Fun" },
+      { tokenKind: "Variable", value: "x" },
+      { tokenKind: "RightArrow" },
+      { tokenKind: "Variable", value: "x" }
+    ]);
     expect(() => tokenize("#")).toThrowError();
   });
 });
