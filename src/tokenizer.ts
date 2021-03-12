@@ -166,63 +166,63 @@ export function tokenize(input: string) {
     )
     .match(
       () => reservedWord(input, "fun"),
-      v => {
+      (v) => {
         tokens.push({ tokenKind: "Fun" });
         input = input.slice(v);
       }
     )
     .match(
       () => reservedWord(input, "let"),
-      v => {
+      (v) => {
         tokens.push({ tokenKind: "Let" });
         input = input.slice(v);
       }
     )
     .match(
       () => reservedWord(input, "rec"),
-      v => {
+      (v) => {
         tokens.push({ tokenKind: "Rec" });
         input = input.slice(v);
       }
     )
     .match(
       () => reservedWord(input, "in"),
-      v => {
+      (v) => {
         tokens.push({ tokenKind: "In" });
         input = input.slice(v);
       }
     )
     .match(
       () => reservedWord(input, "true"),
-      v => {
+      (v) => {
         tokens.push({ tokenKind: "Boolean", value: true });
         input = input.slice(v);
       }
     )
     .match(
       () => reservedWord(input, "false"),
-      v => {
+      (v) => {
         tokens.push({ tokenKind: "Boolean", value: false });
         input = input.slice(v);
       }
     )
     .match(
       () => reservedWord(input, "if"),
-      v => {
+      (v) => {
         tokens.push({ tokenKind: "If" });
         input = input.slice(v);
       }
     )
     .match(
       () => reservedWord(input, "then"),
-      v => {
+      (v) => {
         tokens.push({ tokenKind: "Then" });
         input = input.slice(v);
       }
     )
     .match(
       () => reservedWord(input, "else"),
-      v => {
+      (v) => {
         tokens.push({ tokenKind: "Else" });
         input = input.slice(v);
       }
@@ -292,7 +292,7 @@ export function tokenize(input: string) {
     )
     .match(
       () => variable(input),
-      value => {
+      (value) => {
         tokens.push({ tokenKind: "Variable", value });
         input = input.slice(value.length);
       }

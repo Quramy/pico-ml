@@ -31,7 +31,7 @@ interface Environment {
 }
 
 class RootEnvironment implements Environment {
-  get(identifier: IdentifierNode) {
+  get(_identifier: IdentifierNode) {
     return undefined;
   }
 }
@@ -77,13 +77,13 @@ function tryNumber(
   if (typeof left !== "number") {
     return {
       failure: true,
-      message: `The left operand is not number. ${getType(left)}`
+      message: `The left operand is not number. ${getType(left)}`,
     };
   }
   if (typeof right !== "number") {
     return {
       failure: true,
-      message: `The right operand is not number. ${getType(right)}`
+      message: `The right operand is not number. ${getType(right)}`,
     };
   }
   return cb(left, right);
@@ -102,7 +102,7 @@ function evaluateWithEnv(
     if (!v)
       return {
         failure: true,
-        message: `variable ${expression.name} is not defined`
+        message: `variable ${expression.name} is not defined`,
       };
     return v;
   } else if (expression.kind === "FunctionDefinition") {
@@ -131,7 +131,7 @@ function evaluateWithEnv(
     } else {
       return {
         failure: true,
-        message: `condition should be boolean, but: ${getType(condition)}.`
+        message: `condition should be boolean, but: ${getType(condition)}.`,
       };
     }
   } else if (expression.kind === "LetRecExpression") {
@@ -150,7 +150,7 @@ function evaluateWithEnv(
     if (!(callee instanceof Closure)) {
       return {
         failure: true,
-        message: `should be function, but ${getType(callee)}}`
+        message: `should be function, but ${getType(callee)}}`,
       };
     }
     if (callee instanceof RecClosure) {

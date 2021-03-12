@@ -3,23 +3,8 @@ import {
   Tokens,
   TokenKind,
   NumberToken,
-  LeftParenthesisToken,
-  RightParenthesisToken,
-  PlusToken,
-  TimesToken,
-  MinusToken,
-  IfToken,
-  ThenToken,
-  ElseToken,
-  LessThanToken,
   BoolToken,
-  LetToken,
-  EqualToken,
-  InToken,
   VariableToken,
-  FunToken,
-  RightArrowToken,
-  tokenize
 } from "./tokenizer";
 
 export interface NumberLiteralNode {
@@ -101,7 +86,7 @@ function consume<T extends Token = Token, K extends TokenKind = T["tokenKind"]>(
 
 function expect(tokens: Tokens, ...kinds: TokenKind[]) {
   if (!tokens.length) return false;
-  return kinds.some(kind => tokens[0].tokenKind === kind);
+  return kinds.some((kind) => tokens[0].tokenKind === kind);
 }
 
 /**
@@ -136,7 +121,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
         kind: "IfExpression",
         cond: condition,
         then: thenNode,
-        else: elseNode
+        else: elseNode,
       } as IfExpressionNode;
     }
     return comp();
@@ -155,7 +140,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
         kind: "LetRecExpression",
         identifier: id,
         binding,
-        exp
+        exp,
       } as LetRecExpressionNode;
     }
     const id = identifier();
@@ -167,7 +152,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
       kind: "LetExpression",
       identifier: id,
       binding,
-      exp
+      exp,
     } as LetExpressionNode;
   };
 
@@ -179,7 +164,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
     return {
       kind: "FunctionDefinition",
       param: id,
-      body
+      body,
     } as FunctionDefinitionNode;
   };
 
@@ -191,7 +176,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
         kind: "BinaryExpression",
         op: "LessThan",
         left: node,
-        right: expr()
+        right: expr(),
       } as BinaryExpressionNode;
     }
     return node;
@@ -205,7 +190,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
         kind: "BinaryExpression",
         op: "Add",
         left: node,
-        right: expr()
+        right: expr(),
       } as BinaryExpressionNode;
     }
     while (expect(tokens, "Minus")) {
@@ -214,7 +199,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
         kind: "BinaryExpression",
         op: "Sub",
         left: node,
-        right: expr()
+        right: expr(),
       } as BinaryExpressionNode;
     }
     return node;
@@ -228,7 +213,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
         kind: "BinaryExpression",
         op: "Multiply",
         left: node,
-        right: expr()
+        right: expr(),
       } as BinaryExpressionNode;
     }
     return node;
@@ -240,7 +225,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
       node = {
         kind: "FunctionApplication",
         callee: node,
-        argument: prim()
+        argument: prim(),
       } as FunctionApplicationNode;
     }
     return node;
@@ -274,7 +259,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
     const t = consume<NumberToken>(tokens, "Number");
     return {
       kind: "NumberLiteral",
-      value: t.value
+      value: t.value,
     } as NumberLiteralNode;
   };
 
@@ -282,7 +267,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
     const t = consume<BoolToken>(tokens, "Boolean");
     return {
       kind: "BoolLiteral",
-      value: t.value
+      value: t.value,
     } as BoolLiteralNode;
   };
 
@@ -290,7 +275,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
     const t = consume<VariableToken>(tokens, "Variable");
     return {
       kind: "Identifier",
-      name: t.value
+      name: t.value,
     } as IdentifierNode;
   };
 

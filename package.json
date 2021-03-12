@@ -6,7 +6,9 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
-    "start": "ts-node src/cli.ts"
+    "start": "ts-node src/cli.ts",
+    "prettier": "prettier \"src/**/*.ts\" \"*.{js,json,md}\"",
+    "format": "npm run prettier -- --write"
   },
   "keywords": [],
   "author": "",

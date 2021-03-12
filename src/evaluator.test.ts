@@ -1,4 +1,3 @@
-import assert from "assert";
 import { parse } from "./parser";
 import { evaluate } from "./evaluator";
 

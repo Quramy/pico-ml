@@ -5,17 +5,17 @@ describe(tokenize, () => {
     expect(tokenize("1")).toEqual<Tokens>([{ tokenKind: "Number", value: 1 }]);
     expect(tokenize("100 200")).toEqual<Tokens>([
       { tokenKind: "Number", value: 100 },
-      { tokenKind: "Number", value: 200 }
+      { tokenKind: "Number", value: 200 },
     ]);
     expect(tokenize("001 002")).toEqual<Tokens>([
       { tokenKind: "Number", value: 1 },
-      { tokenKind: "Number", value: 2 }
+      { tokenKind: "Number", value: 2 },
     ]);
     expect(tokenize("*+-<")).toEqual<Tokens>([
       { tokenKind: "Times" },
       { tokenKind: "Plus" },
       { tokenKind: "Minus" },
-      { tokenKind: "LessThan" }
+      { tokenKind: "LessThan" },
     ]);
     expect(tokenize("if true then true else false")).toEqual<Tokens>([
       { tokenKind: "If" },
@@ -23,7 +23,7 @@ describe(tokenize, () => {
       { tokenKind: "Then" },
       { tokenKind: "Boolean", value: true },
       { tokenKind: "Else" },
-      { tokenKind: "Boolean", value: false }
+      { tokenKind: "Boolean", value: false },
     ]);
     expect(tokenize("let x = 1 in x")).toEqual<Tokens>([
       { tokenKind: "Let" },
@@ -31,20 +31,20 @@ describe(tokenize, () => {
       { tokenKind: "Equal" },
       { tokenKind: "Number", value: 1 },
       { tokenKind: "In" },
-      { tokenKind: "Variable", value: "x" }
+      { tokenKind: "Variable", value: "x" },
     ]);
     expect(tokenize("fun x -> x")).toEqual<Tokens>([
       { tokenKind: "Fun" },
       { tokenKind: "Variable", value: "x" },
       { tokenKind: "RightArrow" },
-      { tokenKind: "Variable", value: "x" }
+      { tokenKind: "Variable", value: "x" },
     ]);
     expect(tokenize("let rec f = g")).toEqual<Tokens>([
       { tokenKind: "Let" },
       { tokenKind: "Rec" },
       { tokenKind: "Variable", value: "f" },
       { tokenKind: "Equal" },
-      { tokenKind: "Variable", value: "g" }
+      { tokenKind: "Variable", value: "g" },
     ]);
     expect(() => tokenize("#")).toThrowError();
   });

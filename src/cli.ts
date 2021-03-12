@@ -12,14 +12,14 @@ const colorCode = {
   blue: "\u001b[34m",
   magenta: "\u001b[35m",
   cyan: "\u001b[36m",
-  white: "\u001b[37m"
+  white: "\u001b[37m",
 };
 
 export const color = Object.entries(colorCode).reduce(
   (acc: any, [name, code]) => {
     return {
       ...acc,
-      [name]: (msg: string) => code + msg + resetCode
+      [name]: (msg: string) => code + msg + resetCode,
     };
   },
   {}
