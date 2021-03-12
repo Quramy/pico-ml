@@ -69,5 +69,13 @@ describe(evaluate, () => {
         fact 3
       `),
     ).toBe(6);
+
+    expect(
+      parseAndEval(`
+        let rec fib = fun n ->
+          if n < 2 then n else fib (n - 1) + fib (n -2) in
+        fib 10
+      `),
+    ).toBe(55);
   });
 });

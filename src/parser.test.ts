@@ -124,6 +124,54 @@ const fixture = {
       binding: fixture["fun x -> 1"](),
       exp: id("f"),
     }),
+  "let rec fib = fun n -> if n < 2 then n else fib (n - 1) + fib (n -2) in fib 10": () =>
+    expr({
+      kind: "LetRecExpression",
+      identifier: id("fib"),
+      binding: {
+        kind: "FunctionDefinition",
+        param: id("n"),
+        body: {
+          kind: "IfExpression",
+          cond: {
+            kind: "BinaryExpression",
+            op: "LessThan",
+            left: id("n"),
+            right: num(2),
+          },
+          then: id("n"),
+          else: {
+            kind: "BinaryExpression",
+            op: "Add",
+            left: {
+              kind: "FunctionApplication",
+              callee: id("fib"),
+              argument: {
+                kind: "BinaryExpression",
+                op: "Sub",
+                left: id("n"),
+                right: num(1),
+              },
+            },
+            right: {
+              kind: "FunctionApplication",
+              callee: id("fib"),
+              argument: {
+                kind: "BinaryExpression",
+                op: "Sub",
+                left: id("n"),
+                right: num(2),
+              },
+            },
+          },
+        },
+      },
+      exp: {
+        kind: "FunctionApplication",
+        callee: id("fib"),
+        argument: num(10),
+      },
+    }),
 };
 
 describe(parse, () => {

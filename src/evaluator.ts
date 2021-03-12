@@ -8,6 +8,7 @@ export interface EvaluationFailure {
 
 export interface Environment {
   get(identifier: IdentifierNode): EvaluetionValue | undefined;
+  print(): readonly string[];
 }
 
 export interface Closure {
@@ -38,7 +39,7 @@ export function isRecClosure(value: EvaluationResult): value is RecClosure {
   return typeof value === "object" && value.kind === "Closure" && value.closureModifier === "Recursive";
 }
 
-export function getEvaluationResultTypeName(value: EvaluationResult) {
+export function getEvaluationResultTypeName(value: EvaluationResult): string {
   if (isFailed(value)) {
     return "failure";
   } else if (isRecClosure(value)) {
@@ -50,6 +51,12 @@ export function getEvaluationResultTypeName(value: EvaluationResult) {
   } else if (typeof value === "boolean") {
     return "boolean";
   }
+  return undefined as never;
+}
+
+export function getEvaluationResultValue(value: EvaluationResult): string {
+  if (isFailed(value) || isClosure(value)) return getEvaluationResultTypeName(value);
+  return value.toString();
 }
 
 function createFailure(message: string): EvaluationFailure {
@@ -65,6 +72,9 @@ function createRootEnvironment(): Environment {
     get() {
       return undefined;
     },
+    print() {
+      return [];
+    },
   };
 }
 
@@ -75,6 +85,9 @@ function createChildEnvironment(id: IdentifierNode, value: EvaluetionValue, pare
         return value;
       }
       return parent.get(identifier);
+    },
+    print() {
+      return [...parent.print(), `${id.name}: ${getEvaluationResultValue(value)}`];
     },
   };
 }
@@ -122,7 +135,9 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
     return expression.value;
   } else if (expression.kind === "Identifier") {
     const v = env.get(expression);
-    if (!v) return createFailure(`variable ${expression.name} is not defined`);
+    if (v == null) {
+      return createFailure(`variable ${expression.name} is not defined`);
+    }
     return v;
   } else if (expression.kind === "FunctionDefinition") {
     return createClosure(expression, env);
