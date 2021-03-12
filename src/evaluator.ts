@@ -26,6 +26,14 @@ type RHS = number | boolean | Closure;
 
 type EvaluationResult = RHS | EvaluationFailure;
 
+function createFailure(message: string) {
+  return {
+    kind: "Failure",
+    failure: true,
+    message,
+  } as EvaluationFailure;
+}
+
 function createRootEnvironment(): Environment {
   return {
     get() {
@@ -112,18 +120,10 @@ function tryNumber(
   if (isFailed(left)) return left;
   if (isFailed(right)) return right;
   if (typeof left !== "number") {
-    return {
-      kind: "Failure",
-      failure: true,
-      message: `The left operand is not number. ${getType(left)}`,
-    };
+    return createFailure(`The left operand is not number. ${getType(left)}`);
   }
   if (typeof right !== "number") {
-    return {
-      kind: "Failure",
-      failure: true,
-      message: `The right operand is not number. ${getType(right)}`,
-    };
+    return createFailure(`The right operand is not number. ${getType(right)}`);
   }
   return cb(left, right);
 }
@@ -138,12 +138,7 @@ function evaluateWithEnv(
     return expression.value;
   } else if (expression.kind === "Identifier") {
     const v = env.get(expression);
-    if (!v)
-      return {
-        kind: "Failure",
-        failure: true,
-        message: `variable ${expression.name} is not defined`,
-      };
+    if (!v) return createFailure(`variable ${expression.name} is not defined`);
     return v;
   } else if (expression.kind === "FunctionDefinition") {
     return createClosure(expression, env);
@@ -169,11 +164,9 @@ function evaluateWithEnv(
         return evaluateWithEnv(expression.else, env);
       }
     } else {
-      return {
-        kind: "Failure",
-        failure: true,
-        message: `condition should be boolean, but: ${getType(condition)}.`,
-      };
+      return createFailure(
+        `condition should be boolean, but: ${getType(condition)}.`
+      );
     }
   } else if (expression.kind === "LetRecExpression") {
     const { identifier, binding, exp } = expression;
@@ -189,17 +182,22 @@ function evaluateWithEnv(
   } else if (expression.kind === "FunctionApplication") {
     const callee = evaluateWithEnv(expression.callee, env);
     if (!isClosure(callee)) {
-      return {
-        kind: "Failure",
-        failure: true,
-        message: `should be function, but ${getType(callee)}}`,
-      };
+      return createFailure(`should be function, but ${getType(callee)}}`);
     }
-    if (isRecClosure(callee)) {
-      const argument = evaluateWithEnv(expression.argument, env);
-      if (isFailed(argument)) {
-        return argument;
-      }
+    const argument = evaluateWithEnv(expression.argument, env);
+    if (isFailed(argument)) {
+      return argument;
+    }
+    if (!isRecClosure(callee)) {
+      return evaluateWithEnv(
+        callee.functionDefinition.body,
+        createChildEnvironment(
+          callee.functionDefinition.param,
+          argument,
+          callee.env
+        )
+      );
+    } else {
       const recEnv = createChildEnvironment(
         callee.recursievId,
         callee,
@@ -211,19 +209,6 @@ function evaluateWithEnv(
           callee.functionDefinition.param,
           argument,
           recEnv
-        )
-      );
-    } else {
-      const argument = evaluateWithEnv(expression.argument, env);
-      if (isFailed(argument)) {
-        return argument;
-      }
-      return evaluateWithEnv(
-        callee.functionDefinition.body,
-        createChildEnvironment(
-          callee.functionDefinition.param,
-          argument,
-          callee.env
         )
       );
     }
