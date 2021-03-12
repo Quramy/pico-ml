@@ -8,58 +8,58 @@ import {
 } from "./tokenizer";
 
 export interface NumberLiteralNode {
-  kind: "NumberLiteral";
-  value: number;
+  readonly kind: "NumberLiteral";
+  readonly value: number;
 }
 
 export interface BoolLiteralNode {
-  kind: "BoolLiteral";
-  value: boolean;
+  readonly kind: "BoolLiteral";
+  readonly value: boolean;
 }
 
 export interface IdentifierNode {
-  kind: "Identifier";
-  name: string;
+  readonly kind: "Identifier";
+  readonly name: string;
 }
 
 export interface IfExpressionNode {
-  kind: "IfExpression";
-  cond: ExpressionNode;
-  then: ExpressionNode;
-  else: ExpressionNode;
+  readonly kind: "IfExpression";
+  readonly cond: ExpressionNode;
+  readonly then: ExpressionNode;
+  readonly else: ExpressionNode;
 }
 
 export interface BinaryExpressionNode {
-  kind: "BinaryExpression";
-  op: "Add" | "Multiply" | "Sub" | "LessThan";
-  left: ExpressionNode;
-  right: ExpressionNode;
+  readonly kind: "BinaryExpression";
+  readonly op: "Add" | "Multiply" | "Sub" | "LessThan";
+  readonly left: ExpressionNode;
+  readonly right: ExpressionNode;
 }
 
 export interface LetExpressionNode {
-  kind: "LetExpression";
-  identifier: IdentifierNode;
-  binding: ExpressionNode;
-  exp: ExpressionNode;
+  readonly kind: "LetExpression";
+  readonly identifier: IdentifierNode;
+  readonly binding: ExpressionNode;
+  readonly exp: ExpressionNode;
 }
 
 export interface FunctionDefinitionNode {
-  kind: "FunctionDefinition";
-  param: IdentifierNode;
-  body: ExpressionNode;
+  readonly kind: "FunctionDefinition";
+  readonly param: IdentifierNode;
+  readonly body: ExpressionNode;
 }
 
 export interface LetRecExpressionNode {
-  kind: "LetRecExpression";
-  identifier: IdentifierNode;
-  binding: FunctionDefinitionNode;
-  exp: ExpressionNode;
+  readonly kind: "LetRecExpression";
+  readonly identifier: IdentifierNode;
+  readonly binding: FunctionDefinitionNode;
+  readonly exp: ExpressionNode;
 }
 
 export interface FunctionApplicationNode {
-  kind: "FunctionApplication";
-  callee: ExpressionNode;
-  argument: ExpressionNode;
+  readonly kind: "FunctionApplication";
+  readonly callee: ExpressionNode;
+  readonly argument: ExpressionNode;
 }
 
 export type ExpressionNode =

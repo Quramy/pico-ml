@@ -1,76 +1,76 @@
 export interface NumberToken {
-  tokenKind: "Number";
-  value: number;
+  readonly tokenKind: "Number";
+  readonly value: number;
 }
 
 export interface BoolToken {
-  tokenKind: "Boolean";
-  value: boolean;
+  readonly tokenKind: "Boolean";
+  readonly value: boolean;
 }
 
 export interface LeftParenthesisToken {
-  tokenKind: "LeftParenthesis";
+  readonly tokenKind: "LeftParenthesis";
 }
 
 export interface RightParenthesisToken {
-  tokenKind: "RightParenthesis";
+  readonly tokenKind: "RightParenthesis";
 }
 
 export interface PlusToken {
-  tokenKind: "Plus";
+  readonly tokenKind: "Plus";
 }
 
 export interface MinusToken {
-  tokenKind: "Minus";
+  readonly tokenKind: "Minus";
 }
 
 export interface TimesToken {
-  tokenKind: "Times";
+  readonly tokenKind: "Times";
 }
 
 export interface LessThanToken {
-  tokenKind: "LessThan";
+  readonly tokenKind: "LessThan";
 }
 
 export interface EqualToken {
-  tokenKind: "Equal";
+  readonly tokenKind: "Equal";
 }
 
 export interface RightArrowToken {
-  tokenKind: "RightArrow";
+  readonly tokenKind: "RightArrow";
 }
 
 export interface IfToken {
-  tokenKind: "If";
+  readonly tokenKind: "If";
 }
 
 export interface ThenToken {
-  tokenKind: "Then";
+  readonly tokenKind: "Then";
 }
 
 export interface ElseToken {
-  tokenKind: "Else";
+  readonly tokenKind: "Else";
 }
 
 export interface LetToken {
-  tokenKind: "Let";
+  readonly tokenKind: "Let";
 }
 
 export interface RecToken {
-  tokenKind: "Rec";
+  readonly tokenKind: "Rec";
 }
 
 export interface InToken {
-  tokenKind: "In";
+  readonly tokenKind: "In";
 }
 
 export interface FunToken {
-  tokenKind: "Fun";
+  readonly tokenKind: "Fun";
 }
 
 export interface VariableToken {
-  tokenKind: "Variable";
-  value: string;
+  readonly tokenKind: "Variable";
+  readonly value: string;
 }
 
 export type Token =
