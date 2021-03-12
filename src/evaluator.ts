@@ -1,73 +1,30 @@
 import { ExpressionNode, IdentifierNode, FunctionDefinitionNode } from "./ast";
 
-interface EvaluationFailure {
+export interface EvaluationFailure {
   readonly kind: "Failure";
   readonly failure: true;
   readonly message: string;
 }
 
-interface Environment {
-  get(identifier: IdentifierNode): RHS | undefined;
+export interface Environment {
+  get(identifier: IdentifierNode): EvaluetionValue | undefined;
 }
 
-interface Closure {
+export interface Closure {
   readonly kind: "Closure";
   readonly functionDefinition: FunctionDefinitionNode;
   readonly env: Environment;
   readonly closureModifier?: string;
 }
 
-interface RecClosure extends Closure {
+export interface RecClosure extends Closure {
   readonly closureModifier: "Recursive";
   readonly recursievId: IdentifierNode;
 }
 
-type RHS = number | boolean | Closure;
+export type EvaluetionValue = number | boolean | Closure;
 
-type EvaluationResult = RHS | EvaluationFailure;
-
-function createFailure(message: string) {
-  return {
-    kind: "Failure",
-    failure: true,
-    message,
-  } as EvaluationFailure;
-}
-
-function createRootEnvironment(): Environment {
-  return {
-    get() {
-      return undefined;
-    },
-  };
-}
-
-function createChildEnvironment(id: IdentifierNode, value: RHS, parent: Environment): Environment {
-  return {
-    get(identifier: IdentifierNode) {
-      if (id.name === identifier.name) {
-        return value;
-      }
-      return parent.get(identifier);
-    },
-  };
-}
-
-function createClosure(functionDefinition: FunctionDefinitionNode, env: Environment) {
-  return {
-    kind: "Closure",
-    env,
-    functionDefinition,
-  } as Closure;
-}
-
-function createRecClosure(functionDefinition: FunctionDefinitionNode, env: Environment, recursievId: IdentifierNode) {
-  return {
-    ...createClosure(functionDefinition, env),
-    closureModifier: "Recursive",
-    recursievId,
-  } as RecClosure;
-}
+export type EvaluationResult = EvaluetionValue | EvaluationFailure;
 
 export function isFailed(result: EvaluationResult): result is EvaluationFailure {
   return typeof result === "object" && result.kind === "Failure";
@@ -81,7 +38,7 @@ export function isRecClosure(value: EvaluationResult): value is RecClosure {
   return typeof value === "object" && value.kind === "Closure" && value.closureModifier === "Recursive";
 }
 
-function getType(value: EvaluationResult) {
+export function getEvaluationResultTypeName(value: EvaluationResult) {
   if (isFailed(value)) {
     return "failure";
   } else if (isRecClosure(value)) {
@@ -95,6 +52,53 @@ function getType(value: EvaluationResult) {
   }
 }
 
+function createFailure(message: string): EvaluationFailure {
+  return {
+    kind: "Failure",
+    failure: true,
+    message,
+  };
+}
+
+function createRootEnvironment(): Environment {
+  return {
+    get() {
+      return undefined;
+    },
+  };
+}
+
+function createChildEnvironment(id: IdentifierNode, value: EvaluetionValue, parent: Environment): Environment {
+  return {
+    get(identifier: IdentifierNode) {
+      if (id.name === identifier.name) {
+        return value;
+      }
+      return parent.get(identifier);
+    },
+  };
+}
+
+function createClosure(functionDefinition: FunctionDefinitionNode, env: Environment): Closure {
+  return {
+    kind: "Closure",
+    env,
+    functionDefinition,
+  };
+}
+
+function createRecClosure(
+  functionDefinition: FunctionDefinitionNode,
+  env: Environment,
+  recursievId: IdentifierNode,
+): RecClosure {
+  return {
+    ...createClosure(functionDefinition, env),
+    closureModifier: "Recursive",
+    recursievId,
+  };
+}
+
 function tryNumber(
   left: EvaluationResult,
   right: EvaluationResult,
@@ -103,10 +107,10 @@ function tryNumber(
   if (isFailed(left)) return left;
   if (isFailed(right)) return right;
   if (typeof left !== "number") {
-    return createFailure(`The left operand is not number. ${getType(left)}`);
+    return createFailure(`The left operand is not number. ${getEvaluationResultTypeName(left)}`);
   }
   if (typeof right !== "number") {
-    return createFailure(`The right operand is not number. ${getType(right)}`);
+    return createFailure(`The right operand is not number. ${getEvaluationResultTypeName(right)}`);
   }
   return cb(left, right);
 }
@@ -144,7 +148,7 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
         return evaluateWithEnv(expression.else, env);
       }
     } else {
-      return createFailure(`condition should be boolean, but: ${getType(condition)}.`);
+      return createFailure(`condition should be boolean, but: ${getEvaluationResultTypeName(condition)}.`);
     }
   } else if (expression.kind === "LetRecExpression") {
     const { identifier, binding, exp } = expression;
@@ -160,7 +164,7 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
   } else if (expression.kind === "FunctionApplication") {
     const callee = evaluateWithEnv(expression.callee, env);
     if (!isClosure(callee)) {
-      return createFailure(`should be function, but ${getType(callee)}}`);
+      return createFailure(`should be function, but ${getEvaluationResultTypeName(callee)}}`);
     }
     const argument = evaluateWithEnv(expression.argument, env);
     if (isFailed(argument)) {
@@ -179,7 +183,7 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
       );
     }
   }
-  throw new Error("invalid node");
+  return createFailure(`invalid node kind. ${expression.kind}`);
 }
 
 export function evaluate(expression: ExpressionNode) {
