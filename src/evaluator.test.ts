@@ -22,9 +22,7 @@ describe(evaluate, () => {
   });
 
   test("if expression", () => {
-    expect(parseAndEval("if 100 then true else false")).toMatchObject(
-      failedResult
-    );
+    expect(parseAndEval("if 100 then true else false")).toMatchObject(failedResult);
     expect(parseAndEval("if true then 0 else 1")).toBe(0);
     expect(parseAndEval("if false then 0 else 1")).toBe(1);
   });
@@ -37,7 +35,7 @@ describe(evaluate, () => {
         let x = 5 in
         let y = if x < 4 then 1 else x in
         x * x
-      `)
+      `),
     ).toBe(25);
   });
 
@@ -48,7 +46,7 @@ describe(evaluate, () => {
       parseAndEval(`
         let add = fun a -> fun b -> a + b in
         add 1 3
-      `)
+      `),
     ).toBe(4);
 
     expect(
@@ -57,7 +55,7 @@ describe(evaluate, () => {
         let p = fun x -> x * x in
         let q = fun x -> x + 3 in
         compose p q 4
-      `)
+      `),
     ).toBe(49);
   });
 
@@ -69,7 +67,7 @@ describe(evaluate, () => {
         let rec fact = fun n ->
           if n < 2 then 1 else n * fact (n - 1) in
         fact 3
-      `)
+      `),
     ).toBe(6);
   });
 });

@@ -42,11 +42,7 @@ function createRootEnvironment(): Environment {
   };
 }
 
-function createChildEnvironment(
-  id: IdentifierNode,
-  value: RHS,
-  parent: Environment
-): Environment {
+function createChildEnvironment(id: IdentifierNode, value: RHS, parent: Environment): Environment {
   return {
     get(identifier: IdentifierNode) {
       if (id.name === identifier.name) {
@@ -57,10 +53,7 @@ function createChildEnvironment(
   };
 }
 
-function createClosure(
-  functionDefinition: FunctionDefinitionNode,
-  env: Environment
-) {
+function createClosure(functionDefinition: FunctionDefinitionNode, env: Environment) {
   return {
     kind: "Closure",
     env,
@@ -68,11 +61,7 @@ function createClosure(
   } as Closure;
 }
 
-function createRecClosure(
-  functionDefinition: FunctionDefinitionNode,
-  env: Environment,
-  recursievId: IdentifierNode
-) {
+function createRecClosure(functionDefinition: FunctionDefinitionNode, env: Environment, recursievId: IdentifierNode) {
   return {
     ...createClosure(functionDefinition, env),
     closureModifier: "Recursive",
@@ -80,9 +69,7 @@ function createRecClosure(
   } as RecClosure;
 }
 
-export function isFailed(
-  result: EvaluationResult
-): result is EvaluationFailure {
+export function isFailed(result: EvaluationResult): result is EvaluationFailure {
   return typeof result === "object" && result.kind === "Failure";
 }
 
@@ -91,11 +78,7 @@ export function isClosure(value: EvaluationResult): value is Closure {
 }
 
 export function isRecClosure(value: EvaluationResult): value is RecClosure {
-  return (
-    typeof value === "object" &&
-    value.kind === "Closure" &&
-    value.closureModifier === "Recursive"
-  );
+  return typeof value === "object" && value.kind === "Closure" && value.closureModifier === "Recursive";
 }
 
 function getType(value: EvaluationResult) {
@@ -115,7 +98,7 @@ function getType(value: EvaluationResult) {
 function tryNumber(
   left: EvaluationResult,
   right: EvaluationResult,
-  cb: (a: number, b: number) => EvaluationResult
+  cb: (a: number, b: number) => EvaluationResult,
 ): EvaluationResult {
   if (isFailed(left)) return left;
   if (isFailed(right)) return right;
@@ -128,10 +111,7 @@ function tryNumber(
   return cb(left, right);
 }
 
-function evaluateWithEnv(
-  expression: ExpressionNode,
-  env: Environment
-): EvaluationResult {
+function evaluateWithEnv(expression: ExpressionNode, env: Environment): EvaluationResult {
   if (expression.kind === "BoolLiteral") {
     return expression.value;
   } else if (expression.kind === "NumberLiteral") {
@@ -164,9 +144,7 @@ function evaluateWithEnv(
         return evaluateWithEnv(expression.else, env);
       }
     } else {
-      return createFailure(
-        `condition should be boolean, but: ${getType(condition)}.`
-      );
+      return createFailure(`condition should be boolean, but: ${getType(condition)}.`);
     }
   } else if (expression.kind === "LetRecExpression") {
     const { identifier, binding, exp } = expression;
@@ -191,25 +169,13 @@ function evaluateWithEnv(
     if (!isRecClosure(callee)) {
       return evaluateWithEnv(
         callee.functionDefinition.body,
-        createChildEnvironment(
-          callee.functionDefinition.param,
-          argument,
-          callee.env
-        )
+        createChildEnvironment(callee.functionDefinition.param, argument, callee.env),
       );
     } else {
-      const recEnv = createChildEnvironment(
-        callee.recursievId,
-        callee,
-        callee.env
-      );
+      const recEnv = createChildEnvironment(callee.recursievId, callee, callee.env);
       return evaluateWithEnv(
         callee.functionDefinition.body,
-        createChildEnvironment(
-          callee.functionDefinition.param,
-          argument,
-          recEnv
-        )
+        createChildEnvironment(callee.functionDefinition.param, argument, recEnv),
       );
     }
   }

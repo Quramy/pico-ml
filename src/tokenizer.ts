@@ -154,148 +154,145 @@ export function tokenize(input: string) {
 
   const matcher = new Matcher()
     .match(
-      () =>
-        input.startsWith(" ") ||
-        input.startsWith("\n") ||
-        input.startsWith("\t"),
-      () => (input = input.slice(1))
+      () => input.startsWith(" ") || input.startsWith("\n") || input.startsWith("\t"),
+      () => (input = input.slice(1)),
     )
     .match(
       () => input.startsWith("\r\n"),
-      () => (input = input.slice(2))
+      () => (input = input.slice(2)),
     )
     .match(
       () => reservedWord(input, "fun"),
-      (v) => {
+      v => {
         tokens.push({ tokenKind: "Fun" });
         input = input.slice(v);
-      }
+      },
     )
     .match(
       () => reservedWord(input, "let"),
-      (v) => {
+      v => {
         tokens.push({ tokenKind: "Let" });
         input = input.slice(v);
-      }
+      },
     )
     .match(
       () => reservedWord(input, "rec"),
-      (v) => {
+      v => {
         tokens.push({ tokenKind: "Rec" });
         input = input.slice(v);
-      }
+      },
     )
     .match(
       () => reservedWord(input, "in"),
-      (v) => {
+      v => {
         tokens.push({ tokenKind: "In" });
         input = input.slice(v);
-      }
+      },
     )
     .match(
       () => reservedWord(input, "true"),
-      (v) => {
+      v => {
         tokens.push({ tokenKind: "Boolean", value: true });
         input = input.slice(v);
-      }
+      },
     )
     .match(
       () => reservedWord(input, "false"),
-      (v) => {
+      v => {
         tokens.push({ tokenKind: "Boolean", value: false });
         input = input.slice(v);
-      }
+      },
     )
     .match(
       () => reservedWord(input, "if"),
-      (v) => {
+      v => {
         tokens.push({ tokenKind: "If" });
         input = input.slice(v);
-      }
+      },
     )
     .match(
       () => reservedWord(input, "then"),
-      (v) => {
+      v => {
         tokens.push({ tokenKind: "Then" });
         input = input.slice(v);
-      }
+      },
     )
     .match(
       () => reservedWord(input, "else"),
-      (v) => {
+      v => {
         tokens.push({ tokenKind: "Else" });
         input = input.slice(v);
-      }
+      },
     )
     .match(
       () => input.startsWith("->"),
       () => {
         tokens.push({ tokenKind: "RightArrow" });
         input = input.slice(2);
-      }
+      },
     )
     .match(
       () => input.startsWith("("),
       () => {
         tokens.push({ tokenKind: "LeftParenthesis" });
         input = input.slice(1);
-      }
+      },
     )
     .match(
       () => input.startsWith(")"),
       () => {
         tokens.push({ tokenKind: "RightParenthesis" });
         input = input.slice(1);
-      }
+      },
     )
     .match(
       () => input.startsWith("+"),
       () => {
         tokens.push({ tokenKind: "Plus" });
         input = input.slice(1);
-      }
+      },
     )
     .match(
       () => input.startsWith("-"),
       () => {
         tokens.push({ tokenKind: "Minus" });
         input = input.slice(1);
-      }
+      },
     )
     .match(
       () => input.startsWith("*"),
       () => {
         tokens.push({ tokenKind: "Times" });
         input = input.slice(1);
-      }
+      },
     )
     .match(
       () => input.startsWith("<"),
       () => {
         tokens.push({ tokenKind: "LessThan" });
         input = input.slice(1);
-      }
+      },
     )
     .match(
       () => input.startsWith("="),
       () => {
         tokens.push({ tokenKind: "Equal" });
         input = input.slice(1);
-      }
+      },
     )
     .match(
       () => integer(input),
       ([value, strValue]) => {
         tokens.push({ tokenKind: "Number", value });
         input = input.slice(strValue.length);
-      }
+      },
     )
     .match(
       () => variable(input),
-      (value) => {
+      value => {
         tokens.push({ tokenKind: "Variable", value });
         input = input.slice(value.length);
-      }
+      },
     )
     .default(() => {
       throw new Error("invalid input: " + input);

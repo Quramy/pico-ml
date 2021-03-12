@@ -1,11 +1,4 @@
-import {
-  Token,
-  Tokens,
-  TokenKind,
-  NumberToken,
-  BoolToken,
-  VariableToken,
-} from "./tokenizer";
+import { Token, Tokens, TokenKind, NumberToken, BoolToken, VariableToken } from "./tokenizer";
 
 export interface NumberLiteralNode {
   readonly kind: "NumberLiteral";
@@ -73,10 +66,7 @@ export type ExpressionNode =
   | FunctionDefinitionNode
   | FunctionApplicationNode;
 
-function consume<T extends Token = Token, K extends TokenKind = T["tokenKind"]>(
-  tokens: Tokens,
-  kind: K
-) {
+function consume<T extends Token = Token, K extends TokenKind = T["tokenKind"]>(tokens: Tokens, kind: K) {
   if (tokens[0].tokenKind === kind) {
     const t = tokens.shift() as T;
     return t;
@@ -86,7 +76,7 @@ function consume<T extends Token = Token, K extends TokenKind = T["tokenKind"]>(
 
 function expect(tokens: Tokens, ...kinds: TokenKind[]) {
   if (!tokens.length) return false;
-  return kinds.some((kind) => tokens[0].tokenKind === kind);
+  return kinds.some(kind => tokens[0].tokenKind === kind);
 }
 
 /**

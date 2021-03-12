@@ -15,15 +15,12 @@ const colorCode = {
   white: "\u001b[37m",
 };
 
-export const color = Object.entries(colorCode).reduce(
-  (acc: any, [name, code]) => {
-    return {
-      ...acc,
-      [name]: (msg: string) => code + msg + resetCode,
-    };
-  },
-  {}
-) as {
+export const color = Object.entries(colorCode).reduce((acc: any, [name, code]) => {
+  return {
+    ...acc,
+    [name]: (msg: string) => code + msg + resetCode,
+  };
+}, {}) as {
   [P in keyof typeof colorCode]: (msg: string) => string;
 };
 

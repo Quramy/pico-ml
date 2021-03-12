@@ -1,10 +1,5 @@
 import { parse } from "./parser";
-import {
-  ExpressionNode,
-  NumberLiteralNode,
-  BoolLiteralNode,
-  IdentifierNode,
-} from "./ast";
+import { ExpressionNode, NumberLiteralNode, BoolLiteralNode, IdentifierNode } from "./ast";
 
 const num = (value: number) =>
   ({
@@ -132,11 +127,9 @@ const fixture = {
 };
 
 describe(parse, () => {
-  Object.keys(fixture).forEach((input) => {
+  Object.keys(fixture).forEach(input => {
     test(`parse: "${input}"`, () => {
-      const expectedNode = (fixture as Record<string, () => ExpressionNode>)[
-        input
-      ]();
+      const expectedNode = (fixture as Record<string, () => ExpressionNode>)[input]();
       expect(parse(input)).toEqual(expectedNode);
     });
   });
