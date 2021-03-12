@@ -64,6 +64,13 @@ export interface FunctionDefinitionNode {
   body: ExpressionNode;
 }
 
+export interface LetRecExpressionNode {
+  kind: "LetRecExpression";
+  identifier: IdentifierNode;
+  binding: FunctionDefinitionNode;
+  exp: ExpressionNode;
+}
+
 export interface FunctionApplicationNode {
   kind: "FunctionApplication";
   callee: ExpressionNode;
@@ -77,6 +84,7 @@ export type ExpressionNode =
   | IfExpressionNode
   | IdentifierNode
   | LetExpressionNode
+  | LetRecExpressionNode
   | FunctionDefinitionNode
   | FunctionApplicationNode;
 
@@ -98,7 +106,9 @@ function expect(tokens: Tokens, ...kinds: TokenKind[]) {
 
 /**
  *
- * expr   ::= comp | "if" expr "then" expr "else" expr | "let" id "=" expr "in" expr | "fun" id "->" expr
+ * expr   ::= comp | "if" expr "then" expr "else" expr | func | bind
+ * bind   ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr)
+ * func   ::= "fun" id "->" expr
  * comp   ::= add("<" expr)*
  * add    ::= mul("+" expr | "-" expr)*
  * mul    ::= app("*" expr)*
@@ -111,29 +121,10 @@ function expect(tokens: Tokens, ...kinds: TokenKind[]) {
  */
 export function createTree(tokens: Tokens): ExpressionNode {
   const expr = (): ExpressionNode => {
-    if (expect(tokens, "Fun")) {
-      consume(tokens, "Fun");
-      const id = identifier();
-      consume(tokens, "RightArrow");
-      const body = expr();
-      return {
-        kind: "FunctionDefinition",
-        param: id,
-        body
-      } as FunctionDefinitionNode;
-    } else if (expect(tokens, "Let")) {
-      consume(tokens, "Let");
-      const id = identifier();
-      consume(tokens, "Equal");
-      const binding = expr();
-      consume(tokens, "In");
-      const exp = expr();
-      return {
-        kind: "LetExpression",
-        identifier: id,
-        binding,
-        exp
-      } as LetExpressionNode;
+    if (expect(tokens, "Let")) {
+      return bind();
+    } else if (expect(tokens, "Fun")) {
+      return func();
     } else if (expect(tokens, "If")) {
       consume(tokens, "If");
       const condition = expr();
@@ -151,7 +142,48 @@ export function createTree(tokens: Tokens): ExpressionNode {
     return comp();
   };
 
-  const comp = (): ExpressionNode => {
+  const bind = () => {
+    consume(tokens, "Let");
+    if (expect(tokens, "Rec")) {
+      consume(tokens, "Rec");
+      const id = identifier();
+      consume(tokens, "Equal");
+      const binding = func();
+      consume(tokens, "In");
+      const exp = expr();
+      return {
+        kind: "LetRecExpression",
+        identifier: id,
+        binding,
+        exp
+      } as LetRecExpressionNode;
+    }
+    const id = identifier();
+    consume(tokens, "Equal");
+    const binding = expr();
+    consume(tokens, "In");
+    const exp = expr();
+    return {
+      kind: "LetExpression",
+      identifier: id,
+      binding,
+      exp
+    } as LetExpressionNode;
+  };
+
+  const func = () => {
+    consume(tokens, "Fun");
+    const id = identifier();
+    consume(tokens, "RightArrow");
+    const body = expr();
+    return {
+      kind: "FunctionDefinition",
+      param: id,
+      body
+    } as FunctionDefinitionNode;
+  };
+
+  const comp = () => {
     let node: ExpressionNode = add();
     while (expect(tokens, "LessThan")) {
       consume(tokens, "LessThan");
@@ -165,7 +197,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
     return node;
   };
 
-  const add = (): ExpressionNode => {
+  const add = () => {
     let node: ExpressionNode = mul();
     while (expect(tokens, "Plus")) {
       consume(tokens, "Plus");
@@ -188,7 +220,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
     return node;
   };
 
-  const mul = (): ExpressionNode => {
+  const mul = () => {
     let node: ExpressionNode = app();
     while (expect(tokens, "Times")) {
       consume(tokens, "Times");
@@ -202,7 +234,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
     return node;
   };
 
-  const app = (): ExpressionNode => {
+  const app = () => {
     let node: ExpressionNode = prim();
     while (expectPrim()) {
       node = {
@@ -218,7 +250,7 @@ export function createTree(tokens: Tokens): ExpressionNode {
     return expect(tokens, "LeftParenthesis", "Boolean", "Variable", "Number");
   };
 
-  const prim = (): ExpressionNode => {
+  const prim = () => {
     if (expect(tokens, "LeftParenthesis")) {
       consume(tokens, "LeftParenthesis");
       const node = expr();

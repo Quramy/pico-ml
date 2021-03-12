@@ -56,6 +56,10 @@ export interface LetToken {
   tokenKind: "Let";
 }
 
+export interface RecToken {
+  tokenKind: "Rec";
+}
+
 export interface InToken {
   tokenKind: "In";
 }
@@ -84,6 +88,7 @@ export type Token =
   | ThenToken
   | ElseToken
   | LetToken
+  | RecToken
   | InToken
   | FunToken
   | VariableToken;
@@ -170,6 +175,13 @@ export function tokenize(input: string) {
       () => reservedWord(input, "let"),
       v => {
         tokens.push({ tokenKind: "Let" });
+        input = input.slice(v);
+      }
+    )
+    .match(
+      () => reservedWord(input, "rec"),
+      v => {
+        tokens.push({ tokenKind: "Rec" });
         input = input.slice(v);
       }
     )

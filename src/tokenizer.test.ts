@@ -39,6 +39,13 @@ describe(tokenize, () => {
       { tokenKind: "RightArrow" },
       { tokenKind: "Variable", value: "x" }
     ]);
+    expect(tokenize("let rec f = g")).toEqual<Tokens>([
+      { tokenKind: "Let" },
+      { tokenKind: "Rec" },
+      { tokenKind: "Variable", value: "f" },
+      { tokenKind: "Equal" },
+      { tokenKind: "Variable", value: "g" }
+    ]);
     expect(() => tokenize("#")).toThrowError();
   });
 });

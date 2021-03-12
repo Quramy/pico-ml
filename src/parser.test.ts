@@ -1,4 +1,3 @@
-import assert from "assert";
 import { parse } from "./parser";
 import {
   ExpressionNode,
@@ -78,21 +77,23 @@ const fixture = {
       param: id("x"),
       body: num(1)
     }),
-  "fun x -> if true then 0 else 1": () => expr({
-    kind: "FunctionDefinition",
-    param: id("x"),
-    body: fixture["if true then 0 else 1"](),
-  }),
-  "fun f -> if true then fun x -> 1 else fun x -> 1": () => expr({
-    kind: "FunctionDefinition",
-    param: id("f"),
-    body: {
-      kind: "IfExpression",
-      cond: bool(true),
-      then: fixture["fun x -> 1"](),
-      else: fixture["fun x -> 1"](),
-    },
-  }),
+  "fun x -> if true then 0 else 1": () =>
+    expr({
+      kind: "FunctionDefinition",
+      param: id("x"),
+      body: fixture["if true then 0 else 1"]()
+    }),
+  "fun f -> if true then fun x -> 1 else fun x -> 1": () =>
+    expr({
+      kind: "FunctionDefinition",
+      param: id("f"),
+      body: {
+        kind: "IfExpression",
+        cond: bool(true),
+        then: fixture["fun x -> 1"](),
+        else: fixture["fun x -> 1"]()
+      }
+    }),
   "f x": () =>
     expr({
       kind: "FunctionApplication",
@@ -121,6 +122,13 @@ const fixture = {
       kind: "FunctionApplication",
       callee: id("f"),
       argument: fixture["1+2"]()
+    }),
+  "let rec f = fun x -> 1 in f": () =>
+    expr({
+      kind: "LetRecExpression",
+      identifier: id("f"),
+      binding: fixture["fun x -> 1"](),
+      exp: id("f")
     })
 };
 
