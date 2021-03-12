@@ -9,6 +9,7 @@
     "start": "ts-node src/cli.ts",
     "prettier": "prettier \"src/**/*.ts\" \"*.{js,json,md}\"",
     "format": "npm run prettier -- --write",
+    "lint": "npm run prettier -- --check",
     "postinstall": "husky install"
   },
   "keywords": [],
