@@ -1,4 +1,4 @@
-import { ExpressionNode, IdentifierNode, FunctionDefinitionNode } from "./ast";
+import { ExpressionNode, IdentifierNode, FunctionDefinitionNode } from "./parser";
 
 export interface EvaluationFailure {
   readonly kind: "Failure";
@@ -144,13 +144,13 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
   } else if (expression.kind === "BinaryExpression") {
     const resultLeft = evaluateWithEnv(expression.left, env);
     const resultRight = evaluateWithEnv(expression.right, env);
-    if (expression.op === "Add") {
+    if (expression.op.kind === "Add") {
       return tryNumber(resultLeft, resultRight, (l, r) => l + r);
-    } else if (expression.op === "Multiply") {
+    } else if (expression.op.kind === "Multiply") {
       return tryNumber(resultLeft, resultRight, (l, r) => l * r);
-    } else if (expression.op === "Sub") {
+    } else if (expression.op.kind === "Sub") {
       return tryNumber(resultLeft, resultRight, (l, r) => l - r);
-    } else if (expression.op === "LessThan") {
+    } else if (expression.op.kind === "LessThan") {
       return tryNumber(resultLeft, resultRight, (l, r) => l < r);
     }
   } else if (expression.kind === "IfExpression") {

@@ -1,11 +1,48 @@
 import { parse } from "./parser";
-import { ExpressionNode, NumberLiteralNode, BoolLiteralNode, IdentifierNode } from "./ast";
+import {
+  ExpressionNode,
+  NumberLiteralNode,
+  AddOperation,
+  MultiplyOperation,
+  BoolLiteralNode,
+  IdentifierNode,
+  LessThanOperation,
+  SubOperation,
+} from "./types";
 
 const num = (value: number) =>
   ({
     kind: "NumberLiteral",
     value,
   } as NumberLiteralNode);
+
+const add: AddOperation = {
+  kind: "Add",
+  token: {
+    tokenKind: "Plus",
+  },
+};
+
+const sub: SubOperation = {
+  kind: "Sub",
+  token: {
+    tokenKind: "Minus",
+  },
+};
+
+const multiply: MultiplyOperation = {
+  kind: "Multiply",
+  token: {
+    tokenKind: "Times",
+  },
+};
+
+const lessThan: LessThanOperation = {
+  kind: "LessThan",
+  token: {
+    tokenKind: "LessThan",
+  },
+};
 
 const bool = (value: boolean) =>
   ({
@@ -18,17 +55,20 @@ const id = (name: string) => ({ kind: "Identifier", name } as IdentifierNode);
 const expr = <T extends ExpressionNode = ExpressionNode>(node: T) => node;
 
 const fixture = {
+  "0": () => num(0),
+  true: () => bool(true),
+  false: () => bool(false),
   "1+2": () =>
     expr({
       kind: "BinaryExpression",
-      op: "Add",
+      op: add,
       left: num(1),
       right: num(2),
     }),
   "(1+2)*3": () =>
     expr({
       kind: "BinaryExpression",
-      op: "Multiply",
+      op: multiply,
       left: fixture["1+2"](),
       right: num(3),
     }),
@@ -46,7 +86,7 @@ const fixture = {
       then: num(0),
       else: {
         kind: "BinaryExpression",
-        op: "Add",
+        op: add,
         left: num(1),
         right: fixture["if true then 0 else 1"](),
       },
@@ -54,7 +94,7 @@ const fixture = {
   "(if true then 0 else 1) + if true then 0 else 1": () =>
     expr({
       kind: "BinaryExpression",
-      op: "Add",
+      op: add,
       left: fixture["if true then 0 else 1"](),
       right: fixture["if true then 0 else 1"](),
     }),
@@ -107,7 +147,7 @@ const fixture = {
   "f x*3": () =>
     expr({
       kind: "BinaryExpression",
-      op: "Multiply",
+      op: multiply,
       left: fixture["f x"](),
       right: num(3),
     }),
@@ -135,20 +175,20 @@ const fixture = {
           kind: "IfExpression",
           cond: {
             kind: "BinaryExpression",
-            op: "LessThan",
+            op: lessThan,
             left: id("n"),
             right: num(2),
           },
           then: id("n"),
           else: {
             kind: "BinaryExpression",
-            op: "Add",
+            op: add,
             left: {
               kind: "FunctionApplication",
               callee: id("fib"),
               argument: {
                 kind: "BinaryExpression",
-                op: "Sub",
+                op: sub,
                 left: id("n"),
                 right: num(1),
               },
@@ -158,7 +198,7 @@ const fixture = {
               callee: id("fib"),
               argument: {
                 kind: "BinaryExpression",
-                op: "Sub",
+                op: sub,
                 left: id("n"),
                 right: num(2),
               },
@@ -178,7 +218,7 @@ describe(parse, () => {
   Object.keys(fixture).forEach(input => {
     test(`parse: "${input}"`, () => {
       const expectedNode = (fixture as Record<string, () => ExpressionNode>)[input]();
-      expect(parse(input)).toEqual(expectedNode);
+      expect(parse(input)).toMatchObject(expectedNode);
     });
   });
 });
