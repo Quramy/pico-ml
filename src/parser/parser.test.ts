@@ -65,6 +65,30 @@ const fixture = {
       left: num(1),
       right: num(2),
     }),
+  "1+2*3": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: add,
+      left: num(1),
+      right: {
+        kind: "BinaryExpression",
+        op: multiply,
+        left: num(2),
+        right: num(3),
+      },
+    }),
+  "1*2+3": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: add,
+      left: {
+        kind: "BinaryExpression",
+        op: multiply,
+        left: num(1),
+        right: num(2),
+      },
+      right: num(3),
+    }),
   "(1+2)*3": () =>
     expr({
       kind: "BinaryExpression",
@@ -96,6 +120,13 @@ const fixture = {
       kind: "BinaryExpression",
       op: add,
       left: fixture["if true then 0 else 1"](),
+      right: fixture["if true then 0 else 1"](),
+    }),
+  "1 * if true then 0 else 1": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: multiply,
+      left: num(1),
       right: fixture["if true then 0 else 1"](),
     }),
   "let x = 1 + 2 in x": () =>

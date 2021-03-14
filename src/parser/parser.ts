@@ -21,9 +21,9 @@ import { loc } from "./utils";
  * cond   ::= "if" expr "then" expr "else" expr
  * bind   ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
  * func   ::= "fun" id "->" expr
- * comp   ::= add("<" expr)*
- * add    ::= mul(("+"|"-") expr)*
- * mul    ::= app("*" expr)*
+ * comp   ::= add("<" (add | cond | bind))*
+ * add    ::= mul(("+"|"-") (mul | cond | bind))*
+ * mul    ::= app("*" (app | cond | bind))*
  * app    ::= prim(prim)*
  * prim   ::= id | bool | number | group
  * group  ::= "(" expr ")"
@@ -110,7 +110,11 @@ const cond: Parser<IfExpressionNode> = expect(
 const comp: Parser<ExpressionNode> = expect(use(() => add))(
   leftAssociate(
     symbolToken("<"),
-    use(() => expr),
+    oneOf(
+      use(() => add),
+      use(() => cond),
+      use(() => bind),
+    ),
   )(
     (left, token, right): BinaryExpressionNode => ({
       kind: "BinaryExpression",
@@ -125,7 +129,11 @@ const comp: Parser<ExpressionNode> = expect(use(() => add))(
 const add: Parser<ExpressionNode> = expect(use(() => mul))(
   leftAssociate(
     oneOf(symbolToken("+"), symbolToken("-")),
-    use(() => expr),
+    oneOf(
+      use(() => mul),
+      use(() => cond),
+      use(() => bind),
+    ),
   )(
     (left, token, right): BinaryExpressionNode => ({
       kind: "BinaryExpression",
@@ -140,7 +148,11 @@ const add: Parser<ExpressionNode> = expect(use(() => mul))(
 const mul: Parser<ExpressionNode> = expect(use(() => app))(
   leftAssociate(
     symbolToken("*"),
-    use(() => expr),
+    oneOf(
+      use(() => app),
+      use(() => cond),
+      use(() => bind),
+    ),
   )(
     (left, token, right): BinaryExpressionNode => ({
       kind: "BinaryExpression",
