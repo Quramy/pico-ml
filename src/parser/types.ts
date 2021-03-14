@@ -5,8 +5,8 @@ export interface Position {
   };
 }
 
-export type Symbols = ["(", ")", "+", "-", "*", "<", "=", "->"];
-export type ReservedWords = ["if", "then", "else", "let", "in", "fun", "rec", "true", "false"];
+export type Symbols = readonly ["(", ")", "+", "-", "*", "<", "=", "->"];
+export type ReservedWords = readonly ["if", "then", "else", "let", "in", "fun", "rec", "true", "false"];
 
 export interface TokenBase<T extends string> extends Position {
   readonly tokenKind: T;

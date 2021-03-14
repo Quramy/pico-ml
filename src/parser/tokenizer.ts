@@ -16,7 +16,7 @@ const symbolTokenKindMap: SymbolTokenKindMapBase = {
   "->": "RightArrow",
 };
 
-const reservedWords: ReservedWords = ["if", "then", "else", "let", "in", "fun", "rec", "true", "false"];
+const reservedWords: ReservedWords = ["if", "then", "else", "let", "in", "fun", "rec", "true", "false"] as const;
 
 export const symbolToken = <S extends keyof SymbolTokenKindMapBase, T extends SymbolTokensMap[S]>(sym: S) => {
   return (scanner: Scanner) => {
