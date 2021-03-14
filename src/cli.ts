@@ -56,7 +56,8 @@ process.stdin.on("data", function (chunk) {
   const idx = str.indexOf(";;");
   if (idx !== -1) {
     buf.push(str.slice(0, idx));
-    const result = evaluate(parse(buf.join(" ")));
+    const tree = parse(buf.join(" "))!;
+    const result = evaluate(tree);
     console.log(result);
     initBuf();
   } else {

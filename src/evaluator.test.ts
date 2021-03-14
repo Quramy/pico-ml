@@ -1,7 +1,7 @@
 import { parse } from "./parser";
 import { evaluate } from "./evaluator";
 
-const parseAndEval = (code: string) => evaluate(parse(code));
+const parseAndEval = (code: string) => evaluate(parse(code)!);
 
 const failedResult = { failure: true };
 
@@ -14,11 +14,11 @@ describe(evaluate, () => {
   });
 
   test("arithmetic operation", () => {
-    expect(parseAndEval("1+1")).toBe(2);
-    expect(parseAndEval("1-1")).toBe(0);
-    expect(parseAndEval("2*3")).toBe(6);
-    expect(parseAndEval("1<1")).toBe(false);
-    expect(parseAndEval("1<2")).toBe(true);
+    expect(parseAndEval("1 + 1")).toBe(2);
+    expect(parseAndEval("1 - 1")).toBe(0);
+    expect(parseAndEval("2 * 3")).toBe(6);
+    expect(parseAndEval("1 < 1")).toBe(false);
+    expect(parseAndEval("1 < 2")).toBe(true);
   });
 
   test("if expression", () => {
