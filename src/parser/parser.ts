@@ -137,7 +137,7 @@ const add: Parser<ExpressionNode> = expect(use(() => mul))(
   )(
     (left, token, right): BinaryExpressionNode => ({
       kind: "BinaryExpression",
-      op: token.tokenKind === "Plus" ? { kind: "Add", token } : { kind: "Sub", token },
+      op: token.symbol === "+" ? { kind: "Add", token } : { kind: "Sub", token },
       left,
       right,
       ...loc(left, token, right),

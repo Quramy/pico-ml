@@ -19,28 +19,32 @@ const num = (value: number) =>
 const add: AddOperation = {
   kind: "Add",
   token: {
-    tokenKind: "Plus",
+    tokenKind: "Symbol",
+    symbol: "+",
   },
 };
 
 const sub: SubOperation = {
   kind: "Sub",
   token: {
-    tokenKind: "Minus",
+    tokenKind: "Symbol",
+    symbol: "-",
   },
 };
 
 const multiply: MultiplyOperation = {
   kind: "Multiply",
   token: {
-    tokenKind: "Times",
+    tokenKind: "Symbol",
+    symbol: "*",
   },
 };
 
 const lessThan: LessThanOperation = {
   kind: "LessThan",
   token: {
-    tokenKind: "LessThan",
+    tokenKind: "Symbol",
+    symbol: "<",
   },
 };
 

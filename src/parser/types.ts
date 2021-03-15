@@ -6,22 +6,20 @@ export interface Position {
 }
 
 export type Symbols = readonly ["(", ")", "+", "-", "*", "<", "=", "->"];
+export type SymbolKind = Symbols[number];
 export type ReservedWords = readonly ["if", "then", "else", "let", "in", "fun", "rec", "true", "false"];
+export type ReservedWordKind = ReservedWords[number];
 
 export interface TokenBase<T extends string> extends Position {
   readonly tokenKind: T;
 }
 
-export interface LeftParenthesisToken extends TokenBase<"LeftParenthesis"> {}
-export interface RightParenthesisToken extends TokenBase<"RightParenthesis"> {}
-export interface PlusToken extends TokenBase<"Plus"> {}
-export interface MinusToken extends TokenBase<"Minus"> {}
-export interface TimesToken extends TokenBase<"Times"> {}
-export interface LessThanToken extends TokenBase<"LessThan"> {}
-export interface EqualToken extends TokenBase<"Equal"> {}
-export interface RightArrowToken extends TokenBase<"RightArrow"> {}
+export interface SymbolToken extends TokenBase<"Symbol"> {
+  readonly symbol: SymbolKind;
+}
+
 export interface KeywordToken extends TokenBase<"Keyword"> {
-  readonly keyword: ReservedWords[number];
+  readonly keyword: ReservedWordKind;
 }
 export interface VariableToken extends TokenBase<"Variable"> {
   name: string;
@@ -31,51 +29,26 @@ export interface NumberToken extends TokenBase<"Number"> {
   readonly value: number;
 }
 
-export type SymbolToken =
-  | LeftParenthesisToken
-  | RightParenthesisToken
-  | PlusToken
-  | MinusToken
-  | TimesToken
-  | LessThanToken
-  | EqualToken
-  | RightArrowToken;
-
-type SymbolTokensMapBase = {
-  readonly [s in Symbols[number]]: SymbolToken;
-};
-
-export interface SymbolTokensMap extends SymbolTokensMapBase {
-  readonly "(": LeftParenthesisToken;
-  readonly ")": RightParenthesisToken;
-  readonly "+": PlusToken;
-  readonly "-": MinusToken;
-  readonly "*": TimesToken;
-  readonly "<": LessThanToken;
-  readonly "=": EqualToken;
-  readonly "->": RightArrowToken;
-}
-
 export type Token = SymbolToken | KeywordToken | NumberToken | VariableToken;
 
 export interface AddOperation {
   readonly kind: "Add";
-  readonly token: PlusToken;
+  readonly token: Token;
 }
 
 export interface SubOperation {
   readonly kind: "Sub";
-  readonly token: MinusToken;
+  readonly token: Token;
 }
 
 export interface MultiplyOperation {
   readonly kind: "Multiply";
-  readonly token: TimesToken;
+  readonly token: Token;
 }
 
 export interface LessThanOperation {
   readonly kind: "LessThan";
-  readonly token: LessThanToken;
+  readonly token: Token;
 }
 
 export type BinaryOperation = AddOperation | SubOperation | MultiplyOperation | LessThanOperation;

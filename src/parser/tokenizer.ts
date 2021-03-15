@@ -1,55 +1,50 @@
-import { SymbolTokensMap, NumberToken, ReservedWords, KeywordToken, VariableToken } from "./types";
+import {
+  SymbolKind,
+  SymbolToken,
+  NumberToken,
+  ReservedWords,
+  ReservedWordKind,
+  KeywordToken,
+  VariableToken,
+} from "./types";
 import type { Scanner } from "./scanner";
-
-type SymbolTokenKindMapBase = {
-  readonly [P in keyof SymbolTokensMap]: SymbolTokensMap[P]["tokenKind"];
-};
-
-const symbolTokenKindMap: SymbolTokenKindMapBase = {
-  "(": "LeftParenthesis",
-  ")": "RightParenthesis",
-  "+": "Plus",
-  "-": "Minus",
-  "*": "Times",
-  "<": "LessThan",
-  "=": "Equal",
-  "->": "RightArrow",
-};
+import { Parser } from "./combinator";
 
 const reservedWords: ReservedWords = ["if", "then", "else", "let", "in", "fun", "rec", "true", "false"] as const;
 
-export const symbolToken = <S extends keyof SymbolTokenKindMapBase, T extends SymbolTokensMap[S]>(sym: S) => {
+export const symbolToken: (sym: SymbolKind) => Parser<SymbolToken> = sym => {
   return (scanner: Scanner) => {
     if (!scanner.startsWith(sym)) return;
-    return ({
-      tokenKind: symbolTokenKindMap[sym],
+    return {
+      tokenKind: "Symbol",
+      symbol: sym,
       loc: scanner.consume(sym.length),
-    } as unknown) as T;
+    };
   };
 };
 
-export const keywordToken = (keyword: ReservedWords[number]) => {
-  return (scanner: Scanner) => {
+export const keywordToken: (keyword: ReservedWordKind) => Parser<KeywordToken> = keyword => {
+  return scanner => {
     if (!scanner.match(new RegExp(`^${keyword}($|[^a-zA-Z0-9\$_])`))) return;
     return {
       tokenKind: "Keyword",
       keyword,
       loc: scanner.consume(keyword.length),
-    } as KeywordToken;
+    };
   };
 };
 
-export const numberToken = (scanner: Scanner) => {
+export const numberToken: Parser<NumberToken> = scanner => {
   const hit = scanner.match(/^(\d+)/);
   if (!hit) return;
   return {
     tokenKind: "Number",
     value: parseInt(hit[1], 10),
     loc: scanner.consume(hit[1].length),
-  } as NumberToken;
+  };
 };
 
-export const variableToken = (scanner: Scanner) => {
+export const variableToken: Parser<VariableToken> = scanner => {
   const hit = scanner.match(/^([a-zA-Z_\$][a-zA-Z0-9_\$]*)/);
   if (!hit) return;
   if (reservedWords.some(w => w === hit[1])) return;
@@ -57,5 +52,5 @@ export const variableToken = (scanner: Scanner) => {
     tokenKind: "Variable",
     name: hit[1],
     loc: scanner.consume(hit[1].length),
-  } as VariableToken;
+  };
 };
