@@ -3,8 +3,6 @@ import { evaluate } from "./evaluator";
 
 const parseAndEval = (code: string) => evaluate(parse(code)!).value;
 
-const failedResult = { failure: true };
-
 describe(evaluate, () => {
   test("literal", () => {
     expect(parseAndEval("1")).toBe(1);
@@ -22,7 +20,7 @@ describe(evaluate, () => {
   });
 
   test("if expression", () => {
-    expect(parseAndEval("if 100 then true else false")).toMatchObject(failedResult);
+    expect(parseAndEval("if 100 then true else false")).toHaveProperty("message");
     expect(parseAndEval("if true then 0 else 1")).toBe(0);
     expect(parseAndEval("if false then 0 else 1")).toBe(1);
   });

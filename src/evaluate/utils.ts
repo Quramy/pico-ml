@@ -7,6 +7,7 @@ export function isClosure(value: EvaluationValue): value is Closure {
 export function isRecClosure(value: EvaluationValue): value is RecClosure {
   return typeof value === "object" && value.kind === "Closure" && value.closureModifier === "Recursive";
 }
+
 export function getEvaluationResultTypeName(value: EvaluationValue): string {
   if (isRecClosure(value)) {
     return "recursive function";

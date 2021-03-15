@@ -15,8 +15,6 @@ function error(message: string): EvaluationResult {
   return {
     ok: false,
     value: {
-      kind: "Failure",
-      failure: true,
       message,
     },
   };

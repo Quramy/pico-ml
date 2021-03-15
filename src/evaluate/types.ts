@@ -1,8 +1,6 @@
 import { IdentifierNode, FunctionDefinitionNode } from "../parser";
 
 export interface EvaluationFailure {
-  readonly kind: "Failure";
-  readonly failure: true;
   readonly message: string;
 }
 
