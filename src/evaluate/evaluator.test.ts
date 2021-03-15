@@ -83,5 +83,14 @@ describe(evaluate, () => {
 
   test("match expression", () => {
     expect(parseAndEval("match 1::[] with [] -> false | x::y -> y")).toStrictEqual([]);
+
+    expect(
+      parseAndEval(`
+        let rec ln = fun list  ->
+          match list with [] -> 0 | x::y -> 1 + ln y in
+        let l = 1::2::3::4::[] in
+        ln l
+      `),
+    ).toBe(4);
   });
 });
