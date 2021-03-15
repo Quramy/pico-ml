@@ -62,3 +62,22 @@ export const leftAssociate = <T extends readonly Parser[]>(...parsers: T) => <L 
     return inner(first);
   };
 };
+
+export const rightAssociate = <T extends readonly Parser[]>(...parsers: T) => <L extends ParseValue>(
+  cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => L,
+) => {
+  return (first: L, scanner: Scanner) => {
+    const inner = (node: L): L => {
+      const results: any[] = [];
+      for (const parser of parsers) {
+        const r = parser(scanner);
+        if (!r) return node;
+        results.push(r);
+      }
+      const mid = results.slice(0, results.length - 1);
+      const last = results[results.length - 1];
+      return cb(node, ...([...mid, inner(last)] as any));
+    };
+    return inner(first);
+  };
+};

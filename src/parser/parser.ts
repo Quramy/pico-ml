@@ -9,19 +9,23 @@ import {
   FunctionDefinitionNode,
   FunctionApplicationNode,
   LetRecExpressionNode,
+  EmptyListNode,
+  MatchExpressionNode,
 } from "./types";
-import { Parser, use, oneOf, expect, leftAssociate } from "./combinator";
+import { Parser, use, oneOf, expect, leftAssociate, rightAssociate } from "./combinator";
 import { symbolToken, numberToken, keywordToken, variableToken } from "./tokenizer";
 import { Scanner } from "./scanner";
 import { loc } from "./utils";
 
 /**
  *
- * expr   ::= comp | cond | func | bind
+ * expr   ::= comp | cond | match | func | bind
  * cond   ::= "if" expr "then" expr "else" expr
- * bind   ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
+ * match  ::= "match" expr "with" "[" "]" "->" expr "|" id::id -> expr
  * func   ::= "fun" id "->" expr
- * comp   ::= add("<" (add | cond | bind))*
+ * bind   ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
+ * comp   ::= cons("<" (cons | cond | bind))*
+ * cons   ::= add("::" add | cond | bind)+
  * add    ::= mul(("+"|"-") (mul | cond | bind))*
  * mul    ::= app("*" (app | cond | bind))*
  * app    ::= prim(prim)*
@@ -35,6 +39,7 @@ import { loc } from "./utils";
 const expr: Parser<ExpressionNode> = oneOf(
   use(() => comp),
   use(() => cond),
+  use(() => match),
   use(() => func),
   use(() => bind),
 );
@@ -107,9 +112,82 @@ const cond: Parser<IfExpressionNode> = expect(
     } as IfExpressionNode),
 );
 
-const comp: Parser<ExpressionNode> = expect(use(() => add))(
+const match: Parser<MatchExpressionNode> = expect(
+  keywordToken("match"),
+  use(() => expr),
+  keywordToken("with"),
+  symbolToken("["),
+  symbolToken("]"),
+  symbolToken("->"),
+  use(() => expr),
+  symbolToken("|"),
+  use(() => id),
+  symbolToken("::"),
+  use(() => id),
+  symbolToken("->"),
+  use(() => expr),
+)(
+  (
+    tMatch,
+    exp,
+    tWith,
+    tl,
+    tr,
+    tArrow,
+    emptyClause,
+    tPipe,
+    leftIdentifier,
+    tCons,
+    rightIdentifier,
+    tArrow2,
+    consClause,
+  ): MatchExpressionNode => ({
+    kind: "MatchExpression",
+    exp,
+    emptyClause,
+    leftIdentifier,
+    rightIdentifier,
+    consClause,
+    ...loc(
+      tMatch,
+      exp,
+      tWith,
+      tl,
+      tr,
+      tArrow,
+      emptyClause,
+      tPipe,
+      leftIdentifier,
+      tCons,
+      rightIdentifier,
+      tArrow2,
+      consClause,
+    ),
+  }),
+);
+
+const comp: Parser<ExpressionNode> = expect(use(() => cons))(
   leftAssociate(
     symbolToken("<"),
+    oneOf(
+      use(() => cons),
+      use(() => cond),
+      use(() => bind),
+    ),
+  )(
+    (left, token, right): BinaryExpressionNode => ({
+      kind: "BinaryExpression",
+      op: { kind: "LessThan", token },
+      left,
+      right,
+      ...loc(left, token, right),
+    }),
+  ),
+);
+
+const cons: Parser<ExpressionNode> = expect(use(() => add))(
+  rightAssociate(
+    symbolToken("::"),
     oneOf(
       use(() => add),
       use(() => cond),
@@ -118,7 +196,7 @@ const comp: Parser<ExpressionNode> = expect(use(() => add))(
   )(
     (left, token, right): BinaryExpressionNode => ({
       kind: "BinaryExpression",
-      op: { kind: "LessThan", token },
+      op: { kind: "Cons", token },
       left,
       right,
       ...loc(left, token, right),
@@ -183,6 +261,17 @@ const prim: Parser<ExpressionNode> = oneOf(
   use(() => num),
   use(() => bool),
   use(() => group),
+  use(() => empty),
+);
+
+const empty: Parser<EmptyListNode> = expect(
+  symbolToken("["),
+  symbolToken("]"),
+)(
+  (l, r): EmptyListNode => ({
+    kind: "EmptyList",
+    ...loc(l, r),
+  }),
 );
 
 const group: Parser<ExpressionNode> = expect(

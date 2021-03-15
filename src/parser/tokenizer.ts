@@ -10,7 +10,19 @@ import {
 import type { Scanner } from "./scanner";
 import { Parser } from "./combinator";
 
-const reservedWords: ReservedWords = ["if", "then", "else", "let", "in", "fun", "rec", "true", "false"] as const;
+const reservedWords: ReservedWords = [
+  "if",
+  "then",
+  "else",
+  "let",
+  "in",
+  "fun",
+  "rec",
+  "true",
+  "false",
+  "match",
+  "with",
+] as const;
 
 export const symbolToken: (sym: SymbolKind) => Parser<SymbolToken> = sym => {
   return (scanner: Scanner) => {

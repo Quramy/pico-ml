@@ -21,7 +21,8 @@ export interface RecClosure extends Closure {
   readonly recursievId: IdentifierNode;
 }
 
-export type EvaluationValue = number | boolean | Closure;
+export type EvaluationList = readonly EvaluationValue[];
+export type EvaluationValue = number | boolean | Closure | EvaluationList;
 
 export type EvaluationResult =
   | {

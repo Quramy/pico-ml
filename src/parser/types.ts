@@ -5,9 +5,21 @@ export interface Position {
   };
 }
 
-export type Symbols = readonly ["(", ")", "+", "-", "*", "<", "=", "->"];
+export type Symbols = readonly ["(", ")", "+", "-", "*", "<", "=", "->", "[", "]", "::", "|"];
 export type SymbolKind = Symbols[number];
-export type ReservedWords = readonly ["if", "then", "else", "let", "in", "fun", "rec", "true", "false"];
+export type ReservedWords = readonly [
+  "if",
+  "then",
+  "else",
+  "let",
+  "in",
+  "fun",
+  "rec",
+  "true",
+  "false",
+  "match",
+  "with",
+];
 export type ReservedWordKind = ReservedWords[number];
 
 export interface TokenBase<T extends string> extends Position {
@@ -51,7 +63,12 @@ export interface LessThanOperation {
   readonly token: Token;
 }
 
-export type BinaryOperation = AddOperation | SubOperation | MultiplyOperation | LessThanOperation;
+export interface ConsOperation {
+  readonly kind: "Cons";
+  readonly token: Token;
+}
+
+export type BinaryOperation = AddOperation | SubOperation | MultiplyOperation | LessThanOperation | ConsOperation;
 
 export interface Node<T extends string> extends Position {
   readonly kind: T;
@@ -103,13 +120,25 @@ export interface FunctionApplicationNode extends Node<"FunctionApplication"> {
   readonly argument: ExpressionNode;
 }
 
+export interface EmptyListNode extends Node<"EmptyList"> {}
+
+export interface MatchExpressionNode extends Node<"MatchExpression"> {
+  exp: ExpressionNode;
+  emptyClause: ExpressionNode;
+  leftIdentifier: IdentifierNode;
+  rightIdentifier: IdentifierNode;
+  consClause: ExpressionNode;
+}
+
 export type ExpressionNode =
   | NumberLiteralNode
   | BoolLiteralNode
+  | EmptyListNode
   | IdentifierNode
   | BinaryExpressionNode
   | IfExpressionNode
   | LetExpressionNode
   | FunctionDefinitionNode
   | LetRecExpressionNode
-  | FunctionApplicationNode;
+  | FunctionApplicationNode
+  | MatchExpressionNode;

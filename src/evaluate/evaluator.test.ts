@@ -19,6 +19,10 @@ describe(evaluate, () => {
     expect(parseAndEval("1 < 2")).toBe(true);
   });
 
+  test("cons operation", () => {
+    expect(parseAndEval("1::2::3::[]")).toStrictEqual([1, 2, 3]);
+  });
+
   test("if expression", () => {
     expect(parseAndEval("if 100 then true else false")).toHaveProperty("message");
     expect(parseAndEval("if true then 0 else 1")).toBe(0);
@@ -75,5 +79,9 @@ describe(evaluate, () => {
         fib 10
       `),
     ).toBe(55);
+  });
+
+  test("match expression", () => {
+    expect(parseAndEval("match 1::[] with [] -> false | x::y -> y")).toStrictEqual([]);
   });
 });

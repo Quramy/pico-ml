@@ -8,6 +8,8 @@ import {
   IdentifierNode,
   LessThanOperation,
   SubOperation,
+  ConsOperation,
+  EmptyListNode,
 } from "./types";
 
 const num = (value: number) =>
@@ -47,6 +49,19 @@ const lessThan: LessThanOperation = {
     symbol: "<",
   },
 };
+
+const cons: ConsOperation = {
+  kind: "Cons",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "::",
+  },
+};
+
+const empty = () =>
+  ({
+    kind: "EmptyList",
+  } as EmptyListNode);
 
 const bool = (value: boolean) =>
   ({
@@ -99,6 +114,18 @@ const fixture = {
       op: multiply,
       left: fixture["1+2"](),
       right: num(3),
+    }),
+  "1::2::[]": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: cons,
+      left: num(1),
+      right: {
+        kind: "BinaryExpression",
+        op: cons,
+        left: num(2),
+        right: empty(),
+      },
     }),
   "if true then 0 else 1": () =>
     expr({
@@ -246,6 +273,15 @@ const fixture = {
         callee: id("fib"),
         argument: num(10),
       },
+    }),
+  "match x with [] -> 1 | y::z -> 0": () =>
+    expr({
+      kind: "MatchExpression",
+      exp: id("x"),
+      emptyClause: num(1),
+      leftIdentifier: id("y"),
+      rightIdentifier: id("z"),
+      consClause: num(0),
     }),
 };
 
