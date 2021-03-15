@@ -1,5 +1,5 @@
 import { parse } from "./parser";
-import { evaluate } from "./evaluator";
+import { evaluate } from "./evaluate";
 
 const resetCode = "\u001b[0m";
 const colorCode = {

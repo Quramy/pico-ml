@@ -1,66 +1,8 @@
-import { ExpressionNode, IdentifierNode, FunctionDefinitionNode } from "./parser";
-
-export interface EvaluationFailure {
-  readonly kind: "Failure";
-  readonly failure: true;
-  readonly message: string;
-}
-
-export interface Environment {
-  get(identifier: IdentifierNode): EvaluationValue | undefined;
-  print(): readonly string[];
-}
-
-export interface Closure {
-  readonly kind: "Closure";
-  readonly functionDefinition: FunctionDefinitionNode;
-  readonly env: Environment;
-  readonly closureModifier?: string;
-}
-
-export interface RecClosure extends Closure {
-  readonly closureModifier: "Recursive";
-  readonly recursievId: IdentifierNode;
-}
-
-export type EvaluationValue = number | boolean | Closure;
-
-export type EvaluationResult =
-  | {
-      ok: true;
-      value: EvaluationValue;
-    }
-  | {
-      ok: false;
-      value: EvaluationFailure;
-    };
-
-export function isClosure(value: EvaluationValue): value is Closure {
-  return typeof value === "object" && value.kind === "Closure";
-}
-
-export function isRecClosure(value: EvaluationValue): value is RecClosure {
-  return typeof value === "object" && value.kind === "Closure" && value.closureModifier === "Recursive";
-}
-
-export function getEvaluationResultTypeName(value: EvaluationValue): string {
-  if (isRecClosure(value)) {
-    return "recursive function";
-  } else if (isClosure(value)) {
-    return "function";
-  } else if (typeof value === "number") {
-    return "number";
-  } else if (typeof value === "boolean") {
-    return "boolean";
-  }
-  return undefined as never;
-}
-
-export function getEvaluationResultValue(result: EvaluationResult): string {
-  if (!result.ok) return result.value.message;
-  if (isClosure(result.value)) return getEvaluationResultTypeName(result.value);
-  return result.value.toString();
-}
+import { ExpressionNode } from "../parser";
+import { EvaluationResult, EvaluationValue, Environment } from "./types";
+import { createChildEnvironment, createRootEnvironment } from "./environment";
+import { getEvaluationResultTypeName, isClosure, isRecClosure } from "./utils";
+import { createClosure, createRecClosure } from "./closure";
 
 function ok(value: EvaluationValue): EvaluationResult {
   return {
@@ -77,51 +19,6 @@ function error(message: string): EvaluationResult {
       failure: true,
       message,
     },
-  };
-}
-
-function createRootEnvironment(): Environment {
-  return {
-    get() {
-      return undefined;
-    },
-    print() {
-      return [];
-    },
-  };
-}
-
-function createChildEnvironment(id: IdentifierNode, value: EvaluationValue, parent: Environment): Environment {
-  return {
-    get(identifier: IdentifierNode) {
-      if (id.name === identifier.name) {
-        return value;
-      }
-      return parent.get(identifier);
-    },
-    print() {
-      return [...parent.print(), `${id.name}: ${getEvaluationResultValue({ ok: true, value })}`];
-    },
-  };
-}
-
-function createClosure(functionDefinition: FunctionDefinitionNode, env: Environment): Closure {
-  return {
-    kind: "Closure",
-    env,
-    functionDefinition,
-  };
-}
-
-function createRecClosure(
-  functionDefinition: FunctionDefinitionNode,
-  env: Environment,
-  recursievId: IdentifierNode,
-): RecClosure {
-  return {
-    ...createClosure(functionDefinition, env),
-    closureModifier: "Recursive",
-    recursievId,
   };
 }
 

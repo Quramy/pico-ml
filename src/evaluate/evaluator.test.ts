@@ -1,4 +1,4 @@
-import { parse } from "./parser";
+import { parse } from "../parser";
 import { evaluate } from "./evaluator";
 
 const parseAndEval = (code: string) => evaluate(parse(code)!).value;
