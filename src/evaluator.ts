@@ -7,7 +7,7 @@ export interface EvaluationFailure {
 }
 
 export interface Environment {
-  get(identifier: IdentifierNode): EvaluetionValue | undefined;
+  get(identifier: IdentifierNode): EvaluationValue | undefined;
   print(): readonly string[];
 }
 
@@ -23,26 +23,28 @@ export interface RecClosure extends Closure {
   readonly recursievId: IdentifierNode;
 }
 
-export type EvaluetionValue = number | boolean | Closure;
+export type EvaluationValue = number | boolean | Closure;
 
-export type EvaluationResult = EvaluetionValue | EvaluationFailure;
+export type EvaluationResult =
+  | {
+      ok: true;
+      value: EvaluationValue;
+    }
+  | {
+      ok: false;
+      value: EvaluationFailure;
+    };
 
-export function isFailed(result: EvaluationResult): result is EvaluationFailure {
-  return typeof result === "object" && result.kind === "Failure";
-}
-
-export function isClosure(value: EvaluationResult): value is Closure {
+export function isClosure(value: EvaluationValue): value is Closure {
   return typeof value === "object" && value.kind === "Closure";
 }
 
-export function isRecClosure(value: EvaluationResult): value is RecClosure {
+export function isRecClosure(value: EvaluationValue): value is RecClosure {
   return typeof value === "object" && value.kind === "Closure" && value.closureModifier === "Recursive";
 }
 
-export function getEvaluationResultTypeName(value: EvaluationResult): string {
-  if (isFailed(value)) {
-    return "failure";
-  } else if (isRecClosure(value)) {
+export function getEvaluationResultTypeName(value: EvaluationValue): string {
+  if (isRecClosure(value)) {
     return "recursive function";
   } else if (isClosure(value)) {
     return "function";
@@ -54,16 +56,27 @@ export function getEvaluationResultTypeName(value: EvaluationResult): string {
   return undefined as never;
 }
 
-export function getEvaluationResultValue(value: EvaluationResult): string {
-  if (isFailed(value) || isClosure(value)) return getEvaluationResultTypeName(value);
-  return value.toString();
+export function getEvaluationResultValue(result: EvaluationResult): string {
+  if (!result.ok) return result.value.message;
+  if (isClosure(result.value)) return getEvaluationResultTypeName(result.value);
+  return result.value.toString();
 }
 
-function createFailure(message: string): EvaluationFailure {
+function ok(value: EvaluationValue): EvaluationResult {
   return {
-    kind: "Failure",
-    failure: true,
-    message,
+    ok: true,
+    value,
+  };
+}
+
+function error(message: string): EvaluationResult {
+  return {
+    ok: false,
+    value: {
+      kind: "Failure",
+      failure: true,
+      message,
+    },
   };
 }
 
@@ -78,7 +91,7 @@ function createRootEnvironment(): Environment {
   };
 }
 
-function createChildEnvironment(id: IdentifierNode, value: EvaluetionValue, parent: Environment): Environment {
+function createChildEnvironment(id: IdentifierNode, value: EvaluationValue, parent: Environment): Environment {
   return {
     get(identifier: IdentifierNode) {
       if (id.name === identifier.name) {
@@ -87,7 +100,7 @@ function createChildEnvironment(id: IdentifierNode, value: EvaluetionValue, pare
       return parent.get(identifier);
     },
     print() {
-      return [...parent.print(), `${id.name}: ${getEvaluationResultValue(value)}`];
+      return [...parent.print(), `${id.name}: ${getEvaluationResultValue({ ok: true, value })}`];
     },
   };
 }
@@ -112,93 +125,102 @@ function createRecClosure(
   };
 }
 
-function tryNumber(
-  left: EvaluationResult,
-  right: EvaluationResult,
-  cb: (a: number, b: number) => EvaluationResult,
+function mapNumber(
+  left: EvaluationValue,
+  right: EvaluationValue,
+  cb: (a: number, b: number) => EvaluationValue,
 ): EvaluationResult {
-  if (isFailed(left)) return left;
-  if (isFailed(right)) return right;
   if (typeof left !== "number") {
-    return createFailure(`The left operand is not number. ${getEvaluationResultTypeName(left)}`);
+    return error(`The left operand is not number. ${getEvaluationResultTypeName(left)}`);
   }
   if (typeof right !== "number") {
-    return createFailure(`The right operand is not number. ${getEvaluationResultTypeName(right)}`);
+    return error(`The right operand is not number. ${getEvaluationResultTypeName(right)}`);
   }
-  return cb(left, right);
+  return ok(cb(left, right));
+}
+
+function mapEvalVal(env: Environment) {
+  return (...nodes: ExpressionNode[]) => (cb: (...values: EvaluationValue[]) => EvaluationResult) => {
+    const values: EvaluationValue[] = [];
+    for (const node of nodes) {
+      const result = evaluateWithEnv(node, env);
+      if (!result.ok) return result;
+      values.push(result.value);
+    }
+    return cb(...values);
+  };
 }
 
 function evaluateWithEnv(expression: ExpressionNode, env: Environment): EvaluationResult {
   if (expression.kind === "BoolLiteral") {
-    return expression.value;
+    return ok(expression.value);
   } else if (expression.kind === "NumberLiteral") {
-    return expression.value;
+    return ok(expression.value);
   } else if (expression.kind === "Identifier") {
-    const v = env.get(expression);
-    if (v == null) {
-      return createFailure(`variable ${expression.name} is not defined`);
+    const value = env.get(expression);
+    if (value == null) {
+      return error(`variable ${expression.name} is not defined`);
     }
-    return v;
+    return ok(value);
   } else if (expression.kind === "FunctionDefinition") {
-    return createClosure(expression, env);
+    return ok(createClosure(expression, env));
   } else if (expression.kind === "BinaryExpression") {
-    const resultLeft = evaluateWithEnv(expression.left, env);
-    const resultRight = evaluateWithEnv(expression.right, env);
-    if (expression.op.kind === "Add") {
-      return tryNumber(resultLeft, resultRight, (l, r) => l + r);
-    } else if (expression.op.kind === "Multiply") {
-      return tryNumber(resultLeft, resultRight, (l, r) => l * r);
-    } else if (expression.op.kind === "Sub") {
-      return tryNumber(resultLeft, resultRight, (l, r) => l - r);
-    } else if (expression.op.kind === "LessThan") {
-      return tryNumber(resultLeft, resultRight, (l, r) => l < r);
-    }
-  } else if (expression.kind === "IfExpression") {
-    const condition = evaluateWithEnv(expression.cond, env);
-    if (isFailed(condition)) return condition;
-    if (typeof condition === "boolean") {
-      if (condition) {
-        return evaluateWithEnv(expression.then, env);
-      } else {
-        return evaluateWithEnv(expression.else, env);
+    return mapEvalVal(env)(expression.left, expression.right)((left, right) => {
+      switch (expression.op.kind) {
+        case "Add":
+          return mapNumber(left, right, (l, r) => l + r);
+        case "Sub":
+          return mapNumber(left, right, (l, r) => l - r);
+        case "Multiply":
+          return mapNumber(left, right, (l, r) => l * r);
+        case "LessThan":
+          return mapNumber(left, right, (l, r) => l < r);
+        default:
+          return undefined as never;
       }
-    } else {
-      return createFailure(`condition should be boolean, but: ${getEvaluationResultTypeName(condition)}.`);
-    }
+    });
+  } else if (expression.kind === "IfExpression") {
+    return mapEvalVal(env)(expression.cond)(condition => {
+      if (typeof condition === "boolean") {
+        if (condition) {
+          return evaluateWithEnv(expression.then, env);
+        } else {
+          return evaluateWithEnv(expression.else, env);
+        }
+      } else {
+        return error(`condition should be boolean, but: ${getEvaluationResultTypeName(condition)}.`);
+      }
+    });
   } else if (expression.kind === "LetRecExpression") {
     const { identifier, binding, exp } = expression;
     const boundValue = createRecClosure(binding, env, identifier);
     const childEnv = createChildEnvironment(identifier, boundValue, env);
     return evaluateWithEnv(exp, childEnv);
   } else if (expression.kind === "LetExpression") {
-    const { identifier, binding, exp } = expression;
-    const boundValue = evaluateWithEnv(binding, env);
-    if (isFailed(boundValue)) return boundValue;
-    const childEnv = createChildEnvironment(identifier, boundValue, env);
-    return evaluateWithEnv(exp, childEnv);
+    return mapEvalVal(env)(expression.binding)(boundValue => {
+      const childEnv = createChildEnvironment(expression.identifier, boundValue, env);
+      return evaluateWithEnv(expression.exp, childEnv);
+    });
   } else if (expression.kind === "FunctionApplication") {
-    const callee = evaluateWithEnv(expression.callee, env);
-    if (!isClosure(callee)) {
-      return createFailure(`should be function, but ${getEvaluationResultTypeName(callee)}}`);
-    }
-    const argument = evaluateWithEnv(expression.argument, env);
-    if (isFailed(argument)) {
-      return argument;
-    }
-    if (!isRecClosure(callee)) {
-      return evaluateWithEnv(
-        callee.functionDefinition.body,
-        createChildEnvironment(callee.functionDefinition.param, argument, callee.env),
-      );
-    } else {
-      const recEnv = createChildEnvironment(callee.recursievId, callee, callee.env);
-      return evaluateWithEnv(
-        callee.functionDefinition.body,
-        createChildEnvironment(callee.functionDefinition.param, argument, recEnv),
-      );
-    }
+    return mapEvalVal(env)(expression.callee, expression.argument)((callee, argument) => {
+      if (!isClosure(callee)) {
+        return error(`should be function, but ${getEvaluationResultTypeName(callee)}}`);
+      }
+      if (!isRecClosure(callee)) {
+        return evaluateWithEnv(
+          callee.functionDefinition.body,
+          createChildEnvironment(callee.functionDefinition.param, argument, callee.env),
+        );
+      } else {
+        const recEnv = createChildEnvironment(callee.recursievId, callee, callee.env);
+        return evaluateWithEnv(
+          callee.functionDefinition.body,
+          createChildEnvironment(callee.functionDefinition.param, argument, recEnv),
+        );
+      }
+    });
   }
-  return createFailure(`invalid node kind. ${expression.kind}`);
+  return error(`invalid node kind`);
 }
 
 export function evaluate(expression: ExpressionNode) {
