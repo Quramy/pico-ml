@@ -29,8 +29,9 @@ import { loc } from "./utils";
  * add    ::= mul(("+"|"-") (mul | cond | bind))*
  * mul    ::= app("*" (app | cond | bind))*
  * app    ::= prim(prim)*
- * prim   ::= id | bool | number | group
+ * prim   ::= id | bool | number | empty | group
  * group  ::= "(" expr ")"
+ * empty  ;;= "[" "]"
  * bool   ::= "true" | "false"
  * number ::= "0" | "1" | "2" |  ...
  * id     ::= regExp([a-zA-Z$_][a-zA-Z$_0-9]*)
@@ -172,6 +173,7 @@ const comp: Parser<ExpressionNode> = expect(use(() => cons))(
     oneOf(
       use(() => cons),
       use(() => cond),
+      use(() => match),
       use(() => bind),
     ),
   )(
@@ -191,6 +193,7 @@ const cons: Parser<ExpressionNode> = expect(use(() => add))(
     oneOf(
       use(() => add),
       use(() => cond),
+      use(() => match),
       use(() => bind),
     ),
   )(
@@ -210,6 +213,7 @@ const add: Parser<ExpressionNode> = expect(use(() => mul))(
     oneOf(
       use(() => mul),
       use(() => cond),
+      use(() => match),
       use(() => bind),
     ),
   )(
@@ -229,6 +233,7 @@ const mul: Parser<ExpressionNode> = expect(use(() => app))(
     oneOf(
       use(() => app),
       use(() => cond),
+      use(() => match),
       use(() => bind),
     ),
   )(
@@ -260,18 +265,8 @@ const prim: Parser<ExpressionNode> = oneOf(
   use(() => id),
   use(() => num),
   use(() => bool),
-  use(() => group),
   use(() => empty),
-);
-
-const empty: Parser<EmptyListNode> = expect(
-  symbolToken("["),
-  symbolToken("]"),
-)(
-  (l, r): EmptyListNode => ({
-    kind: "EmptyList",
-    ...loc(l, r),
-  }),
+  use(() => group),
 );
 
 const group: Parser<ExpressionNode> = expect(
@@ -282,6 +277,16 @@ const group: Parser<ExpressionNode> = expect(
   ...node,
   ...loc(lp, node, rp),
 }));
+
+const empty: Parser<EmptyListNode> = expect(
+  symbolToken("["),
+  symbolToken("]"),
+)(
+  (l, r): EmptyListNode => ({
+    kind: "EmptyList",
+    ...loc(l, r),
+  }),
+);
 
 const bool: Parser<BoolLiteralNode> = oneOf(
   expect(keywordToken("true"))(
