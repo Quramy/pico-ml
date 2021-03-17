@@ -123,11 +123,11 @@ export interface FunctionApplicationNode extends Node<"FunctionApplication"> {
 export interface EmptyListNode extends Node<"EmptyList"> {}
 
 export interface MatchExpressionNode extends Node<"MatchExpression"> {
-  exp: ExpressionNode;
-  emptyClause: ExpressionNode;
-  leftIdentifier: IdentifierNode;
-  rightIdentifier: IdentifierNode;
-  consClause: ExpressionNode;
+  readonly exp: ExpressionNode;
+  readonly emptyClause: ExpressionNode;
+  readonly leftIdentifier: IdentifierNode;
+  readonly rightIdentifier: IdentifierNode;
+  readonly consClause: ExpressionNode;
 }
 
 export type ExpressionNode =
