@@ -8,6 +8,10 @@ export interface IntType extends TypeValueBase<"Int"> {}
 
 export interface BoolType extends TypeValueBase<"Bool"> {}
 
+export interface TypeParameterType extends TypeValueBase<"TypeParameter"> {
+  readonly id: number;
+}
+
 export interface ListType extends TypeValueBase<"List"> {
   readonly elementType: TypeValue;
 }
@@ -17,11 +21,7 @@ export interface FunctionType extends TypeValueBase<"Function"> {
   readonly returnType: TypeValue;
 }
 
-export interface TypeParameterType extends TypeValueBase<"TypeParameter"> {
-  readonly id: number;
-}
-
-export type TypeValue = IntType | BoolType | ListType | FunctionType | TypeParameterType;
+export type TypeValue = IntType | BoolType | TypeParameterType | ListType | FunctionType;
 
 export interface TypeScheme {}
 
