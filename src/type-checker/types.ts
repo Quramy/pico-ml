@@ -31,7 +31,6 @@ export interface TypeScheme {
 
 export interface TypeEnvironment {
   readonly kind: "TypeEnvironment";
-  readonly root: boolean;
   get(id: IdentifierNode): TypeScheme | undefined;
   parent(): { readonly value: TypeScheme; readonly env: TypeEnvironment } | undefined;
   map(cb: (value: TypeScheme) => TypeScheme): TypeEnvironment;

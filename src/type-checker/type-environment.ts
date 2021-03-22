@@ -4,7 +4,6 @@ import { TypeEnvironment, TypeScheme } from "./types";
 export function createRootEnvironment(): TypeEnvironment {
   const root = {
     kind: "TypeEnvironment",
-    root: true,
     get() {
       return undefined;
     },
@@ -25,7 +24,6 @@ export function createChildEnvironment(
 ): TypeEnvironment {
   const env = {
     kind: "TypeEnvironment",
-    root: false,
     get(identifier: IdentifierNode) {
       if (id.name === identifier.name) {
         return value;

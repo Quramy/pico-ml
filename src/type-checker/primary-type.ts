@@ -8,6 +8,7 @@ import {
   PrimaryTypeValue,
   TypeSubstitution,
   TypeEquation,
+  TypeScheme,
 } from "./types";
 import { createRootEnvironment, createChildEnvironment } from "./type-environment";
 import { unify } from "./unify";
@@ -70,6 +71,14 @@ function toEquationSet(...values: PrimaryTypeValue[]): TypeEquation[] {
     ],
     [] as TypeEquation[],
   );
+}
+
+function schemeFromType(type: TypeValue): TypeScheme {
+  return {
+    kind: "TypeScheme",
+    type,
+    variables: [],
+  };
 }
 
 function pt(expression: ExpressionNode, ctx: Context): PrimaryTypeResult {
@@ -177,11 +186,7 @@ function pt(expression: ExpressionNode, ctx: Context): PrimaryTypeResult {
     });
   } else if (expression.kind === "FunctionDefinition") {
     const paramType = ctx.generator.gen();
-    const env = createChildEnvironment(
-      expression.param,
-      { kind: "TypeScheme", type: paramType, variables: [] },
-      ctx.env,
-    );
+    const env = createChildEnvironment(expression.param, schemeFromType(paramType), ctx.env);
     return mapValues(pt(expression.body, { ...ctx, env }))(body => {
       return ok(
         substituteType(
