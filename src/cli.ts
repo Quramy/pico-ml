@@ -1,5 +1,6 @@
 import { parse } from "./parser";
 import { evaluate } from "./evaluate";
+import { createTypePrinter, getPrimaryType } from "./type-checker";
 
 const resetCode = "\u001b[0m";
 const colorCode = {
@@ -50,6 +51,7 @@ function initBuf() {
 
 process.stdin.on("data", function (chunk) {
   const str = chunk.toString("utf-8").trim();
+  const typePrinter = createTypePrinter();
   if (str.toLowerCase() === "quit" || str.toLowerCase() === "exit") {
     process.exit();
   }
@@ -57,11 +59,17 @@ process.stdin.on("data", function (chunk) {
   if (idx !== -1) {
     buf.push(str.slice(0, idx));
     const tree = parse(buf.join(" "))!;
-    const result = evaluate(tree);
-    if (result.ok) {
-      console.log(result.value);
+    const typeResult = getPrimaryType(tree);
+    if (!typeResult.ok) {
+      console.log(typeResult.value.message);
     } else {
-      console.log(result.value.message);
+      console.log(typePrinter(typeResult.value.expressionType));
+      const result = evaluate(tree);
+      if (result.ok) {
+        console.log(result.value);
+      } else {
+        console.log(result.value.message);
+      }
     }
     initBuf();
   } else {
