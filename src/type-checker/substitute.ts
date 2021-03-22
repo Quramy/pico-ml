@@ -1,6 +1,6 @@
 import { TypeEquation, TypeSubstitution, TypeValue } from "./types";
 
-export function substituteType(type: TypeValue, substitution: TypeSubstitution): TypeValue {
+function substituteTypeInner(type: TypeValue, substitution: TypeSubstitution): TypeValue {
   switch (type.kind) {
     case "Int":
     case "Bool":
@@ -19,6 +19,10 @@ export function substituteType(type: TypeValue, substitution: TypeSubstitution):
         elementType: substituteType(type.elementType, substitution),
       };
   }
+}
+
+export function substituteType(type: TypeValue, ...substitutions: readonly TypeSubstitution[]): TypeValue {
+  return substitutions.reduce((t, s) => substituteTypeInner(t, s), type);
 }
 
 export function substituteEquationSet(

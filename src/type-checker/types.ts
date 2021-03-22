@@ -70,3 +70,22 @@ export type UnifiedResult =
       readonly ok: false;
       readonly value: UnifiedFailure;
     };
+
+export interface PrimaryTypeValue {
+  readonly substitutions: readonly TypeSubstitution[];
+  readonly expressionType: TypeValue;
+}
+
+export interface PrimaryTypeFailure {
+  readonly message: string;
+}
+
+export type PrimaryTypeResult =
+  | {
+      readonly ok: true;
+      readonly value: PrimaryTypeValue;
+    }
+  | {
+      readonly ok: false;
+      readonly value: PrimaryTypeFailure;
+    };
