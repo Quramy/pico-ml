@@ -39,6 +39,15 @@ const fixture: Record<string, () => PrimaryTypeValue | PrimaryTypeFailure> = {
     ],
     expressionType: func(func(int(), int()), int()),
   }),
+  "let id = fun x -> x in if id true then 1 else id 2": () => ({
+    substitutions: [
+      { from: param(1), to: bool() },
+      { from: param(2), to: bool() },
+      { from: param(3), to: int() },
+      { from: param(4), to: int() },
+    ],
+    expressionType: int(),
+  }),
 };
 
 describe(getPrimaryType, () => {

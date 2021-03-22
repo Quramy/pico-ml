@@ -1,6 +1,7 @@
 import { TypeEquation, TypeSubstitution, UnifiedResult, TypeValue, TypeParameterType } from "./types";
 import { substituteEquationSet, composite } from "./substitute";
-import { equal, getFreeTypeVariables } from "./utils";
+import { getFreeTypeVariables } from "./ftv";
+import { equal } from "./utils";
 
 function ok(substitutions: readonly TypeSubstitution[]): UnifiedResult {
   return {

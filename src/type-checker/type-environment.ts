@@ -1,21 +1,49 @@
 import { IdentifierNode } from "../parser";
-import { TypeEnvironment, TypeValue } from "./types";
+import { TypeEnvironment, TypeScheme } from "./types";
 
 export function createRootEnvironment(): TypeEnvironment {
-  return {
+  const root = {
+    kind: "TypeEnvironment",
+    root: true,
     get() {
       return undefined;
     },
-  };
+    parent() {
+      return undefined;
+    },
+    map() {
+      return root;
+    },
+  } as const;
+  return root;
 }
 
-export function createChildEnvironment(id: IdentifierNode, value: TypeValue, parent: TypeEnvironment): TypeEnvironment {
-  return {
+export function createChildEnvironment(
+  id: IdentifierNode,
+  value: TypeScheme,
+  parent: TypeEnvironment,
+): TypeEnvironment {
+  const env = {
+    kind: "TypeEnvironment",
+    root: false,
     get(identifier: IdentifierNode) {
       if (id.name === identifier.name) {
         return value;
       }
       return parent.get(identifier);
     },
-  };
+    parent() {
+      return {
+        value,
+        env: parent,
+      };
+    },
+    map(cb: (value: TypeScheme) => TypeScheme) {
+      const { env: pEnv } = env.parent();
+      const np = pEnv.map(cb);
+      const nv = cb(value);
+      return createChildEnvironment(id, nv, np);
+    },
+  } as const;
+  return env;
 }

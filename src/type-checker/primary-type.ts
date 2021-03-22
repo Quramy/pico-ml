@@ -11,7 +11,8 @@ import {
 } from "./types";
 import { createRootEnvironment, createChildEnvironment } from "./type-environment";
 import { unify } from "./unify";
-import { substituteType } from "./substitute";
+import { substituteType, substituteEnv } from "./substitute";
+import { getClosure } from "./ftv";
 
 function ok(type: TypeValue, substitutions: readonly TypeSubstitution[] = [] as const): PrimaryTypeResult {
   return {
@@ -80,13 +81,17 @@ function pt(expression: ExpressionNode, ctx: Context): PrimaryTypeResult {
     const elementType = ctx.generator.gen();
     return ok({ kind: "List", elementType });
   } else if (expression.kind === "Identifier") {
-    const typeValue = ctx.env.get(expression);
-    if (!typeValue) {
+    const typeScheme = ctx.env.get(expression);
+    if (!typeScheme) {
       return error({
         message: `No identifier ${expression.name}`,
       });
     }
-    return ok(typeValue);
+    const substituions: TypeSubstitution[] = typeScheme.variables.map(v => ({
+      from: v,
+      to: ctx.generator.gen(),
+    }));
+    return ok(substituteType(typeScheme.type, ...substituions));
   } else if (expression.kind === "BinaryExpression") {
     switch (expression.op.kind) {
       case "Add":
@@ -162,7 +167,8 @@ function pt(expression: ExpressionNode, ctx: Context): PrimaryTypeResult {
     });
   } else if (expression.kind === "LetExpression") {
     return mapValues(pt(expression.binding, ctx))(binding => {
-      const env = createChildEnvironment(expression.identifier, binding.expressionType, ctx.env);
+      const scheme = getClosure(binding.expressionType, substituteEnv(ctx.env, ...binding.substitutions));
+      const env = createChildEnvironment(expression.identifier, scheme, ctx.env);
       return mapValues(pt(expression.exp, { ...ctx, env }))(exp => {
         const unified = unify(toEquationSet(binding, exp));
         if (!unified.ok) return error(unified.value);
@@ -171,7 +177,11 @@ function pt(expression: ExpressionNode, ctx: Context): PrimaryTypeResult {
     });
   } else if (expression.kind === "FunctionDefinition") {
     const paramType = ctx.generator.gen();
-    const env = createChildEnvironment(expression.param, paramType, ctx.env);
+    const env = createChildEnvironment(
+      expression.param,
+      { kind: "TypeScheme", type: paramType, variables: [] },
+      ctx.env,
+    );
     return mapValues(pt(expression.body, { ...ctx, env }))(body => {
       return ok(
         substituteType(

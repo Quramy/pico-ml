@@ -23,10 +23,18 @@ export interface FunctionType extends TypeValueBase<"Function"> {
 
 export type TypeValue = IntType | BoolType | TypeParameterType | ListType | FunctionType;
 
-export interface TypeScheme {}
+export interface TypeScheme {
+  readonly kind: "TypeScheme";
+  readonly variables: readonly TypeParameterType[];
+  readonly type: TypeValue;
+}
 
 export interface TypeEnvironment {
-  get(id: IdentifierNode): TypeValue | undefined;
+  readonly kind: "TypeEnvironment";
+  readonly root: boolean;
+  get(id: IdentifierNode): TypeScheme | undefined;
+  parent(): { readonly value: TypeScheme; readonly env: TypeEnvironment } | undefined;
+  map(cb: (value: TypeScheme) => TypeScheme): TypeEnvironment;
 }
 
 export interface TypeEquation {
@@ -38,25 +46,6 @@ export interface TypeSubstitution {
   readonly from: TypeParameterType;
   readonly to: TypeValue;
 }
-
-export interface ExtractedValue {
-  readonly equationSet: readonly TypeEquation[];
-  readonly expressionType: TypeValue;
-}
-
-export interface ExtractedFailure {
-  readonly message: string;
-}
-
-export type ExtractedResult =
-  | {
-      readonly ok: false;
-      readonly value: ExtractedFailure;
-    }
-  | {
-      readonly ok: true;
-      readonly value: ExtractedValue;
-    };
 
 export interface UnifiedFailure {
   readonly message: string;

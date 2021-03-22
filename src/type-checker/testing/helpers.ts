@@ -7,6 +7,7 @@ import {
   TypeEquation,
   ListType,
   TypeSubstitution,
+  TypeScheme,
 } from "../types";
 
 export const int = (): IntType => ({
@@ -31,6 +32,12 @@ export const func = (paramType: TypeValue, returnType: TypeValue): FunctionType 
   kind: "Function",
   paramType,
   returnType,
+});
+
+export const scheme = (type: TypeValue, variables: readonly TypeParameterType[]): TypeScheme => ({
+  kind: "TypeScheme",
+  type,
+  variables,
 });
 
 export const equation = (lhs: TypeValue, rhs: TypeValue): TypeEquation => ({

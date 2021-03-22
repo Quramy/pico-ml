@@ -1,4 +1,4 @@
-import { TypeEquation, TypeSubstitution, TypeValue } from "./types";
+import { TypeEquation, TypeSubstitution, TypeValue, TypeScheme, TypeEnvironment } from "./types";
 
 function substituteTypeInner(type: TypeValue, substitution: TypeSubstitution): TypeValue {
   switch (type.kind) {
@@ -23,6 +23,23 @@ function substituteTypeInner(type: TypeValue, substitution: TypeSubstitution): T
 
 export function substituteType(type: TypeValue, ...substitutions: readonly TypeSubstitution[]): TypeValue {
   return substitutions.reduce((t, s) => substituteTypeInner(t, s), type);
+}
+
+export function substituteScheme(scheme: TypeScheme, ...substitutions: readonly TypeSubstitution[]): TypeScheme {
+  return substitutions.reduce((sc, s) => {
+    if (sc.variables.some(v => v.id === s.from.id)) {
+      return scheme;
+    } else {
+      return {
+        ...scheme,
+        type: substituteType(scheme.type, s),
+      };
+    }
+  }, scheme);
+}
+
+export function substituteEnv(env: TypeEnvironment, ...substitutions: readonly TypeSubstitution[]): TypeEnvironment {
+  return env.map(scheme => substituteScheme(scheme, ...substitutions));
 }
 
 export function substituteEquationSet(

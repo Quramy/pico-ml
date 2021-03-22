@@ -1,4 +1,4 @@
-import { TypeValue, TypeParameterType } from "./types";
+import { TypeValue } from "./types";
 
 export function equal(a: TypeValue, b: TypeValue): boolean {
   switch (a.kind) {
@@ -18,23 +18,4 @@ export function equal(a: TypeValue, b: TypeValue): boolean {
       return a.id === b.id;
     }
   }
-}
-
-function getFTVInner(type: TypeValue): TypeParameterType[] {
-  switch (type.kind) {
-    case "Int":
-    case "Bool":
-      return [];
-    case "TypeParameter":
-      return [type];
-    case "List":
-      return getFTVInner(type.elementType);
-    case "Function":
-      return [...getFTVInner(type.paramType), ...getFTVInner(type.returnType)];
-  }
-}
-
-export function getFreeTypeVariables(type: TypeValue): readonly TypeParameterType[] {
-  const set = getFTVInner(type).sort((a, b) => a.id - b.id);
-  return set.reduce((acc, t) => (acc[0]?.id === t.id ? acc : [t, ...acc]), [] as TypeParameterType[]).reverse();
 }
