@@ -55,6 +55,15 @@ const fixture: Record<string, () => PrimaryTypeValue | PrimaryTypeFailure> = {
     ],
     expressionType: int(),
   }),
+  "let rec fn = fun x -> fn x in 1 + fn 1": () => ({
+    substitutions: [
+      { from: param(0), to: func(param(1), param(2)) },
+      { from: param(3), to: int() },
+      { from: param(4), to: int() },
+      { from: param(5), to: int() },
+    ],
+    expressionType: int(),
+  }),
 };
 
 describe(getPrimaryType, () => {

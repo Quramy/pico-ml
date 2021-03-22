@@ -61,7 +61,7 @@ function mapValues(...resuls: PrimaryTypeResult[]) {
   };
 }
 
-function toEquationSet(...values: PrimaryTypeValue[]): TypeEquation[] {
+function toEquationSet(...values: { substitutions: readonly TypeSubstitution[] }[]): TypeEquation[] {
   return values.reduce(
     (acc, { substitutions }) => [
       ...acc,
@@ -210,6 +210,38 @@ function pt(expression: ExpressionNode, ctx: Context): PrimaryTypeResult {
         return ok(substituteType(exp.expressionType, ...unified.value), unified.value);
       });
     });
+  } else if (expression.kind === "LetRecExpression") {
+    const funcType = ctx.generator.gen();
+    const paramType = ctx.generator.gen();
+    const bodyEnv = createChildEnvironment(
+      expression.binding.param,
+      schemeFromType(paramType),
+      createChildEnvironment(expression.identifier, schemeFromType(funcType), ctx.env),
+    );
+    return mapValues(pt(expression.binding.body, { ...ctx, env: bodyEnv }))(bindingBody => {
+      const unifiedBody = unify([
+        ...toEquationSet(bindingBody),
+        {
+          lhs: funcType,
+          rhs: {
+            kind: "Function",
+            paramType,
+            returnType: bindingBody.expressionType,
+          },
+        },
+      ]);
+      if (!unifiedBody.ok) return error(unifiedBody.value);
+      const scheme = getClosure(
+        substituteType(funcType, ...unifiedBody.value),
+        substituteEnv(ctx.env, ...unifiedBody.value),
+      );
+      const childEnv = createChildEnvironment(expression.identifier, scheme, ctx.env);
+      return mapValues(pt(expression.exp, { ...ctx, env: childEnv }))(exp => {
+        const unifiedExp = unify(toEquationSet({ substitutions: unifiedBody.value }, exp));
+        if (!unifiedExp.ok) return error(unifiedExp.value);
+        return ok(substituteType(exp.expressionType, ...unifiedExp.value), unifiedExp.value);
+      });
+    });
   } else if (expression.kind === "FunctionDefinition") {
     const paramType = ctx.generator.gen();
     const env = createChildEnvironment(expression.param, schemeFromType(paramType), ctx.env);
@@ -248,7 +280,8 @@ function pt(expression: ExpressionNode, ctx: Context): PrimaryTypeResult {
     });
   }
 
-  throw new Error(`Invalid node: ${expression.kind}`);
+  // @ts-expect-error
+  throw new Error(`Unreachable code: ${expression.kind}`);
 }
 
 export function getPrimaryType(expression: ExpressionNode) {
