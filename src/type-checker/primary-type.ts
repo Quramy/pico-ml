@@ -9,6 +9,7 @@ import {
   TypeSubstitution,
   TypeEquation,
   TypeScheme,
+  ListType,
 } from "./types";
 import { createRootEnvironment, createChildEnvironment } from "./type-environment";
 import { unify } from "./unify";
@@ -173,6 +174,31 @@ function pt(expression: ExpressionNode, ctx: Context): PrimaryTypeResult {
       ]);
       if (!unified.ok) return error(unified.value);
       return ok(substituteType(thenVal.expressionType, ...unified.value), unified.value);
+    });
+  } else if (expression.kind === "MatchExpression") {
+    return mapValues(
+      pt(expression.exp, ctx),
+      pt(expression.emptyClause, ctx),
+    )((exp, emptyClause) => {
+      const elementType = ctx.generator.gen();
+      const listType: ListType = {
+        kind: "List",
+        elementType,
+      };
+      const childEnv = createChildEnvironment(
+        expression.rightIdentifier,
+        schemeFromType(listType),
+        createChildEnvironment(expression.leftIdentifier, schemeFromType(elementType), ctx.env),
+      );
+      return mapValues(pt(expression.consClause, { ...ctx, env: childEnv }))(consClause => {
+        const unified = unify([
+          ...toEquationSet(exp, emptyClause, consClause),
+          { lhs: exp.expressionType, rhs: listType },
+          { lhs: emptyClause.expressionType, rhs: consClause.expressionType },
+        ]);
+        if (!unified.ok) return error(unified.value);
+        return ok(substituteType(emptyClause.expressionType, ...unified.value), unified.value);
+      });
     });
   } else if (expression.kind === "LetExpression") {
     return mapValues(pt(expression.binding, ctx))(binding => {

@@ -32,6 +32,13 @@ const fixture: Record<string, () => PrimaryTypeValue | PrimaryTypeFailure> = {
     substitutions: [],
     expressionType: func(param(0), param(0)),
   }),
+  "match 1::[] with [] -> true | x::y -> false": () => ({
+    substitutions: [
+      { from: param(0), to: int() },
+      { from: param(1), to: int() },
+    ],
+    expressionType: bool(),
+  }),
   "fun x -> (x 5) + 1": () => ({
     substitutions: [
       { from: param(0), to: func(int(), int()) },
