@@ -34,3 +34,8 @@ export function getEvaluationResultValue(result: EvaluationResult): string {
   if (isList(result.value) || isClosure(result.value)) return getEvaluationResultTypeName(result.value);
   return result.value.toString();
 }
+
+export function getPrintableEvaluationValue(value: EvaluationValue): any {
+  if (isClosure(value)) return "<fun>";
+  return value;
+}

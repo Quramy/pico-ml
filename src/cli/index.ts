@@ -1,7 +1,7 @@
 import readline from "readline";
 import { parse } from "../parser";
-import { evaluate } from "../evaluate";
 import { createTypePrinter, getPrimaryType } from "../type-checker";
+import { evaluate, getPrintableEvaluationValue } from "../evaluate";
 import { color } from "./color";
 
 const rl = readline.createInterface({
@@ -56,7 +56,7 @@ function evaluateExpression(code: string) {
   // evaluation
   const result = evaluate(tree);
   if (result.ok) {
-    console.log(result.value);
+    console.log(getPrintableEvaluationValue(result.value));
   } else {
     console.log(color.red(result.value.message));
   }
