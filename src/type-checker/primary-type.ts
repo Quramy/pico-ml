@@ -132,7 +132,8 @@ function pt(expression: ExpressionNode, ctx: Context): PrimaryTypeResult {
           );
         });
       default:
-        throw new Error("invalid operation");
+        // @ts-expect-error
+        throw new Error(`invalid operation ${expression.op.kind}`);
     }
   } else if (expression.kind === "ListConstructor") {
     return mapValues(
