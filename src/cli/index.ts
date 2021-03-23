@@ -4,33 +4,73 @@ import { createTypePrinter, getPrimaryType } from "../type-checker";
 import { evaluate, getPrintableEvaluationValue } from "../evaluate";
 import { color } from "./color";
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+function welcome() {
+  console.log("Welcome to CoPL REPL.");
+  console.log('Type ".help" for more information.');
+}
 
-rl.setPrompt(color.green("> "));
-rl.prompt();
+function createCommands(rl: readline.Interface) {
+  let exampleNum = 0;
 
-let buf: string[] = [];
-rl.on("line", line => {
-  const str = line.trim();
-  if (str.toLowerCase() === "quit" || str.toLowerCase() === "exit") {
-    process.exit();
-  }
-  const idx = str.indexOf(";;");
-  if (idx !== -1) {
-    buf.push(str.slice(0, idx));
+  const examples: string[][] = [
+    ["1 + 1 ;;"],
+    ["1 < 2 ;;"],
+    ["if 2 * 2 < 3 then true else false ;;"],
+    ["fun x -> x ;;"],
+    ["let fn = fun x -> x * 2 in", "fn 2;;"],
+    ["let rec fact = fun n -> if n < 2 then 1 else n * fact(n - 1) in fact 7 ;;"],
+    ["let rec array = fun n -> if n < 1 then [] else (n - 1)::(array(n - 1)) in"],
+    [
+      "let rec fact = fun n -> if n < 2 then 1 else n * fact(n - 1) in",
+      "let rec array = fun n -> if n < 1 then [] else (n - 1)::(array(n - 1)) in",
+      "let rec map = fun f -> fun list -> match list with [] -> [] | x::y -> (f x)::(map f y) in",
+      "map fact (array 7) ;;",
+    ],
+  ];
 
-    // syntax check
-    const code = buf.join(" ");
-    buf = [];
-    evaluateExpression(code);
-  } else {
-    buf.push(str);
-  }
-  rl.prompt();
-});
+  const commands: Record<string, () => void> = {
+    help() {
+      console.log(
+        [
+          ".example:  Display example expression.",
+          ".next:     Display the next example expression.",
+          ".prev:     Display the previous example expression.",
+          ".help:     Show this message.",
+          ".exit:     Exit REPL",
+        ].join("\n"),
+      );
+      rl.prompt();
+    },
+    next() {
+      exampleNum++;
+      commands["example"]();
+    },
+    prev() {
+      if (exampleNum > 0) exampleNum--;
+      commands["example"]();
+    },
+    example() {
+      const size = examples.length;
+      const example = examples[exampleNum % size];
+      rl.prompt();
+      example.forEach(line => {
+        if (!line.endsWith(";;")) {
+          rl.write(line + "\n");
+          rl.prompt();
+        } else {
+          rl.write(line);
+        }
+      });
+    },
+    exit() {
+      process.exit();
+    },
+    quit() {
+      process.exit();
+    },
+  };
+  return commands;
+}
 
 function evaluateExpression(code: string) {
   // syntax check
@@ -60,3 +100,36 @@ function evaluateExpression(code: string) {
     console.log(color.red(result.value.message));
   }
 }
+
+function main() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  rl.setPrompt(color.green("> "));
+  welcome();
+  rl.prompt();
+
+  let buf: string[] = [];
+  const commands = createCommands(rl);
+  rl.on("line", line => {
+    const str = line.trim();
+    if (str.startsWith(".") && commands[str.slice(1)]) {
+      commands[str.slice(1)]();
+      return;
+    }
+    const idx = str.indexOf(";;");
+    if (idx !== -1) {
+      buf.push(str.slice(0, idx));
+      const code = buf.join(" ");
+      buf = [];
+      evaluateExpression(code);
+    } else {
+      buf.push(str);
+    }
+    rl.prompt();
+  });
+}
+
+main();
