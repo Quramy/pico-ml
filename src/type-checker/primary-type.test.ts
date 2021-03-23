@@ -1,11 +1,12 @@
+import { ResultErrorBase } from "../structure";
 import { parse } from "../parser";
 import { getPrimaryType } from "./primary-type";
-import { PrimaryTypeValue, PrimaryTypeFailure } from "./types";
+import { PrimaryTypeValue } from "./types";
 import { int, bool, param, list, func } from "./testing/helpers";
 
-const failure = {} as PrimaryTypeFailure;
+const failure = {} as ResultErrorBase;
 
-const fixture: Record<string, () => PrimaryTypeValue | PrimaryTypeFailure> = {
+const fixture: Record<string, () => PrimaryTypeValue | typeof failure> = {
   "1": () => ({
     substitutions: [],
     expressionType: int(),
@@ -69,7 +70,7 @@ const fixture: Record<string, () => PrimaryTypeValue | PrimaryTypeFailure> = {
 describe(getPrimaryType, () => {
   Object.keys(fixture).forEach(input => {
     test(`getPrimaryType: "${input}"`, () => {
-      const expectedValue = (fixture as Record<string, () => PrimaryTypeValue | PrimaryTypeFailure>)[input]();
+      const expectedValue = (fixture as Record<string, () => PrimaryTypeValue | typeof failure>)[input]();
       expect(getPrimaryType(parse(input)!).value).toMatchObject(expectedValue);
     });
   });

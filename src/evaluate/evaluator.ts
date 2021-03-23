@@ -1,24 +1,13 @@
+import { useResult } from "../structure";
 import { ExpressionNode } from "../parser";
-import { EvaluationResult, EvaluationValue, Environment, EvaluationList } from "./types";
+import { EvaluationResult, EvaluationValue, Environment } from "./types";
 import { createChildEnvironment, createRootEnvironment } from "./environment";
 import { getEvaluationResultTypeName, isClosure, isRecClosure, isList } from "./utils";
 import { createClosure, createRecClosure } from "./closure";
 
-function ok(value: EvaluationValue): EvaluationResult {
-  return {
-    ok: true,
-    value,
-  };
-}
+const { ok, mapValues, error: err } = useResult<EvaluationResult>();
 
-function error(message: string): EvaluationResult {
-  return {
-    ok: false,
-    value: {
-      message,
-    },
-  };
-}
+const error = (message: string) => err({ message });
 
 function mapNumber(
   left: EvaluationValue,
@@ -32,25 +21,6 @@ function mapNumber(
     return error(`The right operand is not number. ${getEvaluationResultTypeName(right)}`);
   }
   return ok(cb(left, right));
-}
-
-function mapList(x: EvaluationValue, cb: (v: EvaluationList) => EvaluationValue): EvaluationResult {
-  if (!isList(x)) {
-    return error(`The operand is not a list. ${getEvaluationResultTypeName(x)}`);
-  }
-  return ok(cb(x));
-}
-
-function mapEvalVal(env: Environment) {
-  return (...nodes: ExpressionNode[]) => (cb: (...values: EvaluationValue[]) => EvaluationResult) => {
-    const values: EvaluationValue[] = [];
-    for (const node of nodes) {
-      const result = evaluateWithEnv(node, env);
-      if (!result.ok) return result;
-      values.push(result.value);
-    }
-    return cb(...values);
-  };
 }
 
 function evaluateWithEnv(expression: ExpressionNode, env: Environment): EvaluationResult {
@@ -69,7 +39,10 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
   } else if (expression.kind === "FunctionDefinition") {
     return ok(createClosure(expression, env));
   } else if (expression.kind === "BinaryExpression") {
-    return mapEvalVal(env)(expression.left, expression.right)((left, right) => {
+    return mapValues(
+      evaluateWithEnv(expression.left, env),
+      evaluateWithEnv(expression.right, env),
+    )((left, right) => {
       switch (expression.op.kind) {
         case "Add":
           return mapNumber(left, right, (l, r) => l + r);
@@ -80,15 +53,22 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
         case "LessThan":
           return mapNumber(left, right, (l, r) => l < r);
         default:
-          return undefined as never;
+          // @ts-expect-error
+          throw new Error(`invalid operation: ${expression.op.kind}`);
       }
     });
   } else if (expression.kind === "ListConstructor") {
-    return mapEvalVal(env)(expression.head, expression.tail)((head, tail) => {
-      return mapList(tail, r => (isList(head) ? [...head, ...r] : [head, ...r]));
+    return mapValues(
+      evaluateWithEnv(expression.head, env),
+      evaluateWithEnv(expression.tail, env),
+    )((head, tail) => {
+      if (!isList(tail)) {
+        return error(`The operand is not a list. ${getEvaluationResultTypeName(tail)}`);
+      }
+      return ok(isList(head) ? [...head, ...tail] : [head, ...tail]);
     });
   } else if (expression.kind === "IfExpression") {
-    return mapEvalVal(env)(expression.cond)(condition => {
+    return mapValues(evaluateWithEnv(expression.cond, env))(condition => {
       if (typeof condition === "boolean") {
         if (condition) {
           return evaluateWithEnv(expression.then, env);
@@ -100,7 +80,7 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
       }
     });
   } else if (expression.kind === "MatchExpression") {
-    return mapEvalVal(env)(expression.exp)(listValue => {
+    return mapValues(evaluateWithEnv(expression.exp, env))(listValue => {
       if (!isList(listValue)) {
         return error(`exp should be a list, but: ${getEvaluationResultTypeName(listValue)}`);
       }
@@ -122,12 +102,15 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
     const childEnv = createChildEnvironment(identifier, boundValue, env);
     return evaluateWithEnv(exp, childEnv);
   } else if (expression.kind === "LetExpression") {
-    return mapEvalVal(env)(expression.binding)(boundValue => {
+    return mapValues(evaluateWithEnv(expression.binding, env))(boundValue => {
       const childEnv = createChildEnvironment(expression.identifier, boundValue, env);
       return evaluateWithEnv(expression.exp, childEnv);
     });
   } else if (expression.kind === "FunctionApplication") {
-    return mapEvalVal(env)(expression.callee, expression.argument)((callee, argument) => {
+    return mapValues(
+      evaluateWithEnv(expression.callee, env),
+      evaluateWithEnv(expression.argument, env),
+    )((callee, argument) => {
       if (!isClosure(callee)) {
         return error(`should be function, but ${getEvaluationResultTypeName(callee)}}`);
       }

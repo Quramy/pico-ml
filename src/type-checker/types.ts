@@ -1,3 +1,4 @@
+import { Result } from "../structure";
 import { IdentifierNode } from "../parser";
 
 export interface TypeValueBase<T> {
@@ -46,34 +47,11 @@ export interface TypeSubstitution {
   readonly to: TypeValue;
 }
 
-export interface UnifiedFailure {
-  readonly message: string;
-}
-export type UnifiedResult =
-  | {
-      readonly ok: true;
-      readonly value: readonly TypeSubstitution[];
-    }
-  | {
-      readonly ok: false;
-      readonly value: UnifiedFailure;
-    };
+export type UnifiedResult = Result<readonly TypeSubstitution[]>;
 
 export interface PrimaryTypeValue {
   readonly substitutions: readonly TypeSubstitution[];
   readonly expressionType: TypeValue;
 }
 
-export interface PrimaryTypeFailure {
-  readonly message: string;
-}
-
-export type PrimaryTypeResult =
-  | {
-      readonly ok: true;
-      readonly value: PrimaryTypeValue;
-    }
-  | {
-      readonly ok: false;
-      readonly value: PrimaryTypeFailure;
-    };
+export type PrimaryTypeResult = Result<PrimaryTypeValue>;

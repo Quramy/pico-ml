@@ -1,3 +1,4 @@
+import { Result } from "../structure";
 import { IdentifierNode, FunctionDefinitionNode } from "../parser";
 
 export interface EvaluationFailure {
@@ -24,12 +25,4 @@ export interface RecClosure extends Closure {
 export type EvaluationList = readonly EvaluationValue[];
 export type EvaluationValue = number | boolean | Closure | EvaluationList;
 
-export type EvaluationResult =
-  | {
-      ok: true;
-      value: EvaluationValue;
-    }
-  | {
-      ok: false;
-      value: EvaluationFailure;
-    };
+export type EvaluationResult = Result<EvaluationValue>;
