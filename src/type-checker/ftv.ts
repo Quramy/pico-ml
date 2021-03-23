@@ -1,4 +1,4 @@
-import { TypeParameterType, TypeValue, TypeScheme, TypeEnvironment } from "./types";
+import { TypeParameterType, TypeValue, TypeScheme, TypeEnvironment, TypeSubstitution } from "./types";
 
 type FTV = readonly TypeParameterType[];
 
@@ -70,6 +70,10 @@ export function getFreeTypeVariables(type: TypeValue | TypeScheme | TypeEnvironm
     default:
       return getTypeFTV(type);
   }
+}
+
+export function getResolvedTypeVariables(substitutions: readonly TypeSubstitution[]): FTV {
+  return unique(substitutions.map(s => s.from));
 }
 
 export function getClosure(type: TypeValue, env: TypeEnvironment): TypeScheme {

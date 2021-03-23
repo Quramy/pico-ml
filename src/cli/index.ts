@@ -13,8 +13,6 @@ rl.setPrompt(color.green("> "));
 rl.prompt();
 
 let buf: string[] = [];
-const typePrinter = createTypePrinter();
-
 rl.on("line", line => {
   const str = line.trim();
   if (str.toLowerCase() === "quit" || str.toLowerCase() === "exit") {
@@ -50,6 +48,7 @@ function evaluateExpression(code: string) {
     return;
   }
 
+  const typePrinter = createTypePrinter({ remapWithSubstitutions: typeResult.value.substitutions });
   const typeStr = typePrinter(typeResult.value.expressionType);
   process.stdout.write(`${color.yellow("==> ")}${typeStr}: `);
 
