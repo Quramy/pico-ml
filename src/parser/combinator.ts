@@ -55,7 +55,7 @@ export const oneOf = <U extends readonly Parser[]>(...parsers: U) => {
       if (!result.ok && result.value.confirmed) return result;
       if (result.ok) return result as any;
     }
-    return result;
+    return error({ message: "Expression expected.", confirmed: false });
   };
   return parser;
 };

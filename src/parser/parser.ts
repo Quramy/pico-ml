@@ -23,7 +23,7 @@ import { loc } from "./utils";
  *
  * expr   ::= comp | cond | match | func | bind
  * cond   ::= "if" expr "then" expr "else" expr
- * match  ::= "match" expr "with" "[" "]" "->" expr "|" id "::" id -> expr
+ * match  ::= "match" expr "with" "[" "]" "->" expr "|" id "::" id "->" expr
  * func   ::= "fun" id "->" expr
  * bind   ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
  * comp   ::= cons("<" (cons | cond | bind))*
