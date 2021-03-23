@@ -1,3 +1,4 @@
+import { unwrap } from "../structure";
 import { parse } from "./parser";
 import {
   ExpressionNode,
@@ -289,7 +290,7 @@ describe(parse, () => {
   Object.keys(fixture).forEach(input => {
     test(`parse: "${input}"`, () => {
       const expectedNode = (fixture as Record<string, () => ExpressionNode>)[input]();
-      expect(parse(input)).toMatchObject(expectedNode);
+      expect(unwrap(parse(input))).toMatchObject(expectedNode);
     });
   });
 });

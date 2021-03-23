@@ -1,7 +1,8 @@
+import { unwrap } from "../structure";
 import { parse } from "../parser";
 import { evaluate } from "./evaluator";
 
-const parseAndEval = (code: string) => evaluate(parse(code)!).value;
+const parseAndEval = (code: string) => evaluate(unwrap(parse(code))).value;
 
 describe(evaluate, () => {
   test("literal", () => {

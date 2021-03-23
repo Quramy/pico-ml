@@ -2,18 +2,20 @@ export interface ResultErrorBase {
   readonly message: string;
 }
 
-export type Result<T, E extends ResultErrorBase = ResultErrorBase> =
-  | {
-      readonly ok: true;
-      readonly value: T;
-    }
-  | {
-      readonly ok: false;
-      readonly value: E;
-    };
+interface ResultOkForm<T> {
+  readonly ok: true;
+  readonly value: T;
+}
 
-type ResultValue<R extends Result<any, any>> = R extends Result<infer T, any> ? T : never;
-type ResultError<R extends Result<any, any>> = R extends Result<any, infer E> ? E : never;
+interface ResultErrorForm<E extends ResultErrorBase> {
+  readonly ok: false;
+  readonly value: E;
+}
+
+export type Result<T, E extends ResultErrorBase = ResultErrorBase> = ResultOkForm<T> | ResultErrorForm<E>;
+
+type ResultValue<R extends Result<any, any>> = R extends ResultOkForm<infer T> ? T : never;
+type ResultError<R extends Result<any, any>> = R extends ResultErrorForm<infer E> ? E : never;
 
 export function unwrap<T, E extends ResultErrorBase>(result: Result<T, E>): T {
   if (!result.ok) {
@@ -32,6 +34,20 @@ export function mapValues<T, E extends ResultErrorBase>(...results: Result<T, E>
       values.push(result.value);
     }
     return cb(...values);
+  };
+}
+
+export function ok<T>(value: T): Result<T, any> {
+  return {
+    ok: true,
+    value,
+  };
+}
+
+export function error<E extends ResultErrorBase>(value: E): Result<any, E> {
+  return {
+    ok: false,
+    value,
   };
 }
 

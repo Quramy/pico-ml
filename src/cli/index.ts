@@ -36,13 +36,13 @@ function evaluateExpression(code: string) {
   // syntax check
   const tree = parse(code);
 
-  if (!tree) {
-    console.log(color.red("Syntax error"));
+  if (!tree.ok) {
+    console.log(color.red("Syntax error: " + tree.value.message));
     return;
   }
 
   // type check
-  const typeResult = getPrimaryType(tree);
+  const typeResult = getPrimaryType(tree.value);
   if (!typeResult.ok) {
     console.log(color.red("Type error: " + typeResult.value.message));
     return;
@@ -53,7 +53,7 @@ function evaluateExpression(code: string) {
   process.stdout.write(`${color.yellow("==> ")}${typeStr}: `);
 
   // evaluation
-  const result = evaluate(tree);
+  const result = evaluate(tree.value);
   if (result.ok) {
     console.log(getPrintableEvaluationValue(result.value));
   } else {

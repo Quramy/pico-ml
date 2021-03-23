@@ -1,3 +1,4 @@
+import { ok } from "../structure";
 import {
   ExpressionNode,
   NumberLiteralNode,
@@ -13,7 +14,7 @@ import {
   MatchExpressionNode,
   ListConstructorNode,
 } from "./types";
-import { Parser, use, oneOf, expect, leftAssociate, rightAssociate } from "./combinator";
+import { Parser, ParseResult, use, oneOf, expect, leftAssociate, rightAssociate } from "./combinator";
 import { symbolToken, numberToken, keywordToken, variableToken } from "./tokenizer";
 import { Scanner } from "./scanner";
 import { loc } from "./utils";
@@ -55,13 +56,14 @@ const bind: Parser<LetExpressionNode | LetRecExpressionNode> = expect(keywordTok
       keywordToken("in"),
       use(() => expr),
     )(
-      (id, tEqual, binding, tIn, exp): LetExpressionNode => ({
-        kind: "LetExpression",
-        identifier: id,
-        binding,
-        exp,
-        ...loc(tLet, id, tEqual, binding, tIn, exp),
-      }),
+      (id, tEqual, binding, tIn, exp): ParseResult<LetExpressionNode> =>
+        ok({
+          kind: "LetExpression",
+          identifier: id,
+          binding,
+          exp,
+          ...loc(tLet, id, tEqual, binding, tIn, exp),
+        }),
     ),
     expect(
       keywordToken("rec"),
@@ -71,13 +73,14 @@ const bind: Parser<LetExpressionNode | LetRecExpressionNode> = expect(keywordTok
       keywordToken("in"),
       use(() => expr),
     )(
-      (tRec, id, tEqual, binding, tIn, exp): LetRecExpressionNode => ({
-        kind: "LetRecExpression",
-        identifier: id,
-        binding,
-        exp,
-        ...loc(tLet, tRec, id, tEqual, binding, tIn, exp),
-      }),
+      (tRec, id, tEqual, binding, tIn, exp): ParseResult<LetRecExpressionNode> =>
+        ok({
+          kind: "LetRecExpression",
+          identifier: id,
+          binding,
+          exp,
+          ...loc(tLet, tRec, id, tEqual, binding, tIn, exp),
+        }),
     ),
   )(scanner),
 );
@@ -88,12 +91,13 @@ const func: Parser<FunctionDefinitionNode> = expect(
   symbolToken("->"),
   use(() => expr),
 )(
-  (tFun, param, tArrow, body): FunctionDefinitionNode => ({
-    kind: "FunctionDefinition",
-    param,
-    body,
-    ...loc(tFun, param, tArrow, body),
-  }),
+  (tFun, param, tArrow, body): ParseResult<FunctionDefinitionNode> =>
+    ok({
+      kind: "FunctionDefinition",
+      param,
+      body,
+      ...loc(tFun, param, tArrow, body),
+    }),
 );
 
 const cond: Parser<IfExpressionNode> = expect(
@@ -104,14 +108,14 @@ const cond: Parser<IfExpressionNode> = expect(
   keywordToken("else"),
   use(() => expr),
 )(
-  (tIf, condExpr, tThen, thenExpr, tElse, elseExpr) =>
-    ({
+  (tIf, condExpr, tThen, thenExpr, tElse, elseExpr): ParseResult<IfExpressionNode> =>
+    ok({
       kind: "IfExpression",
       cond: condExpr,
       then: thenExpr,
       else: elseExpr,
       ...loc(tIf, condExpr, tThen, thenExpr, tElse, elseExpr),
-    } as IfExpressionNode),
+    }),
 );
 
 const match: Parser<MatchExpressionNode> = expect(
@@ -143,29 +147,30 @@ const match: Parser<MatchExpressionNode> = expect(
     rightIdentifier,
     tArrow2,
     consClause,
-  ): MatchExpressionNode => ({
-    kind: "MatchExpression",
-    exp,
-    emptyClause,
-    leftIdentifier,
-    rightIdentifier,
-    consClause,
-    ...loc(
-      tMatch,
+  ): ParseResult<MatchExpressionNode> =>
+    ok({
+      kind: "MatchExpression",
       exp,
-      tWith,
-      tl,
-      tr,
-      tArrow,
       emptyClause,
-      tPipe,
       leftIdentifier,
-      tCons,
       rightIdentifier,
-      tArrow2,
       consClause,
-    ),
-  }),
+      ...loc(
+        tMatch,
+        exp,
+        tWith,
+        tl,
+        tr,
+        tArrow,
+        emptyClause,
+        tPipe,
+        leftIdentifier,
+        tCons,
+        rightIdentifier,
+        tArrow2,
+        consClause,
+      ),
+    }),
 );
 
 const comp: Parser<ExpressionNode> = expect(use(() => cons))(
@@ -273,52 +278,59 @@ const group: Parser<ExpressionNode> = expect(
   symbolToken("("),
   use(() => expr),
   symbolToken(")"),
-)((lp, node, rp) => ({
-  ...node,
-  ...loc(lp, node, rp),
-}));
+)((lp, node, rp) =>
+  ok({
+    ...node,
+    ...loc(lp, node, rp),
+  }),
+);
 
 const empty: Parser<EmptyListNode> = expect(
   symbolToken("["),
   symbolToken("]"),
 )(
-  (l, r): EmptyListNode => ({
-    kind: "EmptyList",
-    ...loc(l, r),
-  }),
+  (l, r): ParseResult<EmptyListNode> =>
+    ok({
+      kind: "EmptyList",
+      ...loc(l, r),
+    }),
 );
 
 const bool: Parser<BoolLiteralNode> = oneOf(
   expect(keywordToken("true"))(
-    ({ loc }): BoolLiteralNode => ({
-      kind: "BoolLiteral",
-      value: true,
-      loc,
-    }),
+    ({ loc }): ParseResult<BoolLiteralNode> =>
+      ok({
+        kind: "BoolLiteral",
+        value: true,
+        loc,
+      }),
   ),
   expect(keywordToken("false"))(
-    ({ loc }): BoolLiteralNode => ({
-      kind: "BoolLiteral",
-      value: false,
-      loc,
-    }),
+    ({ loc }): ParseResult<BoolLiteralNode> =>
+      ok({
+        kind: "BoolLiteral",
+        value: false,
+        loc,
+      }),
   ),
 );
 
 const num: Parser<NumberLiteralNode> = expect(numberToken)(
-  ({ value, loc }): NumberLiteralNode => ({
-    kind: "NumberLiteral",
-    value,
-    loc,
-  }),
+  ({ value, loc }): ParseResult<NumberLiteralNode> =>
+    ok({
+      kind: "NumberLiteral",
+      value,
+      loc,
+    }),
 );
 
 const id: Parser<IdentifierNode> = expect(variableToken)(
-  ({ name, loc }): IdentifierNode => ({
-    kind: "Identifier",
-    name,
-    loc,
-  }),
+  ({ name, loc }): ParseResult<IdentifierNode> =>
+    ok({
+      kind: "Identifier",
+      name,
+      loc,
+    }),
 );
 
 export function parse(input: string) {

@@ -1,4 +1,4 @@
-import { ResultErrorBase } from "../structure";
+import { unwrap, ResultErrorBase } from "../structure";
 import { parse } from "../parser";
 import { getPrimaryType } from "./primary-type";
 import { PrimaryTypeValue } from "./types";
@@ -71,7 +71,7 @@ describe(getPrimaryType, () => {
   Object.keys(fixture).forEach(input => {
     test(`getPrimaryType: "${input}"`, () => {
       const expectedValue = (fixture as Record<string, () => PrimaryTypeValue | typeof failure>)[input]();
-      expect(getPrimaryType(parse(input)!).value).toMatchObject(expectedValue);
+      expect(getPrimaryType(unwrap(parse(input))).value).toMatchObject(expectedValue);
     });
   });
 });
