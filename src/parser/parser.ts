@@ -21,17 +21,17 @@ import { loc } from "./utils";
  *
  * expr   ::= comp | cond | match | func | bind
  * cond   ::= "if" expr "then" expr "else" expr
- * match  ::= "match" expr "with" "[" "]" "->" expr "|" id::id -> expr
+ * match  ::= "match" expr "with" "[" "]" "->" expr "|" id "::" id -> expr
  * func   ::= "fun" id "->" expr
  * bind   ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
  * comp   ::= cons("<" (cons | cond | bind))*
- * cons   ::= add("::" add | cond | bind)+
+ * cons   ::= add("::" (add | cond | bind))*
  * add    ::= mul(("+"|"-") (mul | cond | bind))*
  * mul    ::= app("*" (app | cond | bind))*
  * app    ::= prim(prim)*
  * prim   ::= id | bool | number | empty | group
  * group  ::= "(" expr ")"
- * empty  ;;= "[" "]"
+ * empty  ::= "[" "]"
  * bool   ::= "true" | "false"
  * number ::= "0" | "1" | "2" |  ...
  * id     ::= regExp([a-zA-Z$_][a-zA-Z$_0-9]*)

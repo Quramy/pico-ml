@@ -127,6 +127,18 @@ const fixture = {
         right: empty(),
       },
     }),
+  "1<2::[]": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: lessThan,
+      left: num(1),
+      right: {
+        kind: "BinaryExpression",
+        op: cons,
+        left: num(2),
+        right: empty(),
+      },
+    }),
   "if true then 0 else 1": () =>
     expr({
       kind: "IfExpression",
