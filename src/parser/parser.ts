@@ -11,6 +11,7 @@ import {
   LetRecExpressionNode,
   EmptyListNode,
   MatchExpressionNode,
+  ListConstructorNode,
 } from "./types";
 import { Parser, use, oneOf, expect, leftAssociate, rightAssociate } from "./combinator";
 import { symbolToken, numberToken, keywordToken, variableToken } from "./tokenizer";
@@ -197,12 +198,11 @@ const cons: Parser<ExpressionNode> = expect(use(() => add))(
       use(() => bind),
     ),
   )(
-    (left, token, right): BinaryExpressionNode => ({
-      kind: "BinaryExpression",
-      op: { kind: "Cons", token },
-      left,
-      right,
-      ...loc(left, token, right),
+    (head, token, tail): ListConstructorNode => ({
+      kind: "ListConstructor",
+      head,
+      tail,
+      ...loc(head, token, tail),
     }),
   ),
 );

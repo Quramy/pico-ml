@@ -63,12 +63,7 @@ export interface LessThanOperation {
   readonly token: Token;
 }
 
-export interface ConsOperation {
-  readonly kind: "Cons";
-  readonly token: Token;
-}
-
-export type BinaryOperation = AddOperation | SubOperation | MultiplyOperation | LessThanOperation | ConsOperation;
+export type BinaryOperation = AddOperation | SubOperation | MultiplyOperation | LessThanOperation;
 
 export interface Node<T extends string> extends Position {
   readonly kind: T;
@@ -122,6 +117,11 @@ export interface FunctionApplicationNode extends Node<"FunctionApplication"> {
 
 export interface EmptyListNode extends Node<"EmptyList"> {}
 
+export interface ListConstructorNode extends Node<"ListConstructor"> {
+  readonly head: ExpressionNode;
+  readonly tail: ExpressionNode;
+}
+
 export interface MatchExpressionNode extends Node<"MatchExpression"> {
   readonly exp: ExpressionNode;
   readonly emptyClause: ExpressionNode;
@@ -141,4 +141,5 @@ export type ExpressionNode =
   | FunctionDefinitionNode
   | LetRecExpressionNode
   | FunctionApplicationNode
+  | ListConstructorNode
   | MatchExpressionNode;

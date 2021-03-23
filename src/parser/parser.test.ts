@@ -8,7 +8,6 @@ import {
   IdentifierNode,
   LessThanOperation,
   SubOperation,
-  ConsOperation,
   EmptyListNode,
 } from "./types";
 
@@ -47,14 +46,6 @@ const lessThan: LessThanOperation = {
   token: {
     tokenKind: "Symbol",
     symbol: "<",
-  },
-};
-
-const cons: ConsOperation = {
-  kind: "Cons",
-  token: {
-    tokenKind: "Symbol",
-    symbol: "::",
   },
 };
 
@@ -117,14 +108,12 @@ const fixture = {
     }),
   "1::2::[]": () =>
     expr({
-      kind: "BinaryExpression",
-      op: cons,
-      left: num(1),
-      right: {
-        kind: "BinaryExpression",
-        op: cons,
-        left: num(2),
-        right: empty(),
+      kind: "ListConstructor",
+      head: num(1),
+      tail: {
+        kind: "ListConstructor",
+        head: num(2),
+        tail: empty(),
       },
     }),
   "1<2::[]": () =>
@@ -133,10 +122,9 @@ const fixture = {
       op: lessThan,
       left: num(1),
       right: {
-        kind: "BinaryExpression",
-        op: cons,
-        left: num(2),
-        right: empty(),
+        kind: "ListConstructor",
+        head: num(2),
+        tail: empty(),
       },
     }),
   "if true then 0 else 1": () =>

@@ -79,12 +79,13 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
           return mapNumber(left, right, (l, r) => l * r);
         case "LessThan":
           return mapNumber(left, right, (l, r) => l < r);
-        case "Cons": {
-          return mapList(right, r => (isList(left) ? [...left, ...r] : [left, ...r]));
-        }
         default:
           return undefined as never;
       }
+    });
+  } else if (expression.kind === "ListConstructor") {
+    return mapEvalVal(env)(expression.head, expression.tail)((head, tail) => {
+      return mapList(tail, r => (isList(head) ? [...head, ...r] : [head, ...r]));
     });
   } else if (expression.kind === "IfExpression") {
     return mapEvalVal(env)(expression.cond)(condition => {
@@ -144,7 +145,9 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
       }
     });
   }
-  return error(`invalid node kind`);
+
+  // @ts-expect-error
+  return error(`invalid node kind ${expression.kind}`);
 }
 
 export function evaluate(expression: ExpressionNode) {

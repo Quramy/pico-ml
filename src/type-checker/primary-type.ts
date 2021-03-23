@@ -131,28 +131,27 @@ function pt(expression: ExpressionNode, ctx: Context): PrimaryTypeResult {
             unified.value,
           );
         });
-      case "Cons": {
-        return mapValues(
-          pt(expression.left, ctx),
-          pt(expression.right, ctx),
-        )((head, rest) => {
-          const unified = unify([
-            ...toEquationSet(head, rest),
-            {
-              lhs: rest.expressionType,
-              rhs: {
-                kind: "List",
-                elementType: head.expressionType,
-              },
-            },
-          ]);
-          if (!unified.ok) return error(unified.value);
-          return ok(substituteType(rest.expressionType, ...unified.value), unified.value);
-        });
-      }
       default:
         throw new Error("invalid operation");
     }
+  } else if (expression.kind === "ListConstructor") {
+    return mapValues(
+      pt(expression.head, ctx),
+      pt(expression.tail, ctx),
+    )((head, tail) => {
+      const unified = unify([
+        ...toEquationSet(head, tail),
+        {
+          lhs: tail.expressionType,
+          rhs: {
+            kind: "List",
+            elementType: head.expressionType,
+          },
+        },
+      ]);
+      if (!unified.ok) return error(unified.value);
+      return ok(substituteType(tail.expressionType, ...unified.value), unified.value);
+    });
   } else if (expression.kind === "IfExpression") {
     return mapValues(
       pt(expression.cond, ctx),
