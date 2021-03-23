@@ -64,16 +64,18 @@ export const leftAssociate = <T extends readonly Parser[]>(...parsers: T) => <L 
   cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => L,
 ) => {
   return (first: L, scanner: Scanner) => {
-    const inner = (node: L): L => {
+    const inner = (node: L): Result<L, ParseError> => {
       const results: ParseValue[] = [];
+      let i = 0;
       for (const parser of parsers) {
         const r = parser(scanner);
-        if (!r.ok) return node;
+        if (!r.ok) return i === 0 ? ok(node) : error({ message: "Missing operand.", confirmed: false });
         results.push(r.value);
+        i++;
       }
       return inner(cb(node, ...(results as any)));
     };
-    return ok(inner(first));
+    return inner(first);
   };
 };
 
@@ -81,17 +83,19 @@ export const rightAssociate = <T extends readonly Parser[]>(...parsers: T) => <L
   cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => L,
 ) => {
   return (first: L, scanner: Scanner) => {
-    const inner = (node: L): L => {
+    const inner = (node: L): Result<L, ParseError> => {
       const results: ParseValue[] = [];
+      let i = 0;
       for (const parser of parsers) {
         const r = parser(scanner);
-        if (!r.ok) return node;
+        if (!r.ok) return i === 0 ? ok(node) : error({ message: "Missing operand.", confirmed: false });
         results.push(r.value);
+        i++;
       }
       const mid = results.slice(0, results.length - 1);
       const last = results[results.length - 1];
-      return cb(node, ...([...mid, inner(last as any)] as any));
+      return ok(cb(node, ...([...mid, inner(last as any).value] as any)));
     };
-    return ok(inner(first));
+    return inner(first);
   };
 };
