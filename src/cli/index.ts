@@ -46,7 +46,11 @@ function createCommands(rl: readline.Interface) {
       commands["example"]();
     },
     prev() {
-      if (exampleNum > 0) exampleNum--;
+      if (exampleNum > 0) {
+        exampleNum--;
+      } else {
+        exampleNum = examples.length - 1;
+      }
       commands["example"]();
     },
     example() {
