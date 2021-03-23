@@ -26,6 +26,10 @@ test(keywordToken.name, () => {
 });
 
 test(variableToken.name, () => {
+  expect(variableToken(new Scanner("_'"))).toMatchObject<Token>({
+    tokenKind: "Variable",
+    name: "_'",
+  });
   expect(variableToken(new Scanner("hoge fuga"))).toMatchObject<Token>({
     tokenKind: "Variable",
     name: "hoge",

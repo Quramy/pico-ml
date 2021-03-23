@@ -57,7 +57,7 @@ export const numberToken: Parser<NumberToken> = scanner => {
 };
 
 export const variableToken: Parser<VariableToken> = scanner => {
-  const hit = scanner.match(/^([a-zA-Z_\$][a-zA-Z0-9_\$]*)/);
+  const hit = scanner.match(/^([a-zA-Z_][a-zA-Z0-9_']*)/);
   if (!hit) return;
   if (reservedWords.some(w => w === hit[1])) return;
   return {
