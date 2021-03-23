@@ -1,23 +1,12 @@
-import { TypeEquation, TypeSubstitution, UnifiedResult, TypeValue, TypeParameterType } from "./types";
+import { useResult, mapValue } from "../structure";
+import { TypeEquation, UnifiedResult, TypeValue, TypeParameterType } from "./types";
 import { substituteEquationSet, composite } from "./substitute";
 import { getFreeTypeVariables } from "./ftv";
 import { equal } from "./utils";
 
-function ok(substitutions: readonly TypeSubstitution[]): UnifiedResult {
-  return {
-    ok: true,
-    value: substitutions,
-  };
-}
+const { ok, error: err } = useResult<UnifiedResult>();
 
-function error(message: string): UnifiedResult {
-  return {
-    ok: false,
-    value: {
-      message,
-    },
-  };
-}
+const error = (message: string) => err({ message });
 
 export function unify(typeEquationSet: readonly TypeEquation[]): UnifiedResult {
   if (typeEquationSet.length === 0) {
@@ -48,12 +37,12 @@ export function unify(typeEquationSet: readonly TypeEquation[]): UnifiedResult {
   if (lhs != null && rhs != null) {
     const ftv = getFreeTypeVariables(rhs);
     if (ftv.some(v => v.id === lhs?.id)) {
-      error("This equation does not have solution.");
+      return error("This equation does not have solution.");
     }
     const substitution = { from: lhs, to: rhs };
-    const result = unify(substituteEquationSet(typeEquationSet, substitution));
-    if (!result.ok) return result;
-    return ok(composite(result.value, substitution));
+    return mapValue(unify(substituteEquationSet(typeEquationSet, substitution)))(unifined =>
+      ok(composite(unifined, substitution)),
+    );
   }
 
   return error("This equation does not have solution.");

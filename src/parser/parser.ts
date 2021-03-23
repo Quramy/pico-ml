@@ -36,7 +36,7 @@ import { loc } from "./utils";
  * empty  ::= "[" "]"
  * bool   ::= "true" | "false"
  * number ::= "0" | "1" | "2" |  ...
- * id     ::= regExp([a-zA-Z$_][a-zA-Z$_0-9]*)
+ * id     ::= regExp([a-zA-Z_][a-zA-Z_0-9']*)
  *
  */
 const expr: Parser<ExpressionNode> = oneOf(

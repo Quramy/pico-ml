@@ -1,11 +1,11 @@
-import { useResult } from "../structure";
+import { mapValue, useResult } from "../structure";
 import { ExpressionNode } from "../parser";
 import { EvaluationResult, EvaluationValue, Environment } from "./types";
 import { createChildEnvironment, createRootEnvironment } from "./environment";
 import { getEvaluationResultTypeName, isClosure, isRecClosure, isList } from "./utils";
 import { createClosure, createRecClosure } from "./closure";
 
-const { ok, mapValues, error: err } = useResult<EvaluationResult>();
+const { ok, error: err } = useResult<EvaluationResult>();
 
 const error = (message: string) => err({ message });
 
@@ -39,7 +39,7 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
   } else if (expression.kind === "FunctionDefinition") {
     return ok(createClosure(expression, env));
   } else if (expression.kind === "BinaryExpression") {
-    return mapValues(
+    return mapValue(
       evaluateWithEnv(expression.left, env),
       evaluateWithEnv(expression.right, env),
     )((left, right) => {
@@ -58,7 +58,7 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
       }
     });
   } else if (expression.kind === "ListConstructor") {
-    return mapValues(
+    return mapValue(
       evaluateWithEnv(expression.head, env),
       evaluateWithEnv(expression.tail, env),
     )((head, tail) => {
@@ -68,7 +68,7 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
       return ok(isList(head) ? [...head, ...tail] : [head, ...tail]);
     });
   } else if (expression.kind === "IfExpression") {
-    return mapValues(evaluateWithEnv(expression.cond, env))(condition => {
+    return mapValue(evaluateWithEnv(expression.cond, env))(condition => {
       if (typeof condition === "boolean") {
         if (condition) {
           return evaluateWithEnv(expression.then, env);
@@ -80,7 +80,7 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
       }
     });
   } else if (expression.kind === "MatchExpression") {
-    return mapValues(evaluateWithEnv(expression.exp, env))(listValue => {
+    return mapValue(evaluateWithEnv(expression.exp, env))(listValue => {
       if (!isList(listValue)) {
         return error(`exp should be a list, but: ${getEvaluationResultTypeName(listValue)}`);
       }
@@ -102,12 +102,12 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
     const childEnv = createChildEnvironment(identifier, boundValue, env);
     return evaluateWithEnv(exp, childEnv);
   } else if (expression.kind === "LetExpression") {
-    return mapValues(evaluateWithEnv(expression.binding, env))(boundValue => {
+    return mapValue(evaluateWithEnv(expression.binding, env))(boundValue => {
       const childEnv = createChildEnvironment(expression.identifier, boundValue, env);
       return evaluateWithEnv(expression.exp, childEnv);
     });
   } else if (expression.kind === "FunctionApplication") {
-    return mapValues(
+    return mapValue(
       evaluateWithEnv(expression.callee, env),
       evaluateWithEnv(expression.argument, env),
     )((callee, argument) => {

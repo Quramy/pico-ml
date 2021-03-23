@@ -1,4 +1,4 @@
-import { useResult } from "../structure";
+import { mapValue, useResult } from "../structure";
 import { ExpressionNode } from "../parser";
 import {
   TypeEnvironment,
@@ -9,15 +9,13 @@ import {
   TypeEquation,
   TypeScheme,
   ListType,
-  UnifiedResult,
 } from "./types";
 import { createRootEnvironment, createChildEnvironment } from "./type-environment";
 import { unify } from "./unify";
 import { substituteType, substituteEnv } from "./substitute";
 import { getClosure } from "./ftv";
 
-const { mapValues: mapPrimaryTypes, ok, error } = useResult<PrimaryTypeResult>();
-const { mapValues: mapUnified } = useResult<UnifiedResult>();
+const { ok, error } = useResult<PrimaryTypeResult>();
 
 const primaryType = (type: TypeValue, substitutions: readonly TypeSubstitution[] = [] as const) =>
   ok({
@@ -89,11 +87,11 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
       case "Sub":
       case "Multiply":
       case "LessThan":
-        return mapPrimaryTypes(
+        return mapValue(
           getPrimaryTypeInner(expression.left, ctx),
           getPrimaryTypeInner(expression.right, ctx),
         )((left, right) =>
-          mapUnified(
+          mapValue(
             unify([
               ...toEquationSet(left, right),
               {
@@ -119,11 +117,11 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
         throw new Error(`invalid operation ${expression.op.kind}`);
     }
   } else if (expression.kind === "ListConstructor") {
-    return mapPrimaryTypes(
+    return mapValue(
       getPrimaryTypeInner(expression.head, ctx),
       getPrimaryTypeInner(expression.tail, ctx),
     )((head, tail) =>
-      mapUnified(
+      mapValue(
         unify([
           ...toEquationSet(head, tail),
           {
@@ -137,12 +135,12 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
       )(unified => primaryType(substituteType(tail.expressionType, ...unified), unified)),
     );
   } else if (expression.kind === "IfExpression") {
-    return mapPrimaryTypes(
+    return mapValue(
       getPrimaryTypeInner(expression.cond, ctx),
       getPrimaryTypeInner(expression.then, ctx),
       getPrimaryTypeInner(expression.else, ctx),
     )((cond, thenVal, elseVal) =>
-      mapUnified(
+      mapValue(
         unify([
           ...toEquationSet(cond, thenVal, elseVal),
           {
@@ -159,7 +157,7 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
       )(unified => primaryType(substituteType(thenVal.expressionType, ...unified), unified)),
     );
   } else if (expression.kind === "MatchExpression") {
-    return mapPrimaryTypes(
+    return mapValue(
       getPrimaryTypeInner(expression.exp, ctx),
       getPrimaryTypeInner(expression.emptyClause, ctx),
     )((exp, emptyClause) => {
@@ -173,8 +171,8 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
         schemeFromType(listType),
         createChildEnvironment(expression.leftIdentifier, schemeFromType(elementType), ctx.env),
       );
-      return mapPrimaryTypes(getPrimaryTypeInner(expression.consClause, { ...ctx, env: childEnv }))(consClause =>
-        mapUnified(
+      return mapValue(getPrimaryTypeInner(expression.consClause, { ...ctx, env: childEnv }))(consClause =>
+        mapValue(
           unify([
             ...toEquationSet(exp, emptyClause, consClause),
             { lhs: exp.expressionType, rhs: listType },
@@ -184,11 +182,11 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
       );
     });
   } else if (expression.kind === "LetExpression") {
-    return mapPrimaryTypes(getPrimaryTypeInner(expression.binding, ctx))(binding => {
+    return mapValue(getPrimaryTypeInner(expression.binding, ctx))(binding => {
       const scheme = getClosure(binding.expressionType, substituteEnv(ctx.env, ...binding.substitutions));
       const env = createChildEnvironment(expression.identifier, scheme, ctx.env);
-      return mapPrimaryTypes(getPrimaryTypeInner(expression.exp, { ...ctx, env }))(exp =>
-        mapUnified(unify(toEquationSet(binding, exp)))(unified =>
+      return mapValue(getPrimaryTypeInner(expression.exp, { ...ctx, env }))(exp =>
+        mapValue(unify(toEquationSet(binding, exp)))(unified =>
           primaryType(substituteType(exp.expressionType, ...unified), unified),
         ),
       );
@@ -201,8 +199,8 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
       schemeFromType(paramType),
       createChildEnvironment(expression.identifier, schemeFromType(funcType), ctx.env),
     );
-    return mapPrimaryTypes(getPrimaryTypeInner(expression.binding.body, { ...ctx, env: bodyEnv }))(bindingBody =>
-      mapUnified(
+    return mapValue(getPrimaryTypeInner(expression.binding.body, { ...ctx, env: bodyEnv }))(bindingBody =>
+      mapValue(
         unify([
           ...toEquationSet(bindingBody),
           {
@@ -217,8 +215,8 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
       )(unifiedBody => {
         const scheme = getClosure(substituteType(funcType, ...unifiedBody), substituteEnv(ctx.env, ...unifiedBody));
         const childEnv = createChildEnvironment(expression.identifier, scheme, ctx.env);
-        return mapPrimaryTypes(getPrimaryTypeInner(expression.exp, { ...ctx, env: childEnv }))(exp =>
-          mapUnified(unify(toEquationSet({ substitutions: unifiedBody }, exp)))(unifiedExp =>
+        return mapValue(getPrimaryTypeInner(expression.exp, { ...ctx, env: childEnv }))(exp =>
+          mapValue(unify(toEquationSet({ substitutions: unifiedBody }, exp)))(unifiedExp =>
             primaryType(substituteType(exp.expressionType, ...unifiedExp), unifiedExp),
           ),
         );
@@ -227,7 +225,7 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
   } else if (expression.kind === "FunctionDefinition") {
     const paramType = ctx.generator.gen();
     const env = createChildEnvironment(expression.param, schemeFromType(paramType), ctx.env);
-    return mapPrimaryTypes(getPrimaryTypeInner(expression.body, { ...ctx, env }))(body =>
+    return mapValue(getPrimaryTypeInner(expression.body, { ...ctx, env }))(body =>
       primaryType(
         substituteType(
           {
@@ -241,12 +239,12 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
       ),
     );
   } else if (expression.kind === "FunctionApplication") {
-    return mapPrimaryTypes(
+    return mapValue(
       getPrimaryTypeInner(expression.callee, ctx),
       getPrimaryTypeInner(expression.argument, ctx),
     )((callee, argument) => {
       const returnType = ctx.generator.gen();
-      return mapUnified(
+      return mapValue(
         unify([
           ...toEquationSet(callee, argument),
           {
