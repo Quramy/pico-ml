@@ -379,3 +379,7 @@ const id: Parser<IdentifierNode> = expect(variableToken)(
 export function parse(input: string) {
   return expr(new Scanner(input));
 }
+
+export function parseMatchPattern(input: string) {
+  return pattern(new Scanner(input));
+}
