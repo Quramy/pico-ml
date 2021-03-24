@@ -139,7 +139,7 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: PrimaryTypeContext
       )((...patternTypeWrappers) => {
         const patternTypes = patternTypeWrappers.map(w => w.patternType);
         const equationSet = patternTypeWrappers.flatMap(w => w.equations);
-        if (primaryType.length === 0) return error({ message: "unreachable" }) as never;
+        if (patternTypes.length === 0) return error({ message: "unreachable" }) as never;
         const [firstClause, ...restClauses] = patternTypes;
         const equationsForEachPatternExpression: TypeEquation[] = restClauses.map(clause => ({
           lhs: firstClause.expressionType,
