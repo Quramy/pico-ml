@@ -1,31 +1,35 @@
 import { unwrap } from "../structure";
 import { parse } from "../parser";
 import { getPrimaryType } from "./primary-type";
-import { TypeValue } from "./types";
-import { int, bool, param, list, func } from "./testing/helpers";
+import { createTypePrinter } from "./unparse";
 
-const fixture: Record<string, () => TypeValue> = {
-  "1": () => int(),
-  true: () => bool(),
-  "0 < 1": () => bool(),
-  "1::2::[]": () => list(int()),
-  "let x = 1 in x": () => int(),
-  "fun x -> x": () => func(param(0), param(0)),
-  "match 1::[] with [] -> true | x::y -> false": () => bool(),
-  "match 0 with x -> true": () => bool(),
-  "fun x -> match x with [] -> true | _ -> false": () => func(list(param(1)), bool()),
-  "fun x -> (x 5) + 1": () => func(func(int(), int()), int()),
-  "let id = fun x -> x in if id true then 1 else id 2": () => int(),
-  "let rec fn = fun x -> fn x in 1 + fn 1": () => int(),
+const fixture: Record<string, () => string> = {
+  "1": () => "int",
+  true: () => "bool",
+  "0 < 1": () => "bool",
+  "1::2::[]": () => "int list",
+  "let x = 1 in x": () => "int",
+  "fun x -> x": () => "'a -> 'a",
+  "match 1::[] with [] -> true | x::y -> false": () => "bool",
+  "match 0 with x -> true": () => "bool",
+  "fun x -> match x with [] -> true | _ -> false": () => "'a list -> bool",
+  "fun x -> (x 5) + 1": () => "(int -> int) -> int",
+  "fun x -> match x with _ -> x": () => "'a -> 'a",
+  "fun x -> match x with [] -> x": () => "'a list -> 'a list",
+  "let id = fun x -> x in if id true then 1 else id 2": () => "int",
+  "let rec fn = fun x -> fn x in 1 + fn 1": () => "int",
   "let rec map = fun f -> fun list -> match list with [] -> [] | x::y -> (f x)::(map f y) in map": () =>
-    func(func(param(9), param(10)), func(list(param(9)), list(param(10)))),
+    "('a -> 'b) -> 'a list -> 'b list",
 };
 
 describe(getPrimaryType, () => {
   Object.keys(fixture).forEach(input => {
     test(`Primary type for: "${input}"`, () => {
-      const expectedValue = (fixture as Record<string, () => TypeValue>)[input]();
-      expect(unwrap(getPrimaryType(unwrap(parse(input)))).expressionType).toMatchObject(expectedValue);
+      const expectedValue = (fixture as Record<string, () => string>)[input]();
+      const tree = unwrap(parse(input));
+      const pt = unwrap(getPrimaryType(tree));
+      const printer = createTypePrinter({ remapWithSubstitutions: pt.substitutions });
+      expect(printer(pt.expressionType)).toBe(expectedValue);
     });
   });
 

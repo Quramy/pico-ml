@@ -8,8 +8,8 @@ describe(createTypePrinter, () => {
     test("unparse", () => {
       expect(print(int())).toBe("int");
       expect(print(param(0))).toBe("'a");
-      expect(print(param(25))).toBe("'z");
-      expect(print(param(26))).toBe("'aa");
+      expect(print(func(param(0), param(25)))).toBe("'a -> 'z");
+      expect(print(func(param(0), param(26)))).toBe("'a -> 'aa");
       expect(print(func(bool(), int()))).toBe("bool -> int");
       expect(print(func(int(), func(int(), int())))).toBe("int -> int -> int");
       expect(print(func(func(int(), int()), int()))).toBe("(int -> int) -> int");

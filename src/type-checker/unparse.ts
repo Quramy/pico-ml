@@ -22,6 +22,7 @@ function idToAlpha(id: number) {
 
 type Context = {
   idMap(id: number): number;
+  baseId: number;
 };
 
 function group(parent: TypeValue, child: TypeValue, ctx: Context) {
@@ -57,6 +58,20 @@ function printType(type: TypeValue, ctx: Context): string {
   }
 }
 
+function minId(type: TypeValue, current: number = Number.MAX_SAFE_INTEGER): number {
+  switch (type.kind) {
+    case "Int":
+    case "Bool":
+      return current;
+    case "TypeParameter":
+      return type.id < current ? type.id : current;
+    case "List":
+      return minId(type.elementType, current);
+    case "Function":
+      return Math.min(minId(type.paramType, current), minId(type.returnType, current));
+  }
+}
+
 export type TypePrinterOptions = {
   readonly remapWithSubstitutions?: readonly TypeSubstitution[];
 };
@@ -71,11 +86,15 @@ export function createTypePrinter(opts: TypePrinterOptions = {}) {
     }, [] as (boolean | undefined)[]);
   const ctx: Context = {
     idMap(id) {
-      if (!solvedIds) return id;
+      if (!solvedIds) return id - this.baseId;
       solvedIds[id] = undefined;
-      const shift = solvedIds.slice(0, id).reduce((n, solved) => (solved ? n + 1 : n), 0);
-      return id - shift;
+      const shift = solvedIds.slice(this.baseId, id).reduce((n, solved) => (solved ? n + 1 : n), 0);
+      return id - shift - this.baseId;
     },
+    baseId: 0,
   };
-  return (type: TypeValue) => printType(type, ctx);
+  return (type: TypeValue) => {
+    const baseId = minId(type);
+    return printType(type, { ...ctx, baseId });
+  };
 }
