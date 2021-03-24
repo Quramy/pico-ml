@@ -44,7 +44,7 @@ export interface TypeParemeterGenerator {
 export interface PrimaryTypeContext {
   readonly generator: TypeParemeterGenerator;
   readonly env: TypeEnvironment;
-};
+}
 
 export interface TypeEquation {
   readonly lhs: TypeValue;

@@ -1,12 +1,6 @@
 import { ok, mapValue, useResult } from "../structure";
 import { ExpressionNode } from "../parser";
-import {
-  TypeValue,
-  PrimaryTypeResult,
-  TypeSubstitution,
-  TypeEquation,
-  PrimaryTypeContext,
-} from "./types";
+import { TypeValue, PrimaryTypeResult, TypeSubstitution, TypeEquation, PrimaryTypeContext } from "./types";
 import { ParmGenerator, createRootEnvironment, createChildEnvironment } from "./type-environment";
 import { unify } from "./unify";
 import { substituteType, substituteEnv } from "./substitute";
@@ -134,8 +128,12 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: PrimaryTypeContext
       const patterns = getPatternMatchClauseList(expression);
       return mapValue(
         ...patterns.map(({ pattern, exp: patternExpression }) =>
-          mapValue(getTypeEnvForPattern(pattern, exp.expressionType, ctx.env, ctx.generator))(({ typeEnv, equations }) =>
-            mapValue(getPrimaryTypeInner(patternExpression, { ...ctx, env: typeEnv }))(patternType => ok({ patternType, equations }))
+          mapValue(
+            getTypeEnvForPattern(pattern, exp.expressionType, ctx.env, ctx.generator),
+          )(({ typeEnv, equations }) =>
+            mapValue(getPrimaryTypeInner(patternExpression, { ...ctx, env: typeEnv }))(patternType =>
+              ok({ patternType, equations }),
+            ),
           ),
         ),
       )((...patternTypeWrappers) => {
@@ -148,11 +146,7 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: PrimaryTypeContext
           rhs: clause.expressionType,
         }));
         return mapValue(
-          unify([
-            ...toEquationSet(exp, ...patternTypes),
-            ...equationSet,
-            ...equationsForEachPatternExpression,
-          ]),
+          unify([...toEquationSet(exp, ...patternTypes), ...equationSet, ...equationsForEachPatternExpression]),
         )(unified => primaryType(substituteType(firstClause.expressionType, ...unified), unified));
       });
     });
