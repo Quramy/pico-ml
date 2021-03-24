@@ -1,4 +1,4 @@
-import { mapValue, ok, error, Result } from "../structure";
+import { ok, error, Result } from "../structure";
 import { MatchPatternNode } from "../parser";
 import { TypeValue, TypeEnvironment, TypeScheme, TypeParemeterGenerator, TypeEquation } from "./types";
 import { createChildEnvironment } from "./type-environment";
@@ -45,55 +45,43 @@ export function getPatternMatchClauseList(matchExpression: MatchExpressionNode) 
   return inner(matchExpression.matchClause);
 }
 
-function getTypeEnvForPatternInner(
+export function getTypeEnvForPattern(
   pattern: MatchPatternNode,
   valueType: TypeValue,
-  env: TypeEnvironment,
+  typeEnv: TypeEnvironment,
   typeGenerator: TypeParemeterGenerator,
-  names: readonly string[],
-  equations: TypeEquation[],
-): Result<TypeEnvironment> {
+  names: readonly string[] = [],
+  equations: readonly TypeEquation[] = [],
+): Result<{ typeEnv: TypeEnvironment; equations: readonly TypeEquation[] }> {
   if (pattern.kind === "WildcardPattern") {
-    return ok(env);
+    return ok({ typeEnv, equations });
   } else if (pattern.kind === "EmptyListPattern") {
     const elementType = typeGenerator.gen();
-    equations.push({ lhs: valueType, rhs: { kind: "List", elementType } });
-    return ok(env);
+    return ok({ typeEnv, equations: [...equations, { lhs: valueType, rhs: { kind: "List", elementType } }] });
   } else if (pattern.kind === "IdPattern") {
     if (names.some(n => n === pattern.identifier.name)) {
       return error({ message: `Duplicated identifier, '${pattern.identifier.name}'.` });
     }
-    return ok(createChildEnvironment(pattern.identifier, schemeFromType(valueType), env));
-  }
-  if (pattern.kind !== "ListConsPattern") return ok(env);
-  if (pattern.head.kind === "IdPattern") {
-    const name = pattern.head.identifier.name;
-    if (names.some(n => n === name)) {
-      return error({ message: `Duplicated identifier, '${name}'.` });
+    return ok({ typeEnv: createChildEnvironment(pattern.identifier, schemeFromType(valueType), typeEnv), equations });
+  } else if (pattern.kind === "ListConsPattern") {
+    if (pattern.head.kind === "IdPattern") {
+      const name = pattern.head.identifier.name;
+      if (names.some(n => n === name)) {
+        return error({ message: `Duplicated identifier, '${name}'.` });
+      }
+      const elementType = typeGenerator.gen();
+      return getTypeEnvForPattern(
+        pattern.tail,
+        valueType,
+        createChildEnvironment(pattern.head.identifier, schemeFromType(elementType), typeEnv),
+        typeGenerator,
+        [...names, name],
+        [...equations, { lhs: valueType, rhs: { kind: "List", elementType } }],
+      );
+    } else {
+      return getTypeEnvForPattern(pattern.tail, valueType, typeEnv, typeGenerator, names, equations);
     }
-    const elementType = typeGenerator.gen();
-    equations.push({ lhs: valueType, rhs: { kind: "List", elementType } });
-    return getTypeEnvForPatternInner(
-      pattern.tail,
-      valueType,
-      createChildEnvironment(pattern.head.identifier, schemeFromType(elementType), env),
-      typeGenerator,
-      [...names, name],
-      equations,
-    );
-  } else {
-    return getTypeEnvForPatternInner(pattern.tail, valueType, env, typeGenerator, names, equations);
   }
-}
-
-export function getTypeEnvForPattern(
-  pattern: MatchPatternNode,
-  elementType: TypeValue,
-  env: TypeEnvironment,
-  typeGenerator: TypeParemeterGenerator,
-): Result<{ typeEnv: TypeEnvironment; equations: readonly TypeEquation[] }> {
-  const equations: TypeEquation[] = [];
-  return mapValue(getTypeEnvForPatternInner(pattern, elementType, env, typeGenerator, [], equations))(env =>
-    ok({ typeEnv: env, equations }),
-  );
+  // @ts-expect-error
+  throw new Error(`invalid node kind: ${pattern.kind}`);
 }
