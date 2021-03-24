@@ -80,22 +80,23 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
       }
     });
   } else if (expression.kind === "MatchExpression") {
-    return mapValue(evaluateWithEnv(expression.exp, env))(listValue => {
-      if (!isList(listValue)) {
-        return error(`exp should be a list, but: ${getEvaluationResultTypeName(listValue)}`);
-      }
-      if (listValue.length === 0) {
-        return evaluateWithEnv(expression.emptyClause, env);
-      } else {
-        const [head, ...rest] = listValue;
-        const childEnv = createChildEnvironment(
-          expression.rightIdentifier,
-          rest,
-          createChildEnvironment(expression.leftIdentifier, head, env),
-        );
-        return evaluateWithEnv(expression.consClause, childEnv);
-      }
-    });
+    throw new Error("not implemented");
+    // return mapValue(evaluateWithEnv(expression.exp, env))(listValue => {
+    //   if (!isList(listValue)) {
+    //     return error(`exp should be a list, but: ${getEvaluationResultTypeName(listValue)}`);
+    //   }
+    //   if (listValue.length === 0) {
+    //     return evaluateWithEnv(expression.emptyClause, env);
+    //   } else {
+    //     const [head, ...rest] = listValue;
+    //     const childEnv = createChildEnvironment(
+    //       expression.rightIdentifier,
+    //       rest,
+    //       createChildEnvironment(expression.leftIdentifier, head, env),
+    //     );
+    //     return evaluateWithEnv(expression.consClause, childEnv);
+    //   }
+    // });
   } else if (expression.kind === "LetRecExpression") {
     const { identifier, binding, exp } = expression;
     const boundValue = createRecClosure(binding, env, identifier);
