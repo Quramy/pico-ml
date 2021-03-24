@@ -1,5 +1,17 @@
 import { IdentifierNode } from "../parser";
-import { TypeEnvironment, TypeScheme } from "./types";
+import { TypeEnvironment, TypeScheme, TypeParameterType, TypeParemeterGenerator } from "./types";
+
+export class ParmGenerator implements TypeParemeterGenerator{
+  private idx = 0;
+  gen() {
+    const id = this.idx++;
+    const paramType: TypeParameterType = {
+      kind: "TypeParameter",
+      id,
+    };
+    return paramType;
+  }
+}
 
 export function createRootEnvironment(): TypeEnvironment {
   const root = {

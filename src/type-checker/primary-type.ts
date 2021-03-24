@@ -1,43 +1,25 @@
-import { mapValue, useResult } from "../structure";
+import { ok, mapValue, useResult } from "../structure";
 import { ExpressionNode } from "../parser";
 import {
-  TypeEnvironment,
   TypeValue,
-  TypeParameterType,
   PrimaryTypeResult,
   TypeSubstitution,
   TypeEquation,
+  PrimaryTypeContext,
 } from "./types";
-import { createRootEnvironment, createChildEnvironment } from "./type-environment";
+import { ParmGenerator, createRootEnvironment, createChildEnvironment } from "./type-environment";
 import { unify } from "./unify";
 import { substituteType, substituteEnv } from "./substitute";
 import { getClosure } from "./ftv";
 import { schemeFromType, getPatternMatchClauseList, getTypeEnvForPattern } from "./utils";
 
-const { ok, error } = useResult<PrimaryTypeResult>();
+const { ok: _ok, error } = useResult<PrimaryTypeResult>();
 
 const primaryType = (type: TypeValue, substitutions: readonly TypeSubstitution[] = [] as const) =>
-  ok({
+  _ok({
     expressionType: type,
     substitutions,
   });
-
-class ParmGenerator {
-  private idx = 0;
-  gen() {
-    const id = this.idx++;
-    const paramType: TypeParameterType = {
-      kind: "TypeParameter",
-      id,
-    };
-    return paramType;
-  }
-}
-
-type Context = {
-  readonly generator: ParmGenerator;
-  readonly env: TypeEnvironment;
-};
 
 function toEquationSet(...values: { substitutions: readonly TypeSubstitution[] }[]): TypeEquation[] {
   return values.reduce(
@@ -52,7 +34,7 @@ function toEquationSet(...values: { substitutions: readonly TypeSubstitution[] }
   );
 }
 
-function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryTypeResult {
+function getPrimaryTypeInner(expression: ExpressionNode, ctx: PrimaryTypeContext): PrimaryTypeResult {
   if (expression.kind === "NumberLiteral") {
     return primaryType({ kind: "Int" });
   } else if (expression.kind === "BoolLiteral") {
@@ -149,15 +131,16 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
     );
   } else if (expression.kind === "MatchExpression") {
     return mapValue(getPrimaryTypeInner(expression.exp, ctx))(exp => {
-      const expressionValueType = ctx.generator.gen();
       const patterns = getPatternMatchClauseList(expression);
       return mapValue(
         ...patterns.map(({ pattern, exp: patternExpression }) =>
-          mapValue(getTypeEnvForPattern(pattern, expressionValueType, ctx.env))(patternExpEnv =>
-            getPrimaryTypeInner(patternExpression, { ...ctx, env: patternExpEnv }),
+          mapValue(getTypeEnvForPattern(pattern, exp.expressionType, ctx.env, ctx.generator))(({ typeEnv, equations }) =>
+            mapValue(getPrimaryTypeInner(patternExpression, { ...ctx, env: typeEnv }))(patternType => ok({ patternType, equations }))
           ),
         ),
-      )((...patternTypes) => {
+      )((...patternTypeWrappers) => {
+        const patternTypes = patternTypeWrappers.map(w => w.patternType);
+        const equationSet = patternTypeWrappers.flatMap(w => w.equations);
         if (primaryType.length === 0) return error({ message: "unreachable" }) as never;
         const [firstClause, ...restClauses] = patternTypes;
         const equationsForEachPatternExpression: TypeEquation[] = restClauses.map(clause => ({
@@ -166,8 +149,8 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
         }));
         return mapValue(
           unify([
-            ...toEquationSet(...patternTypes),
-            { lhs: exp.expressionType, rhs: expressionValueType },
+            ...toEquationSet(exp, ...patternTypes),
+            ...equationSet,
             ...equationsForEachPatternExpression,
           ]),
         )(unified => primaryType(substituteType(firstClause.expressionType, ...unified), unified));

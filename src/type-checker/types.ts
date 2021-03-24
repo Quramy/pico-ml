@@ -37,6 +37,15 @@ export interface TypeEnvironment {
   map(cb: (value: TypeScheme) => TypeScheme): TypeEnvironment;
 }
 
+export interface TypeParemeterGenerator {
+  gen(): TypeParameterType;
+}
+
+export interface PrimaryTypeContext {
+  readonly generator: TypeParemeterGenerator;
+  readonly env: TypeEnvironment;
+};
+
 export interface TypeEquation {
   readonly lhs: TypeValue;
   readonly rhs: TypeValue;
