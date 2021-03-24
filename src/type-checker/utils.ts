@@ -2,6 +2,7 @@ import { ok, error, Result } from "../structure";
 import { MatchPatternNode } from "../parser";
 import { TypeValue, TypeParameterType, TypeEnvironment, TypeScheme } from "./types";
 import { createChildEnvironment } from "./type-environment";
+import { MatchExpressionNode, PatternMatchClauseNode, MatchClauseNode } from "../parser/types";
 
 export function equal(a: TypeValue, b: TypeValue): boolean {
   switch (a.kind) {
@@ -29,6 +30,19 @@ export function schemeFromType(type: TypeValue): TypeScheme {
     type,
     variables: [],
   };
+}
+
+export function getPatternMatchClauseList(matchExpression: MatchExpressionNode) {
+  const inner = (
+    mc: MatchClauseNode,
+    list: readonly PatternMatchClauseNode[] = [],
+  ): readonly PatternMatchClauseNode[] => {
+    if (mc.kind === "PatternMatchClause") {
+      return [...list, mc];
+    }
+    return inner(mc.or, [...list, mc.patternMatch]);
+  };
+  return inner(matchExpression.matchClause);
 }
 
 export function getTypeEnvForPattern(
