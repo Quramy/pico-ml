@@ -1,12 +1,12 @@
 import { ResultErrorBase, Result, useResult, ok } from "../structure";
-import { ExpressionNode, Token } from "./types";
+import { Position } from "./types";
 import type { Scanner } from "./scanner";
 
 export interface ParseError extends ResultErrorBase {
   readonly confirmed: boolean;
 }
 
-export type ParseValue = ExpressionNode | Token;
+export type ParseValue = Position;
 export type ParseResult<T extends ParseValue = ParseValue> = Result<T, ParseError>;
 
 export interface Parser<T extends ParseValue = ParseValue> {
@@ -79,11 +79,14 @@ export const leftAssociate = <T extends readonly Parser[]>(...parsers: T) => <L 
   };
 };
 
-export const rightAssociate = <T extends readonly Parser[]>(...parsers: T) => <L extends ParseValue>(
-  cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => L,
+export const rightAssociate = <T extends readonly Parser[]>(...parsers: T) => <
+  L extends ParseValue,
+  R extends ParseValue
+>(
+  cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => R,
 ) => {
   return (first: L, scanner: Scanner) => {
-    const inner = (node: L): Result<L, ParseError> => {
+    const inner = (node: L): Result<R, ParseError> => {
       const results: ParseValue[] = [];
       let i = 0;
       for (const parser of parsers) {

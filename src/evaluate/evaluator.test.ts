@@ -84,6 +84,10 @@ describe(evaluate, () => {
 
   test("match expression", () => {
     expect(parseAndEval("match 1::[] with [] -> false | x::y -> y")).toStrictEqual([]);
+    expect(parseAndEval("match 1::2::[] with x::y::z -> y")).toStrictEqual(2);
+    expect(parseAndEval("match 1::2::[] with x::y::z -> z")).toStrictEqual([]);
+
+    expect(parseAndEval("match 0 with _ -> true")).toBe(true);
 
     expect(
       parseAndEval(`

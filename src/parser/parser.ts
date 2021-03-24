@@ -11,8 +11,17 @@ import {
   FunctionApplicationNode,
   LetRecExpressionNode,
   EmptyListNode,
-  MatchExpressionNode,
   ListConstructorNode,
+  MatchPatternNode,
+  IdPatternNode,
+  ListConsPatternNode,
+  EmptyListPatternNode,
+  WildcardPatternNode,
+  MatchClauseNode,
+  PatternMatchClauseNode,
+  MatchOrClauseNode,
+  MatchExpressionNode,
+  MatchPatternElementNode,
 } from "./types";
 import { Parser, ParseResult, use, oneOf, expect, leftAssociate, rightAssociate } from "./combinator";
 import { symbolToken, numberToken, keywordToken, variableToken } from "./tokenizer";
@@ -21,22 +30,26 @@ import { loc } from "./utils";
 
 /**
  *
- * expr   ::= comp | cond | match | func | bind
- * cond   ::= "if" expr "then" expr "else" expr
- * match  ::= "match" expr "with" "[" "]" "->" expr "|" id "::" id "->" expr
- * func   ::= "fun" id "->" expr
- * bind   ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
- * comp   ::= cons("<" (cons | cond | bind))*
- * cons   ::= add("::" (add | cond | bind))*
- * add    ::= mul(("+"|"-") (mul | cond | bind))*
- * mul    ::= app("*" (app | cond | bind))*
- * app    ::= prim(prim)*
- * prim   ::= id | bool | number | empty | group
- * group  ::= "(" expr ")"
- * empty  ::= "[" "]"
- * bool   ::= "true" | "false"
- * number ::= "0" | "1" | "2" |  ...
- * id     ::= regExp([a-zA-Z_][a-zA-Z_0-9']*)
+ * expr         ::= comp | cond | match | func | bind
+ * cond         ::= "if" expr "then" expr "else" expr
+ * match        ::= "match" expr "wich" pat_clauses
+ * pat_clauses  ::= pat_match("|" pat_match)*
+ * pat_match    ::= pattern "->" expr
+ * pattern      ::= p_prim("::" p_prim)*
+ * p_prim       ::= id | "[" "]" | "_"
+ * func         ::= "fun" id "->" expr
+ * bind         ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
+ * comp         ::= cons("<" (cons | cond | bind))*
+ * cons         ::= add("::" (add | cond | bind))*
+ * add          ::= mul(("+"|"-") (mul | cond | bind))*
+ * mul          ::= app("*" (app | cond | bind))*
+ * app          ::= prim(prim)*
+ * prim         ::= id | bool | number | empty | group
+ * group        ::= "(" expr ")"
+ * empty        ::= "[" "]"
+ * bool         ::= "true" | "false"
+ * number       ::= "0" | "1" | "2" |  ...
+ * id           ::= regExp([a-zA-Z_][a-zA-Z_0-9']*)
  *
  */
 const expr: Parser<ExpressionNode> = oneOf(
@@ -122,55 +135,85 @@ const match: Parser<MatchExpressionNode> = expect(
   keywordToken("match"),
   use(() => expr),
   keywordToken("with"),
-  symbolToken("["),
-  symbolToken("]"),
-  symbolToken("->"),
-  use(() => expr),
-  symbolToken("|"),
-  use(() => id),
-  symbolToken("::"),
-  use(() => id),
-  symbolToken("->"),
-  use(() => expr),
+  use(() => patClauses),
 )(
-  (
-    tMatch,
-    exp,
-    tWith,
-    tl,
-    tr,
-    tArrow,
-    emptyClause,
-    tPipe,
-    leftIdentifier,
-    tCons,
-    rightIdentifier,
-    tArrow2,
-    consClause,
-  ): ParseResult<MatchExpressionNode> =>
+  (tMatch, exp, tWith, matchClause): ParseResult<MatchExpressionNode> =>
     ok({
       kind: "MatchExpression",
       exp,
-      emptyClause,
-      leftIdentifier,
-      rightIdentifier,
-      consClause,
-      ...loc(
-        tMatch,
-        exp,
-        tWith,
-        tl,
-        tr,
-        tArrow,
-        emptyClause,
-        tPipe,
-        leftIdentifier,
-        tCons,
-        rightIdentifier,
-        tArrow2,
-        consClause,
-      ),
+      matchClause,
+      ...loc(tMatch, exp, tWith, matchClause),
     }),
+);
+
+const patClauses: Parser<MatchClauseNode> = expect(use(() => patMatch))(
+  rightAssociate(
+    symbolToken("|"),
+    use(() => patMatch),
+  )(
+    (left, tBar, clause): MatchOrClauseNode => ({
+      kind: "MatchOrClause",
+      patternMatch: left,
+      or: clause,
+      ...loc(left, tBar, clause),
+    }),
+  ),
+);
+
+const patMatch: Parser<PatternMatchClauseNode> = expect(
+  use(() => pattern),
+  symbolToken("->"),
+  use(() => expr),
+)(
+  (pattern, tArrow, exp): ParseResult<PatternMatchClauseNode> =>
+    ok({
+      kind: "PatternMatchClause",
+      pattern,
+      exp,
+      ...loc(pattern, tArrow, exp),
+    }),
+);
+
+const pattern: Parser<MatchPatternNode> = expect(use(() => pPrim))(
+  rightAssociate(
+    symbolToken("::"),
+    use(() => pPrim),
+  )(
+    (head, tCons, tail): ListConsPatternNode => ({
+      kind: "ListConsPattern",
+      head,
+      tail,
+      ...loc(head, tCons, tail),
+    }),
+  ),
+);
+
+const pPrim: Parser<MatchPatternElementNode> = oneOf(
+  expect(use(() => id))(
+    (id): ParseResult<IdPatternNode> =>
+      ok({
+        kind: "IdPattern",
+        identifier: id,
+        ...loc(id),
+      }),
+  ),
+  expect(
+    symbolToken("["),
+    symbolToken("]"),
+  )(
+    (t1, t2): ParseResult<EmptyListPatternNode> =>
+      ok({
+        kind: "EmptyListPattern",
+        ...loc(t1, t2),
+      }),
+  ),
+  expect(symbolToken("_"))(
+    (t): ParseResult<WildcardPatternNode> =>
+      ok({
+        kind: "WildcardPattern",
+        ...loc(t),
+      }),
+  ),
 );
 
 const comp: Parser<ExpressionNode> = expect(use(() => cons))(
@@ -335,4 +378,8 @@ const id: Parser<IdentifierNode> = expect(variableToken)(
 
 export function parse(input: string) {
   return expr(new Scanner(input));
+}
+
+export function parseMatchPattern(input: string) {
+  return pattern(new Scanner(input));
 }

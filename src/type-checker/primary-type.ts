@@ -7,13 +7,12 @@ import {
   PrimaryTypeResult,
   TypeSubstitution,
   TypeEquation,
-  TypeScheme,
-  ListType,
 } from "./types";
 import { createRootEnvironment, createChildEnvironment } from "./type-environment";
 import { unify } from "./unify";
 import { substituteType, substituteEnv } from "./substitute";
 import { getClosure } from "./ftv";
+import { schemeFromType, getPatternMatchClauseList, getTypeEnvForPattern } from "./utils";
 
 const { ok, error } = useResult<PrimaryTypeResult>();
 
@@ -51,14 +50,6 @@ function toEquationSet(...values: { substitutions: readonly TypeSubstitution[] }
     ],
     [] as TypeEquation[],
   );
-}
-
-function schemeFromType(type: TypeValue): TypeScheme {
-  return {
-    kind: "TypeScheme",
-    type,
-    variables: [],
-  };
 }
 
 function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryTypeResult {
@@ -157,29 +148,30 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
       )(unified => primaryType(substituteType(thenVal.expressionType, ...unified), unified)),
     );
   } else if (expression.kind === "MatchExpression") {
-    return mapValue(
-      getPrimaryTypeInner(expression.exp, ctx),
-      getPrimaryTypeInner(expression.emptyClause, ctx),
-    )((exp, emptyClause) => {
-      const elementType = ctx.generator.gen();
-      const listType: ListType = {
-        kind: "List",
-        elementType,
-      };
-      const childEnv = createChildEnvironment(
-        expression.rightIdentifier,
-        schemeFromType(listType),
-        createChildEnvironment(expression.leftIdentifier, schemeFromType(elementType), ctx.env),
-      );
-      return mapValue(getPrimaryTypeInner(expression.consClause, { ...ctx, env: childEnv }))(consClause =>
-        mapValue(
+    return mapValue(getPrimaryTypeInner(expression.exp, ctx))(exp => {
+      const expressionValueType = ctx.generator.gen();
+      const patterns = getPatternMatchClauseList(expression);
+      return mapValue(
+        ...patterns.map(({ pattern, exp: patternExpression }) =>
+          mapValue(getTypeEnvForPattern(pattern, expressionValueType, ctx.env))(patternExpEnv =>
+            getPrimaryTypeInner(patternExpression, { ...ctx, env: patternExpEnv }),
+          ),
+        ),
+      )((...patternTypes) => {
+        if (primaryType.length === 0) return error({ message: "unreachable" }) as never;
+        const [firstClause, ...restClauses] = patternTypes;
+        const equationsForEachPatternExpression: TypeEquation[] = restClauses.map(clause => ({
+          lhs: firstClause.expressionType,
+          rhs: clause.expressionType,
+        }));
+        return mapValue(
           unify([
-            ...toEquationSet(exp, emptyClause, consClause),
-            { lhs: exp.expressionType, rhs: listType },
-            { lhs: emptyClause.expressionType, rhs: consClause.expressionType },
+            ...toEquationSet(...patternTypes),
+            { lhs: exp.expressionType, rhs: expressionValueType },
+            ...equationsForEachPatternExpression,
           ]),
-        )(unified => primaryType(substituteType(emptyClause.expressionType, ...unified), unified)),
-      );
+        )(unified => primaryType(substituteType(firstClause.expressionType, ...unified), unified));
+      });
     });
   } else if (expression.kind === "LetExpression") {
     return mapValue(getPrimaryTypeInner(expression.binding, ctx))(binding => {

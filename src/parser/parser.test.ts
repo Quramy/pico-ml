@@ -275,14 +275,52 @@ const fixture = {
         argument: num(10),
       },
     }),
-  "match x with [] -> 1 | y::z -> 0": () =>
+  "match x with [] -> 1 | a::b::c -> 0 | _ -> 100": () =>
     expr({
       kind: "MatchExpression",
       exp: id("x"),
-      emptyClause: num(1),
-      leftIdentifier: id("y"),
-      rightIdentifier: id("z"),
-      consClause: num(0),
+      matchClause: {
+        kind: "MatchOrClause",
+        patternMatch: {
+          kind: "PatternMatchClause",
+          pattern: {
+            kind: "EmptyListPattern",
+          },
+          exp: num(1),
+        },
+        or: {
+          kind: "MatchOrClause",
+          patternMatch: {
+            kind: "PatternMatchClause",
+            pattern: {
+              kind: "ListConsPattern",
+              head: {
+                kind: "IdPattern",
+                identifier: id("a"),
+              },
+              tail: {
+                kind: "ListConsPattern",
+                head: {
+                  kind: "IdPattern",
+                  identifier: id("b"),
+                },
+                tail: {
+                  kind: "IdPattern",
+                  identifier: id("c"),
+                },
+              },
+            },
+            exp: num(0),
+          },
+          or: {
+            kind: "PatternMatchClause",
+            pattern: {
+              kind: "WildcardPattern",
+            },
+            exp: num(100),
+          },
+        },
+      },
     }),
 };
 
