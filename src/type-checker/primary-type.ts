@@ -149,27 +149,25 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
     );
   } else if (expression.kind === "MatchExpression") {
     return mapValue(getPrimaryTypeInner(expression.exp, ctx))(exp => {
-      const elementType = ctx.generator.gen();
+      const expressionValueType = ctx.generator.gen();
       const patterns = getPatternMatchClauseList(expression);
       return mapValue(
-        ...patterns.map(({ pattern, exp: patternExpression }) => {
-          const envResult = getTypeEnvForPattern(pattern, elementType, ctx.env);
-          if (!envResult.ok) return envResult;
-          return getPrimaryTypeInner(patternExpression, { ...ctx, env: envResult.value });
-        }),
-      )((...primaryTypes) => {
-        if (primaryType.length === 0) return undefined as never;
-        const [firstClause, ...restClauses] = primaryTypes;
-        const equationsForEachPatternExpression: TypeEquation[] = restClauses.map(clause => {
-          return {
-            lhs: firstClause.expressionType,
-            rhs: clause.expressionType,
-          };
-        });
+        ...patterns.map(({ pattern, exp: patternExpression }) =>
+          mapValue(getTypeEnvForPattern(pattern, expressionValueType, ctx.env))(patternExpEnv =>
+            getPrimaryTypeInner(patternExpression, { ...ctx, env: patternExpEnv }),
+          ),
+        ),
+      )((...patternTypes) => {
+        if (primaryType.length === 0) return error({ message: "unreachable" }) as never;
+        const [firstClause, ...restClauses] = patternTypes;
+        const equationsForEachPatternExpression: TypeEquation[] = restClauses.map(clause => ({
+          lhs: firstClause.expressionType,
+          rhs: clause.expressionType,
+        }));
         return mapValue(
           unify([
-            ...toEquationSet(...primaryTypes),
-            { lhs: exp.expressionType, rhs: elementType },
+            ...toEquationSet(...patternTypes),
+            { lhs: exp.expressionType, rhs: expressionValueType },
             ...equationsForEachPatternExpression,
           ]),
         )(unified => primaryType(substituteType(firstClause.expressionType, ...unified), unified));
