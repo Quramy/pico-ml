@@ -7,7 +7,6 @@ import {
   PrimaryTypeResult,
   TypeSubstitution,
   TypeEquation,
-  ListType,
 } from "./types";
 import { createRootEnvironment, createChildEnvironment } from "./type-environment";
 import { unify } from "./unify";
@@ -151,10 +150,6 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
   } else if (expression.kind === "MatchExpression") {
     return mapValue(getPrimaryTypeInner(expression.exp, ctx))(exp => {
       const elementType = ctx.generator.gen();
-      const listType: ListType = {
-        kind: "List",
-        elementType,
-      };
       const patterns = getPatternMatchClauseList(expression);
       return mapValue(
         ...patterns.map(({ pattern, exp: patternExpression }) => {
@@ -174,7 +169,7 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: Context): PrimaryT
         return mapValue(
           unify([
             ...toEquationSet(...primaryTypes),
-            { lhs: exp.expressionType, rhs: listType },
+            { lhs: exp.expressionType, rhs: elementType },
             ...equationsForEachPatternExpression,
           ]),
         )(unified => primaryType(substituteType(firstClause.expressionType, ...unified), unified));
