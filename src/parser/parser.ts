@@ -21,6 +21,7 @@ import {
   PatternMatchClauseNode,
   MatchOrClauseNode,
   MatchExpressionNode,
+  MatchPatternElementNode,
 } from "./types";
 import { Parser, ParseResult, use, oneOf, expect, leftAssociate, rightAssociate } from "./combinator";
 import { symbolToken, numberToken, keywordToken, variableToken } from "./tokenizer";
@@ -187,7 +188,7 @@ const pattern: Parser<MatchPatternNode> = expect(use(() => pPrim))(
   ),
 );
 
-const pPrim: Parser<MatchPatternNode> = oneOf(
+const pPrim: Parser<MatchPatternElementNode> = oneOf(
   expect(use(() => id))(
     (id): ParseResult<IdPatternNode> =>
       ok({

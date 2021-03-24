@@ -127,7 +127,7 @@ export interface IdPatternNode extends Node<"IdPattern"> {
 }
 
 export interface ListConsPatternNode extends Node<"ListConsPattern"> {
-  readonly head: MatchPatternNode;
+  readonly head: MatchPatternElementNode;
   readonly tail: MatchPatternNode;
 }
 
@@ -135,7 +135,8 @@ export interface WildcardPatternNode extends Node<"WildcardPattern"> {}
 
 export interface EmptyListPatternNode extends Node<"EmptyListPattern"> {}
 
-export type MatchPatternNode = IdPatternNode | ListConsPatternNode | WildcardPatternNode | EmptyListPatternNode;
+export type MatchPatternElementNode = IdPatternNode | WildcardPatternNode | EmptyListPatternNode;
+export type MatchPatternNode = ListConsPatternNode | MatchPatternElementNode;
 
 export interface PatternMatchClauseNode extends Node<"PatternMatchClause"> {
   readonly pattern: MatchPatternNode;
