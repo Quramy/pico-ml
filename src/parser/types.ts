@@ -5,7 +5,7 @@ export interface Position {
   };
 }
 
-export type Symbols = readonly ["(", ")", "+", "-", "*", "<", "=", "->", "[", "]", "::", "|"];
+export type Symbols = readonly ["(", ")", "+", "-", "*", "<", "=", "->", "[", "]", "::", "|", "_"];
 export type SymbolKind = Symbols[number];
 export type ReservedWords = readonly [
   "if",
@@ -122,12 +122,36 @@ export interface ListConstructorNode extends Node<"ListConstructor"> {
   readonly tail: ExpressionNode;
 }
 
+export interface IdPatternNode extends Node<"IdPattern"> {
+  readonly identifier: IdentifierNode;
+}
+
+export interface ListConsPatternNode extends Node<"ListConsPattern"> {
+  readonly head: MatchPatternNode;
+  readonly tail: MatchPatternNode;
+}
+
+export interface WildcardPatternNode extends Node<"WildcardPattern"> {}
+
+export interface EmptyListPatternNode extends Node<"EmptyListPattern"> {}
+
+export type MatchPatternNode = IdPatternNode | ListConsPatternNode | WildcardPatternNode | EmptyListPatternNode;
+
+export interface PatternMatchClauseNode extends Node<"PatternMatchClause"> {
+  readonly pattern: MatchPatternNode;
+  readonly exp: ExpressionNode;
+}
+
+export interface MatchOrClauseNode extends Node<"MatchOrClause"> {
+  readonly patternMatch: PatternMatchClauseNode;
+  readonly or: MatchClauseNode;
+}
+
+export type MatchClauseNode = PatternMatchClauseNode | MatchOrClauseNode;
+
 export interface MatchExpressionNode extends Node<"MatchExpression"> {
   readonly exp: ExpressionNode;
-  readonly emptyClause: ExpressionNode;
-  readonly leftIdentifier: IdentifierNode;
-  readonly rightIdentifier: IdentifierNode;
-  readonly consClause: ExpressionNode;
+  readonly matchClause: MatchClauseNode;
 }
 
 export type ExpressionNode =
