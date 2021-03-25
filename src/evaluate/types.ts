@@ -7,7 +7,6 @@ export interface EvaluationFailure {
 
 export interface Environment {
   get(identifier: IdentifierNode): EvaluationValue | undefined;
-  print(): readonly string[];
 }
 
 export interface Closure {

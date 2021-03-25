@@ -1,4 +1,4 @@
-import { EvaluationValue, Closure, RecClosure, EvaluationResult, EvaluationList } from "./types";
+import { EvaluationValue, Closure, RecClosure, EvaluationList } from "./types";
 
 export function isList(value: EvaluationValue): value is EvaluationList {
   return Array.isArray(value);
@@ -27,12 +27,6 @@ export function getEvaluationResultTypeName(value: EvaluationValue): string {
     return "boolean";
   }
   return undefined as never;
-}
-
-export function getEvaluationResultValue(result: EvaluationResult): string {
-  if (!result.ok) return result.value.message;
-  if (isList(result.value) || isClosure(result.value)) return getEvaluationResultTypeName(result.value);
-  return result.value.toString();
 }
 
 export function getPrintableEvaluationValue(value: EvaluationValue): any {

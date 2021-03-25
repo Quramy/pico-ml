@@ -1,14 +1,10 @@
 import { IdentifierNode } from "../parser";
 import { Environment, EvaluationValue } from "./types";
-import { getEvaluationResultValue } from "./utils";
 
 export function createRootEnvironment(): Environment {
   return {
     get() {
       return undefined;
-    },
-    print() {
-      return [];
     },
   };
 }
@@ -20,9 +16,6 @@ export function createChildEnvironment(id: IdentifierNode, value: EvaluationValu
         return value;
       }
       return parent.get(identifier);
-    },
-    print() {
-      return [...parent.print(), `${id.name}: ${getEvaluationResultValue({ ok: true, value })}`];
     },
   };
 }
