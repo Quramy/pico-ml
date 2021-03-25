@@ -1,7 +1,7 @@
 import { parse } from "../parser";
 import { evaluate } from "./evaluator";
 
-const parseAndEval = (code: string) => evaluate(parse(code).unwrap()).value;
+const parseAndEval = (code: string) => parse(code).mapValue(evaluate).value;
 
 describe(evaluate, () => {
   test("literal", () => {

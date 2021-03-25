@@ -27,15 +27,14 @@ describe(getPrimaryType, () => {
   Object.keys(fixture).forEach(input => {
     test(`Primary type for: "${input}"`, () => {
       const expectedValue = (fixture as Record<string, () => string>)[input]();
-      const tree = parse(input).unwrap();
-      const pt = getPrimaryType(tree).unwrap();
-      const printer = createTypePrinter({ remapWithSubstitutions: pt.substitutions });
-      expect(printer(pt.expressionType)).toBe(expectedValue);
+      const { expressionType, substitutions } = parse(input).mapValue(getPrimaryType).unwrap();
+      const printer = createTypePrinter({ remapWithSubstitutions: substitutions });
+      expect(printer(expressionType)).toBe(expectedValue);
     });
   });
 
   test("failure", () => {
-    expect(getPrimaryType(parse("1 + false").unwrap()).ok).toBeFalsy();
-    expect(getPrimaryType(parse("true::1::[]").unwrap()).ok).toBeFalsy();
+    expect(parse("1 + false").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("true::1::[]").mapValue(getPrimaryType).ok).toBeFalsy();
   });
 });
