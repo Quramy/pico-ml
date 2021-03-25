@@ -1,4 +1,4 @@
-import { useResult, mapValue } from "../structure";
+import { useResult } from "../structure";
 import { TypeEquation, UnifiedResult, TypeValue, TypeParameterType } from "./types";
 import { substituteEquationSet, composite } from "./substitute";
 import { getFreeTypeVariables } from "./ftv";
@@ -40,8 +40,8 @@ export function unify(typeEquationSet: readonly TypeEquation[]): UnifiedResult {
       return error("This equation does not have solution.");
     }
     const substitution = { from: lhs, to: rhs };
-    return mapValue(unify(substituteEquationSet(typeEquationSet, substitution)))(unifined =>
-      ok(composite(unifined, substitution)),
+    return unify(substituteEquationSet(typeEquationSet, substitution)).map(unifined =>
+      composite(unifined, substitution),
     );
   }
 

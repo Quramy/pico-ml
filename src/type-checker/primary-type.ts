@@ -43,11 +43,11 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: PrimaryTypeContext
         message: `No identifier ${expression.name}`,
       });
     }
-    const substituions: TypeSubstitution[] = typeScheme.variables.map(v => ({
+    const substitutions: TypeSubstitution[] = typeScheme.variables.map(v => ({
       from: v,
       to: ctx.generator.gen(),
     }));
-    return ok(substituteType(typeScheme.type, ...substituions));
+    return ok(substituteType(typeScheme.type, ...substitutions));
   } else if (expression.kind === "BinaryExpression") {
     switch (expression.op.kind) {
       case "Add":
