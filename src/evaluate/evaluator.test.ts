@@ -6,9 +6,12 @@ const parseAndEval = (code: string) => evaluate(parse(code).unwrap()).value;
 describe(evaluate, () => {
   test("literal", () => {
     expect(parseAndEval("1")).toBe(1);
-    // expect(parseAndEval("-2")).toBe(-2); // FIXME
     expect(parseAndEval("true")).toBe(true);
     expect(parseAndEval("false")).toBe(false);
+  });
+
+  test("unary operation", () => {
+    expect(parseAndEval("-2")).toBe(-2);
   });
 
   test("arithmetic operation", () => {

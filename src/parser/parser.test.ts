@@ -3,6 +3,7 @@ import { parse } from "./parser";
 import {
   ExpressionNode,
   NumberLiteralNode,
+  MinusOperation,
   AddOperation,
   MultiplyOperation,
   BoolLiteralNode,
@@ -17,6 +18,14 @@ const num = (value: number) =>
     kind: "NumberLiteral",
     value,
   } as NumberLiteralNode);
+
+const minus: MinusOperation = {
+  kind: "Minus",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "-",
+  },
+};
 
 const add: AddOperation = {
   kind: "Add",
@@ -69,10 +78,23 @@ const fixture = {
   "0": () => num(0),
   true: () => bool(true),
   false: () => bool(false),
+  "-0": () =>
+    expr({
+      kind: "UnaryExpression",
+      op: minus,
+      exp: num(0),
+    }),
   "1+2": () =>
     expr({
       kind: "BinaryExpression",
       op: add,
+      left: num(1),
+      right: num(2),
+    }),
+  "1-2": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: sub,
       left: num(1),
       right: num(2),
     }),

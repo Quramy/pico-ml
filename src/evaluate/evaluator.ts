@@ -11,18 +11,15 @@ const { ok, error: err } = useResult<EvaluationResult>();
 
 const error = (message: string) => err({ message });
 
-function mapNumber(
-  left: EvaluationValue,
-  right: EvaluationValue,
-  cb: (a: number, b: number) => EvaluationValue,
-): EvaluationResult {
-  if (typeof left !== "number") {
-    return error(`The left operand is not number. ${getEvaluationResultTypeName(left)}`);
-  }
-  if (typeof right !== "number") {
-    return error(`The right operand is not number. ${getEvaluationResultTypeName(right)}`);
-  }
-  return ok(cb(left, right));
+function map2num(...operands: EvaluationValue[]) {
+  return (cb: (...numberOperands: number[]) => EvaluationValue) => {
+    for (const operand of operands) {
+      if (typeof operand !== "number") {
+        return error(`The operand is not number. ${getEvaluationResultTypeName(operand)}`);
+      }
+    }
+    return ok(cb(...(operands as number[])));
+  };
 }
 
 function evaluateWithEnv(expression: ExpressionNode, env: Environment): EvaluationResult {
@@ -40,6 +37,15 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
     return ok(value);
   } else if (expression.kind === "FunctionDefinition") {
     return ok(createClosure(expression, env));
+  } else if (expression.kind === "UnaryExpression") {
+    return mapValue(evaluateWithEnv(expression.exp, env))(exp => {
+      switch (expression.op.kind) {
+        case "Minus":
+          return map2num(exp)(v => -1 * v);
+        default:
+          throw new Error(`invalid operation: ${expression.op.kind}`);
+      }
+    });
   } else if (expression.kind === "BinaryExpression") {
     return mapValue(
       evaluateWithEnv(expression.left, env),
@@ -47,13 +53,13 @@ function evaluateWithEnv(expression: ExpressionNode, env: Environment): Evaluati
     )((left, right) => {
       switch (expression.op.kind) {
         case "Add":
-          return mapNumber(left, right, (l, r) => l + r);
+          return map2num(left, right)((l, r) => l + r);
         case "Sub":
-          return mapNumber(left, right, (l, r) => l - r);
+          return map2num(left, right)((l, r) => l - r);
         case "Multiply":
-          return mapNumber(left, right, (l, r) => l * r);
+          return map2num(left, right)((l, r) => l * r);
         case "LessThan":
-          return mapNumber(left, right, (l, r) => l < r);
+          return map2num(left, right)((l, r) => l < r);
         default:
           // @ts-expect-error
           throw new Error(`invalid operation: ${expression.op.kind}`);

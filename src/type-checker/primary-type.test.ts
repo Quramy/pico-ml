@@ -4,11 +4,13 @@ import { createTypePrinter } from "./unparse";
 
 const fixture: Record<string, () => string> = {
   "1": () => "int",
+  "-1": () => "int",
   true: () => "bool",
   "0 < 1": () => "bool",
   "1::2::[]": () => "int list",
   "let x = 1 in x": () => "int",
   "fun x -> x": () => "'a -> 'a",
+  "fun x -> -x": () => "int -> int",
   "match 1::[] with [] -> true | x::y -> false": () => "bool",
   "match 0 with x -> true": () => "bool",
   "fun x -> match x with [] -> true | _ -> false": () => "'a list -> bool",
