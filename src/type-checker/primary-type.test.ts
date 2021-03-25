@@ -1,4 +1,3 @@
-import { unwrap } from "../structure";
 import { parse } from "../parser";
 import { getPrimaryType } from "./primary-type";
 import { createTypePrinter } from "./unparse";
@@ -26,15 +25,15 @@ describe(getPrimaryType, () => {
   Object.keys(fixture).forEach(input => {
     test(`Primary type for: "${input}"`, () => {
       const expectedValue = (fixture as Record<string, () => string>)[input]();
-      const tree = unwrap(parse(input));
-      const pt = unwrap(getPrimaryType(tree));
+      const tree = parse(input).unwrap();
+      const pt = getPrimaryType(tree).unwrap();
       const printer = createTypePrinter({ remapWithSubstitutions: pt.substitutions });
       expect(printer(pt.expressionType)).toBe(expectedValue);
     });
   });
 
   test("failure", () => {
-    expect(getPrimaryType(unwrap(parse("1 + false"))).ok).toBeFalsy();
-    expect(getPrimaryType(unwrap(parse("true::1::[]"))).ok).toBeFalsy();
+    expect(getPrimaryType(parse("1 + false").unwrap()).ok).toBeFalsy();
+    expect(getPrimaryType(parse("true::1::[]").unwrap()).ok).toBeFalsy();
   });
 });

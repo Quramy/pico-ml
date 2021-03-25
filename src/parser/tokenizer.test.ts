@@ -1,25 +1,24 @@
-import { unwrap } from "../structure";
 import { numberToken, variableToken, keywordToken } from "./tokenizer";
 import { Scanner } from "./scanner";
 import { Token } from "./types";
 
 test(numberToken.name, () => {
-  expect(unwrap(numberToken(new Scanner("0")))).toMatchObject<Token>({
+  expect(numberToken(new Scanner("0")).unwrap()).toMatchObject<Token>({
     tokenKind: "Number",
     value: 0,
   });
-  expect(unwrap(numberToken(new Scanner("01")))).toMatchObject<Token>({
+  expect(numberToken(new Scanner("01")).unwrap()).toMatchObject<Token>({
     tokenKind: "Number",
     value: 1,
   });
-  expect(unwrap(numberToken(new Scanner("20")))).toMatchObject<Token>({
+  expect(numberToken(new Scanner("20")).unwrap()).toMatchObject<Token>({
     tokenKind: "Number",
     value: 20,
   });
 });
 
 test(keywordToken.name, () => {
-  expect(unwrap(keywordToken("true")(new Scanner("true")))).toMatchObject<Token>({
+  expect(keywordToken("true")(new Scanner("true")).unwrap()).toMatchObject<Token>({
     tokenKind: "Keyword",
     keyword: "true",
   });
@@ -27,11 +26,11 @@ test(keywordToken.name, () => {
 });
 
 test(variableToken.name, () => {
-  expect(unwrap(variableToken(new Scanner("_'")))).toMatchObject<Token>({
+  expect(variableToken(new Scanner("_'")).unwrap()).toMatchObject<Token>({
     tokenKind: "Variable",
     name: "_'",
   });
-  expect(unwrap(variableToken(new Scanner("hoge fuga")))).toMatchObject<Token>({
+  expect(variableToken(new Scanner("hoge fuga")).unwrap()).toMatchObject<Token>({
     tokenKind: "Variable",
     name: "hoge",
   });

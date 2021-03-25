@@ -1,4 +1,3 @@
-import { unwrap } from "../structure";
 import { parseMatchPattern } from "../parser";
 import { isMatch } from "./pattern-match";
 import { EvaluationValue } from "./types";
@@ -8,7 +7,7 @@ const id = (name: string) => ({ kind: "Identifier", name } as const);
 
 describe(isMatch, () => {
   const getEnv = (input: string, value: EvaluationValue) =>
-    isMatch(value, unwrap(parseMatchPattern(input)), createRootEnvironment());
+    isMatch(value, parseMatchPattern(input).unwrap(), createRootEnvironment());
   test("not match", () => {
     expect(getEnv("x::y", [])).toBeFalsy();
     expect(getEnv("x::y", 0)).toBeFalsy();

@@ -1,4 +1,4 @@
-import { ResultErrorBase, Result, useResult, ok } from "../structure";
+import { ResultErrorBase, Result, ok, error } from "../structure";
 import { Position } from "./types";
 import type { Scanner } from "./scanner";
 
@@ -16,8 +16,6 @@ export interface Parser<T extends ParseValue = ParseValue> {
 type UnwrapToParseResult<T> = T extends Parser ? ReturnType<T> : never;
 type UnwrapToParseValue<T> = T extends Parser<infer S> ? S : never;
 type UnwrapToParseResultTuple<T> = { readonly [P in keyof T]: UnwrapToParseValue<T[P]> };
-
-const { error } = useResult<ParseResult<any>>();
 
 export const use = <T extends ParseValue>(cb: () => Parser<T>) => {
   return (scanner: Scanner) => cb()(scanner) as ParseResult<T>;
@@ -86,7 +84,7 @@ export const rightAssociate = <T extends readonly Parser[]>(...parsers: T) => <
   cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => R,
 ) => {
   return (first: L, scanner: Scanner) => {
-    const inner = (node: L): Result<R, ParseError> => {
+    const inner = (node: L): Result<R | L, ParseError> => {
       const results: ParseValue[] = [];
       let i = 0;
       for (const parser of parsers) {

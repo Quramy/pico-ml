@@ -12,7 +12,14 @@ interface ResultErrorForm<E extends ResultErrorBase> {
   readonly value: E;
 }
 
-export type Result<T, E extends ResultErrorBase = ResultErrorBase> = ResultOkForm<T> | ResultErrorForm<E>;
+interface ResultCombinator<T, E extends ResultErrorBase> {
+  unwrap(): T;
+  map<S>(cb: (value: T) => S): Result<S, E>;
+  mapValue<S, F extends ResultErrorBase>(cb: (value: T) => Result<S, F>): Result<S, E | F>;
+}
+
+export type Result<T, E extends ResultErrorBase = ResultErrorBase> = ResultCombinator<T, E> &
+  (ResultOkForm<T> | ResultErrorForm<E>);
 
 type ResultValue<R extends Result<any, any>> = R extends ResultOkForm<infer T> ? T : never;
 type ResultError<R extends Result<any, any>> = R extends ResultErrorForm<infer E> ? E : never;
@@ -48,33 +55,47 @@ export function mapValue<U extends Result<any, any>[]>(...results: U) {
 }
 
 export function ok<T>(value: T): Result<T, any> {
-  return {
+  const r: Result<T, any> = {
     ok: true,
     value,
+    unwrap() {
+      return unwrap(r);
+    },
+    map(cb) {
+      return ok(cb(value));
+    },
+    mapValue(cb) {
+      return cb(value);
+    },
   };
+  return r;
 }
 
 export function error<E extends ResultErrorBase>(value: E): Result<any, E> {
-  return {
+  const r: Result<any, E> = {
     ok: false,
     value,
+    unwrap() {
+      return unwrap(r);
+    },
+    map() {
+      return r;
+    },
+    mapValue() {
+      return r;
+    },
   };
+  return r;
 }
 
 export function useResult<R extends Result<any, any>, T = ResultValue<R>, E = ResultError<R>>() {
   const obj = {
     mapValue,
     ok<S extends T>(value: S) {
-      return {
-        ok: true,
-        value,
-      } as R;
+      return ok(value) as R;
     },
-    error<F extends E>(err: F) {
-      return {
-        ok: false,
-        value: err,
-      } as R;
+    error<F extends E>(err: F & ResultErrorBase) {
+      return error(err) as R;
     },
   };
   return obj;

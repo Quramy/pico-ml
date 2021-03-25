@@ -1,4 +1,3 @@
-import { unwrap } from "../structure";
 import { parseMatchPattern } from "../parser";
 import { equal, getTypeEnvForPattern } from "./utils";
 import { int, bool, func, param, list } from "./testing/helpers";
@@ -16,7 +15,13 @@ describe(equal, () => {
 
 describe(getTypeEnvForPattern, () => {
   const getEnv = (input: string, type: TypeValue = int()) =>
-    unwrap(getTypeEnvForPattern(unwrap(parseMatchPattern(input)), type, createRootEnvironment(), new ParmGenerator()));
+    getTypeEnvForPattern(
+      parseMatchPattern(input).unwrap(),
+      type,
+      createRootEnvironment(),
+      new ParmGenerator(),
+    ).unwrap();
+
   test(getTypeEnvForPattern.name, () => {
     expect(() => getEnv("x::x")).toThrowError();
     expect(() => getEnv("x::y::x")).toThrowError();
