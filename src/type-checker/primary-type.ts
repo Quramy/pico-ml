@@ -48,6 +48,22 @@ function getPrimaryTypeInner(expression: ExpressionNode, ctx: PrimaryTypeContext
       to: ctx.generator.gen(),
     }));
     return ok(substituteType(typeScheme.type, ...substitutions));
+  } else if (expression.kind === "UnaryExpression") {
+    switch (expression.op.kind) {
+      case "Minus":
+        return mapValue(getPrimaryTypeInner(expression.exp, ctx))(exp =>
+          unify([...toEquationSet(exp), { lhs: exp.expressionType, rhs: { kind: "Int" } }]).mapValue(unified =>
+            ok(
+              {
+                kind: "Int",
+              },
+              unified,
+            ),
+          ),
+        );
+      default:
+        throw new Error(`invalid operation ${expression.op.kind}`);
+    }
   } else if (expression.kind === "BinaryExpression") {
     switch (expression.op.kind) {
       case "Add":

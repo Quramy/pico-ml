@@ -2,8 +2,9 @@ import { ok } from "../structure";
 import {
   ExpressionNode,
   NumberLiteralNode,
-  BinaryExpressionNode,
   BoolLiteralNode,
+  UnaryExpressionNode,
+  BinaryExpressionNode,
   IfExpressionNode,
   IdentifierNode,
   LetExpressionNode,
@@ -39,11 +40,12 @@ import { loc } from "./utils";
  * p_prim       ::= id | "[" "]" | "_"
  * func         ::= "fun" id "->" expr
  * bind         ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
- * comp         ::= cons("<" (cons | cond | bind))*
- * cons         ::= add("::" (add | cond | bind))*
- * add          ::= mul(("+"|"-") (mul | cond | bind))*
- * mul          ::= app("*" (app | cond | bind))*
- * app          ::= prim(prim)*
+ * comp         ::= cons("<" (cons | cond | match | func | bind))*
+ * cons         ::= add("::" (add | cond | match | func | bind))*
+ * add          ::= mul(("+"|"-") (mul | cond | match | func | bind))*
+ * mul          ::= prfx("*" (prfx | cond | match | func | bind))*
+ * prfx         ::= app | "-" app
+ * app          ::= prim (prim)*
  * prim         ::= id | bool | number | empty | group
  * group        ::= "(" expr ")"
  * empty        ::= "[" "]"
@@ -223,6 +225,7 @@ const comp: Parser<ExpressionNode> = expect(use(() => cons))(
       use(() => cons),
       use(() => cond),
       use(() => match),
+      use(() => func),
       use(() => bind),
     ),
   )(
@@ -243,6 +246,7 @@ const cons: Parser<ExpressionNode> = expect(use(() => add))(
       use(() => add),
       use(() => cond),
       use(() => match),
+      use(() => func),
       use(() => bind),
     ),
   )(
@@ -262,6 +266,7 @@ const add: Parser<ExpressionNode> = expect(use(() => mul))(
       use(() => mul),
       use(() => cond),
       use(() => match),
+      use(() => func),
       use(() => bind),
     ),
   )(
@@ -275,13 +280,14 @@ const add: Parser<ExpressionNode> = expect(use(() => mul))(
   ),
 );
 
-const mul: Parser<ExpressionNode> = expect(use(() => app))(
+const mul: Parser<ExpressionNode> = expect(use(() => prfx))(
   leftAssociate(
     symbolToken("*"),
     oneOf(
-      use(() => app),
+      use(() => prfx),
       use(() => cond),
       use(() => match),
+      use(() => func),
       use(() => bind),
     ),
   )(
@@ -295,6 +301,25 @@ const mul: Parser<ExpressionNode> = expect(use(() => app))(
       right,
       ...loc(left, token, right),
     }),
+  ),
+);
+
+const prfx: Parser<ExpressionNode> = oneOf(
+  use(() => app),
+  expect(
+    symbolToken("-"),
+    use(() => app),
+  )(
+    (tMinus, expr): ParseResult<UnaryExpressionNode> =>
+      ok({
+        kind: "UnaryExpression",
+        op: {
+          kind: "Minus",
+          token: tMinus,
+        },
+        exp: expr,
+        ...loc(tMinus, expr),
+      }),
   ),
 );
 

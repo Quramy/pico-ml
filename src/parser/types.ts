@@ -43,26 +43,22 @@ export interface NumberToken extends TokenBase<"Number"> {
 
 export type Token = SymbolToken | KeywordToken | NumberToken | VariableToken;
 
-export interface AddOperation {
-  readonly kind: "Add";
+export interface OperationBase<T extends string> {
+  readonly kind: T;
   readonly token: Token;
 }
 
-export interface SubOperation {
-  readonly kind: "Sub";
-  readonly token: Token;
-}
+export interface MinusOperation extends OperationBase<"Minus"> {}
 
-export interface MultiplyOperation {
-  readonly kind: "Multiply";
-  readonly token: Token;
-}
+export interface AddOperation extends OperationBase<"Add"> {}
 
-export interface LessThanOperation {
-  readonly kind: "LessThan";
-  readonly token: Token;
-}
+export interface SubOperation extends OperationBase<"Sub"> {}
 
+export interface MultiplyOperation extends OperationBase<"Multiply"> {}
+
+export interface LessThanOperation extends OperationBase<"LessThan"> {}
+
+export type UnaryOperation = MinusOperation;
 export type BinaryOperation = AddOperation | SubOperation | MultiplyOperation | LessThanOperation;
 
 export interface Node<T extends string> extends Position {
@@ -79,6 +75,11 @@ export interface BoolLiteralNode extends Node<"BoolLiteral"> {
 
 export interface IdentifierNode extends Node<"Identifier"> {
   readonly name: string;
+}
+
+export interface UnaryExpressionNode extends Node<"UnaryExpression"> {
+  readonly op: UnaryOperation;
+  readonly exp: ExpressionNode;
 }
 
 export interface BinaryExpressionNode extends Node<"BinaryExpression"> {
@@ -160,6 +161,7 @@ export type ExpressionNode =
   | BoolLiteralNode
   | EmptyListNode
   | IdentifierNode
+  | UnaryExpressionNode
   | BinaryExpressionNode
   | IfExpressionNode
   | LetExpressionNode
