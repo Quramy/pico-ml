@@ -1,7 +1,7 @@
-import { MatchPatternNode, IdentifierNode } from "../parser";
-import { EvaluationValue, Environment } from "./types";
-import { isList } from "./utils";
-import { createChildEnvironment } from "./environment";
+import { MatchPatternNode, IdentifierNode } from "../../parser";
+import { EvaluationValue, Environment } from "../types";
+import { isList } from "../utils";
+import { createChildEnvironment } from "../environment";
 
 interface Substitution {
   readonly lhs: IdentifierNode;

@@ -1,7 +1,7 @@
-import { Result } from "../structure";
-import { IdentifierNode, FunctionDefinitionNode } from "../parser";
+import { Result, TraverserCallbackFn } from "../structure";
+import { ExpressionNode, IdentifierNode, FunctionDefinitionNode } from "../parser";
 
-export interface EvaluationFailure {
+export interface EvaluationError {
   readonly message: string;
 }
 
@@ -24,4 +24,10 @@ export interface RecClosure extends Closure {
 export type EvaluationList = readonly EvaluationValue[];
 export type EvaluationValue = number | boolean | Closure | EvaluationList;
 
-export type EvaluationResult = Result<EvaluationValue>;
+export type EvaluationResult = Result<EvaluationValue, EvaluationError>;
+export type EvaluateNodeFn<K extends ExpressionNode["kind"]> = TraverserCallbackFn<
+  ExpressionNode,
+  Environment,
+  EvaluationResult,
+  K
+>;

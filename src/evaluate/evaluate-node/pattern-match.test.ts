@@ -1,7 +1,7 @@
-import { parseMatchPattern } from "../parser";
+import { parseMatchPattern } from "../../parser";
 import { isMatch } from "./pattern-match";
-import { EvaluationValue } from "./types";
-import { createRootEnvironment } from "./environment";
+import { EvaluationValue } from "../types";
+import { createRootEnvironment } from "../environment";
 
 const id = (name: string) => ({ kind: "Identifier", name } as const);
 

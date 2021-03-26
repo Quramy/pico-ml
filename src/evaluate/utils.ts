@@ -1,3 +1,4 @@
+import { error, ok } from "../structure";
 import { EvaluationValue, Closure, RecClosure, EvaluationList } from "./types";
 
 export function isList(value: EvaluationValue): value is EvaluationList {
@@ -12,6 +13,17 @@ export function isClosure(value: EvaluationValue): value is Closure {
 export function isRecClosure(value: EvaluationValue): value is RecClosure {
   if (isList(value)) return false;
   return typeof value === "object" && value.kind === "Closure" && value.closureModifier === "Recursive";
+}
+
+export function map2num(...operands: EvaluationValue[]) {
+  return (cb: (...numberOperands: number[]) => EvaluationValue) => {
+    for (const operand of operands) {
+      if (typeof operand !== "number") {
+        return error({ message: `The operand is not number. ${getEvaluationResultTypeName(operand)}` });
+      }
+    }
+    return ok(cb(...(operands as number[])));
+  };
 }
 
 export function getEvaluationResultTypeName(value: EvaluationValue): string {

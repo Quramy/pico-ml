@@ -1,3 +1,5 @@
+import { Tree } from "../structure";
+
 export interface Position {
   readonly loc?: {
     readonly pos: number;
@@ -20,6 +22,7 @@ export type ReservedWords = readonly [
   "match",
   "with",
 ];
+
 export type ReservedWordKind = ReservedWords[number];
 
 export interface TokenBase<T extends string> extends Position {
@@ -61,9 +64,7 @@ export interface LessThanOperation extends OperationBase<"LessThan"> {}
 export type UnaryOperation = MinusOperation;
 export type BinaryOperation = AddOperation | SubOperation | MultiplyOperation | LessThanOperation;
 
-export interface Node<T extends string> extends Position {
-  readonly kind: T;
-}
+export interface Node<T extends string> extends Tree<T>, Position {}
 
 export interface NumberLiteralNode extends Node<"NumberLiteral"> {
   readonly value: number;

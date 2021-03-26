@@ -62,3 +62,16 @@ export function composite(
   };
   return [s, ...substitutions];
 }
+
+export function toEquationSet(...values: { substitutions: readonly TypeSubstitution[] }[]): TypeEquation[] {
+  return values.reduce(
+    (acc, { substitutions }) => [
+      ...acc,
+      ...substitutions.map(({ from, to }) => ({
+        lhs: from,
+        rhs: to,
+      })),
+    ],
+    [] as TypeEquation[],
+  );
+}

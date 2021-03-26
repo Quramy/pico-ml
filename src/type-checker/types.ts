@@ -1,5 +1,5 @@
-import { Result } from "../structure";
-import { IdentifierNode } from "../parser";
+import { Result, TraverserCallbackFn } from "../structure";
+import { ExpressionNode, IdentifierNode } from "../parser";
 
 export interface TypeValueBase<T> {
   readonly kind: T;
@@ -64,3 +64,10 @@ export interface PrimaryTypeValue {
 }
 
 export type PrimaryTypeResult = Result<PrimaryTypeValue>;
+
+export type PrimaryTypeNode<K extends ExpressionNode["kind"]> = TraverserCallbackFn<
+  ExpressionNode,
+  PrimaryTypeContext,
+  PrimaryTypeResult,
+  K
+>;
