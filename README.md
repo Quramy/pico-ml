@@ -41,7 +41,7 @@ expr   ::= id |
            expr expr |
            "-" expr |
            expr op expr |
-           expr::expr |
+           expr "::" expr |
            "if" expr "then" expr "else" expr |
            "match" expr "with" clause |
            "fun" id "->" expr |
