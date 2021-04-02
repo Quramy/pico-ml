@@ -23,7 +23,7 @@ pico-ml
 
 ## Language
 
-# BNF
+### BNF
 
 ```
 expr   ::= id |
