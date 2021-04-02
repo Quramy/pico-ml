@@ -11,6 +11,9 @@ export const ifExpression: EvaluateNodeFn<"IfExpression"> = (expression, env, ne
         return next(expression.else, env);
       }
     } else {
-      return error({ message: `condition should be boolean, but: ${getEvaluationResultTypeName(condition)}.` });
+      return error({
+        message: `condition should be boolean, but: ${getEvaluationResultTypeName(condition)}.`,
+        occurence: expression.cond,
+      });
     }
   });

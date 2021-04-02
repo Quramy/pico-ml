@@ -108,6 +108,12 @@ function evaluateExpression(code: string, reporter: ErrorReporter) {
     console.log(getPrintableEvaluationValue(result.value));
   } else {
     console.log(color.red(result.value.message));
+    reporter.outputError({
+      ...result.value,
+      fileName: "<REPL input>",
+      content: code,
+      message: color.red(result.value.message),
+    });
   }
 }
 
