@@ -3,6 +3,7 @@ import { parse } from "../parser";
 import { createTypePrinter, getPrimaryType } from "../type-checker";
 import { evaluate, getPrintableEvaluationValue } from "../evaluate";
 import { color } from "./color";
+import { ErrorReporter } from "./error-reporter";
 
 function welcome() {
   console.log("Welcome to CoPL REPL.");
@@ -76,19 +77,32 @@ function createCommands(rl: readline.Interface) {
   return commands;
 }
 
-function evaluateExpression(code: string) {
+function evaluateExpression(code: string, reporter: ErrorReporter) {
   // syntax check
   const tree = parse(code);
 
   if (!tree.ok) {
-    console.log(color.red("Syntax error: " + tree.value.message));
+    reporter.outputError({
+      ...tree.value,
+      fileName: "<REPL input>",
+      content: code,
+      message: color.red("Syntax error: " + tree.value.message),
+    });
     return;
   }
 
   // type check
   const typeResult = getPrimaryType(tree.value);
   if (!typeResult.ok) {
-    console.log(color.red("Type error: " + typeResult.value.message));
+    const message = typeResult.value.messageWithTypes
+      ? typeResult.value.messageWithTypes(createTypePrinter())
+      : typeResult.value.message;
+    reporter.outputError({
+      ...typeResult.value,
+      fileName: "<REPL input>",
+      content: code,
+      message: color.red("Type error: " + message),
+    });
     return;
   }
 
@@ -102,6 +116,12 @@ function evaluateExpression(code: string) {
     console.log(getPrintableEvaluationValue(result.value));
   } else {
     console.log(color.red(result.value.message));
+    reporter.outputError({
+      ...result.value,
+      fileName: "<REPL input>",
+      content: code,
+      message: color.red(result.value.message),
+    });
   }
 }
 
@@ -110,6 +130,8 @@ function main() {
     input: process.stdin,
     output: process.stdout,
   });
+
+  const errorReporter = new ErrorReporter(process.cwd(), console.log.bind(console));
 
   rl.setPrompt(color.green("> "));
   welcome();
@@ -126,9 +148,9 @@ function main() {
     const idx = str.indexOf(";;");
     if (idx !== -1) {
       buf.push(str.slice(0, idx));
-      const code = buf.join(" ");
+      const code = buf.join("\n");
       buf = [];
-      evaluateExpression(code);
+      evaluateExpression(code, errorReporter);
     } else {
       buf.push(str);
     }

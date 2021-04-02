@@ -4,9 +4,7 @@ import { substituteEquationSet, composite } from "./substitute";
 import { getFreeTypeVariables } from "./ftv";
 import { equal } from "./utils";
 
-const { ok, error: err } = useResult<UnifiedResult>();
-
-const error = (message: string) => err({ message });
+const { ok, error } = useResult<UnifiedResult>();
 
 export function unify(typeEquationSet: readonly TypeEquation[]): UnifiedResult {
   if (typeEquationSet.length === 0) {
@@ -37,13 +35,17 @@ export function unify(typeEquationSet: readonly TypeEquation[]): UnifiedResult {
   if (lhs != null && rhs != null) {
     const ftv = getFreeTypeVariables(rhs);
     if (ftv.some(v => v.id === lhs?.id)) {
-      return error("This equation does not have solution.");
+      return error({ message: "This equation does not have solution.", occurence: lhs.referencedFrom });
     }
     const substitution = { from: lhs, to: rhs };
     return unify(substituteEquationSet(typeEquationSet, substitution)).map(unifined =>
       composite(unifined, substitution),
     );
   }
-
-  return error("This equation does not have solution.");
+  return error({
+    message: "This equation does not have solution.",
+    occurence: eq.lhs.referencedFrom,
+    messageWithTypes: unparser =>
+      `This expression type is "${unparser(eq.lhs)}" but the expected type is "${unparser(eq.rhs)}".`,
+  });
 }

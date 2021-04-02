@@ -9,16 +9,17 @@ export const functionApplication: PrimaryTypeNode<"FunctionApplication"> = (expr
     next(expression.callee, ctx),
     next(expression.argument, ctx),
   )((callee, argument) => {
-    const returnType = ctx.generator.gen();
+    const returnType = ctx.generator.gen(expression);
     return unify([
       ...toEquationSet(callee, argument),
       {
-        lhs: callee.expressionType,
-        rhs: {
+        lhs: {
           kind: "Function",
           paramType: argument.expressionType,
           returnType,
+          referencedFrom: expression.callee,
         },
+        rhs: callee.expressionType,
       },
     ]).mapValue(unified => result.ok(substituteType(returnType, ...unified), unified));
   });

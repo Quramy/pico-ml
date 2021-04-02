@@ -9,7 +9,10 @@ export const functionApplication: EvaluateNodeFn<"FunctionApplication"> = (expre
     next(expression.argument, env),
   )((callee, argument) => {
     if (!isClosure(callee)) {
-      return error({ message: `should be function, but ${getEvaluationResultTypeName(callee)}}` });
+      return error({
+        message: `should be function, but ${getEvaluationResultTypeName(callee)}}`,
+        occurence: expression.callee,
+      });
     }
     if (!isRecClosure(callee)) {
       return next(

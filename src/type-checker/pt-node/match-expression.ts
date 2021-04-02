@@ -20,7 +20,7 @@ export const matchExpression: PrimaryTypeNode<"MatchExpression"> = (expression, 
     )((...patternTypeWrappers) => {
       const patternTypes = patternTypeWrappers.map(w => w.patternType);
       const equationSet = patternTypeWrappers.flatMap(w => w.equations);
-      if (patternTypes.length === 0) return result.error({ message: "unreachable" }) as never;
+      if (patternTypes.length === 0) throw new Error("unreachable");
       const [firstClause, ...restClauses] = patternTypes;
       const equationsForEachPatternExpression: TypeEquation[] = restClauses.map(clause => ({
         lhs: firstClause.expressionType,

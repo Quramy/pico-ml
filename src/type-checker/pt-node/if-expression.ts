@@ -16,6 +16,7 @@ export const ifExpression: PrimaryTypeNode<"IfExpression"> = (expression, ctx, n
         lhs: cond.expressionType,
         rhs: {
           kind: "Bool",
+          referencedFrom: expression.cond,
         },
       },
       {

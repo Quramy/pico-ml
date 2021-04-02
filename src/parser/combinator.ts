@@ -4,6 +4,7 @@ import type { Scanner } from "./scanner";
 
 export interface ParseError extends ResultErrorBase {
   readonly confirmed: boolean;
+  readonly occurence: Position;
 }
 
 export type ParseValue = Position;
@@ -47,13 +48,25 @@ type CompositeParser<U extends readonly Parser[]> = (
 
 export const oneOf = <U extends readonly Parser[]>(...parsers: U) => {
   const parser: CompositeParser<U> = (scanner: Scanner) => {
-    let result: ParseResult = error({ confirmed: false, message: "" });
+    const st = scanner.pos;
+    let result: ParseResult = error({
+      confirmed: false,
+      message: "",
+      occurence: {
+        loc: { pos: st, end: st + 1 },
+      },
+    });
     for (const parser of parsers.slice().reverse()) {
       result = parser(scanner);
       if (!result.ok && result.value.confirmed) return result;
       if (result.ok) return result as any;
     }
-    return error({ message: "Expression expected.", confirmed: false });
+    const end = scanner.pos === st ? st + 1 : scanner.pos;
+    return error({
+      message: "Unexpected expression.",
+      confirmed: false,
+      occurence: { loc: { pos: st, end } },
+    });
   };
   return parser;
 };
@@ -67,7 +80,7 @@ export const leftAssociate = <T extends readonly Parser[]>(...parsers: T) => <L 
       let i = 0;
       for (const parser of parsers) {
         const r = parser(scanner);
-        if (!r.ok) return i === 0 ? ok(node) : error({ message: "Missing operand.", confirmed: false });
+        if (!r.ok) return i === 0 ? ok(node) : error({ ...r.value, message: "Missing operand.", confirmed: false });
         results.push(r.value);
         i++;
       }
@@ -89,7 +102,7 @@ export const rightAssociate = <T extends readonly Parser[]>(...parsers: T) => <
       let i = 0;
       for (const parser of parsers) {
         const r = parser(scanner);
-        if (!r.ok) return i === 0 ? ok(node) : error({ message: "Missing operand.", confirmed: false });
+        if (!r.ok) return i === 0 ? ok(node) : error({ ...r.value, message: "Missing operand.", confirmed: false });
         results.push(r.value);
         i++;
       }

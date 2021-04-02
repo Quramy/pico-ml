@@ -1,8 +1,9 @@
 import { Result, TraverserCallbackFn } from "../structure";
-import { ExpressionNode, IdentifierNode, FunctionDefinitionNode } from "../parser";
+import { ExpressionNode, IdentifierNode, FunctionDefinitionNode, Position } from "../parser";
 
 export interface EvaluationError {
   readonly message: string;
+  readonly occurence: Position;
 }
 
 export interface Environment {

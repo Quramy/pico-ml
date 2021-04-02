@@ -8,7 +8,10 @@ export const listConstructor: EvaluateNodeFn<"ListConstructor"> = (expression, e
     next(expression.tail, env),
   )((head, tail) => {
     if (!isList(tail)) {
-      return error({ message: `The operand is not a list. ${getEvaluationResultTypeName(tail)}` });
+      return error({
+        message: `The operand is not a list. ${getEvaluationResultTypeName(tail)}`,
+        occurence: expression.tail,
+      });
     }
     return ok(isList(head) ? [...head, ...tail] : [head, ...tail]);
   });

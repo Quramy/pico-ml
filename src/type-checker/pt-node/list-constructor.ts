@@ -16,6 +16,7 @@ export const listConstructor: PrimaryTypeNode<"ListConstructor"> = (expression, 
         rhs: {
           kind: "List",
           elementType: head.expressionType,
+          referencedFrom: expression,
         },
       },
     ]).mapValue(unified => result.ok(substituteType(tail.expressionType, ...unified), unified)),

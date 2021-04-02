@@ -6,17 +6,19 @@ function substituteTypeInner(type: TypeValue, substitution: TypeSubstitution): T
     case "Bool":
       return type;
     case "TypeParameter":
-      return type.id === substitution.from.id ? substitution.to : type;
+      return type.id === substitution.from.id ? { ...substitution.to, referencedFrom: type.referencedFrom } : type;
     case "Function":
       return {
         kind: "Function",
         paramType: substituteType(type.paramType, substitution),
         returnType: substituteType(type.returnType, substitution),
+        referencedFrom: type.referencedFrom,
       };
     case "List":
       return {
         kind: "List",
         elementType: substituteType(type.elementType, substitution),
+        referencedFrom: type.referencedFrom,
       };
   }
 }
