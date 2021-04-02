@@ -7,7 +7,7 @@ export interface Position {
   };
 }
 
-export type Symbols = readonly ["(", ")", "+", "-", "*", "<", "=", "->", "[", "]", "::", "|", "_"];
+export type Symbols = readonly ["(", ")", "+", "-", "*", "<", ">", "<=", ">=", "=", "->", "[", "]", "::", "|", "_"];
 export type SymbolKind = Symbols[number];
 export type ReservedWords = readonly [
   "if",
@@ -59,10 +59,23 @@ export interface SubOperation extends OperationBase<"Sub"> {}
 
 export interface MultiplyOperation extends OperationBase<"Multiply"> {}
 
-export interface LessThanOperation extends OperationBase<"LessThan"> {}
+export interface LTOperation extends OperationBase<"LessThan"> {}
+
+export interface GTOperation extends OperationBase<"GreaterThan"> {}
+
+export interface LEOperation extends OperationBase<"LessEqualThan"> {}
+
+export interface GEOperation extends OperationBase<"GreaterEqualThan"> {}
 
 export type UnaryOperation = MinusOperation;
-export type BinaryOperation = AddOperation | SubOperation | MultiplyOperation | LessThanOperation;
+export type BinaryOperation =
+  | AddOperation
+  | SubOperation
+  | MultiplyOperation
+  | LTOperation
+  | GTOperation
+  | LEOperation
+  | GEOperation;
 
 export interface Node<T extends string> extends Tree<T>, Position {}
 

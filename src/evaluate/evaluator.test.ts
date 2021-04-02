@@ -18,8 +18,22 @@ describe(evaluate, () => {
     expect(parseAndEval("1 + 1")).toBe(2);
     expect(parseAndEval("1 - 1")).toBe(0);
     expect(parseAndEval("2 * 3")).toBe(6);
+
+    expect(parseAndEval("0 < 1")).toBe(true);
     expect(parseAndEval("1 < 1")).toBe(false);
-    expect(parseAndEval("1 < 2")).toBe(true);
+    expect(parseAndEval("2 < 1")).toBe(false);
+
+    expect(parseAndEval("1 > 0")).toBe(true);
+    expect(parseAndEval("1 > 1")).toBe(false);
+    expect(parseAndEval("1 > 2")).toBe(false);
+
+    expect(parseAndEval("0 <= 1")).toBe(true);
+    expect(parseAndEval("1 <= 1")).toBe(true);
+    expect(parseAndEval("2 <= 1")).toBe(false);
+
+    expect(parseAndEval("1 >= 0")).toBe(true);
+    expect(parseAndEval("1 >= 1")).toBe(true);
+    expect(parseAndEval("1 >= 2")).toBe(false);
   });
 
   test("cons operation", () => {

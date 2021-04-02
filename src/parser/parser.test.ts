@@ -8,7 +8,10 @@ import {
   MultiplyOperation,
   BoolLiteralNode,
   IdentifierNode,
-  LessThanOperation,
+  LTOperation,
+  LEOperation,
+  GTOperation,
+  GEOperation,
   SubOperation,
   EmptyListNode,
 } from "./types";
@@ -51,11 +54,35 @@ const multiply: MultiplyOperation = {
   },
 };
 
-const lessThan: LessThanOperation = {
+const lt: LTOperation = {
   kind: "LessThan",
   token: {
     tokenKind: "Symbol",
     symbol: "<",
+  },
+};
+
+const le: LEOperation = {
+  kind: "LessEqualThan",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "<=",
+  },
+};
+
+const gt: GTOperation = {
+  kind: "GreaterThan",
+  token: {
+    tokenKind: "Symbol",
+    symbol: ">",
+  },
+};
+
+const ge: GEOperation = {
+  kind: "GreaterEqualThan",
+  token: {
+    tokenKind: "Symbol",
+    symbol: ">=",
   },
 };
 
@@ -142,7 +169,40 @@ const fixture = {
   "1<2::[]": () =>
     expr({
       kind: "BinaryExpression",
-      op: lessThan,
+      op: lt,
+      left: num(1),
+      right: {
+        kind: "ListConstructor",
+        head: num(2),
+        tail: empty(),
+      },
+    }),
+  "1<=2::[]": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: le,
+      left: num(1),
+      right: {
+        kind: "ListConstructor",
+        head: num(2),
+        tail: empty(),
+      },
+    }),
+  "1>2::[]": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: gt,
+      left: num(1),
+      right: {
+        kind: "ListConstructor",
+        head: num(2),
+        tail: empty(),
+      },
+    }),
+  "1>=2::[]": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: ge,
       left: num(1),
       right: {
         kind: "ListConstructor",
@@ -260,7 +320,7 @@ const fixture = {
           kind: "IfExpression",
           cond: {
             kind: "BinaryExpression",
-            op: lessThan,
+            op: lt,
             left: id("n"),
             right: num(2),
           },
