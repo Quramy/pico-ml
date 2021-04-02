@@ -12,20 +12,13 @@ map fact list (*  ==> int list: [ 1, 1, 2, 6, 24, 120 ] *)
 
 ## How to use
 
-### Requirements
-
-- Node.js
-
-### Install
-
 ```sh
-npm i
-```
+npx pico-ml
 
-### Start REPL
+# or
 
-```sh
-npm start
+npm install -g pico-ml
+pico-ml
 ```
 
 ## Language
