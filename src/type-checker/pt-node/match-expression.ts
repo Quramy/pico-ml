@@ -23,8 +23,8 @@ export const matchExpression: PrimaryTypeNode<"MatchExpression"> = (expression, 
       if (patternTypes.length === 0) throw new Error("unreachable");
       const [firstClause, ...restClauses] = patternTypes;
       const equationsForEachPatternExpression: TypeEquation[] = restClauses.map(clause => ({
-        lhs: clause.expressionType,
-        rhs: firstClause.expressionType,
+        lhs: firstClause.expressionType,
+        rhs: clause.expressionType,
       }));
       return unify([
         ...toEquationSet(exp, ...patternTypes),
