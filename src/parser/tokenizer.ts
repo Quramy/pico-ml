@@ -27,7 +27,12 @@ const reservedWords: ReservedWords = [
 
 export const symbolToken: (sym: SymbolKind) => Parser<SymbolToken> = sym => {
   return (scanner: Scanner) => {
-    if (!scanner.startsWith(sym)) return error({ confirmed: false, message: `'${sym}' expected.` });
+    if (!scanner.startsWith(sym))
+      return error({
+        confirmed: false,
+        message: `'${sym}' expected.`,
+        occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
+      });
     return ok({
       tokenKind: "Symbol",
       symbol: sym,
@@ -39,7 +44,11 @@ export const symbolToken: (sym: SymbolKind) => Parser<SymbolToken> = sym => {
 export const keywordToken: (keyword: ReservedWordKind) => Parser<KeywordToken> = keyword => {
   return scanner => {
     if (!scanner.match(new RegExp(`^${keyword}($|[^a-zA-Z0-9\$_])`)))
-      return error({ confirmed: false, message: `'${keyword}' expected.` });
+      return error({
+        confirmed: false,
+        message: `'${keyword}' expected.`,
+        occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
+      });
     return ok({
       tokenKind: "Keyword",
       keyword,
@@ -50,7 +59,12 @@ export const keywordToken: (keyword: ReservedWordKind) => Parser<KeywordToken> =
 
 export const numberToken: Parser<NumberToken> = scanner => {
   const hit = scanner.match(/^(\d+)/);
-  if (!hit) return error({ confirmed: false, message: "Number expected." });
+  if (!hit)
+    return error({
+      confirmed: false,
+      message: "Number expected.",
+      occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
+    });
   return ok({
     tokenKind: "Number",
     value: parseInt(hit[1], 10),
@@ -60,9 +74,19 @@ export const numberToken: Parser<NumberToken> = scanner => {
 
 export const variableToken: Parser<VariableToken> = scanner => {
   const hit = scanner.match(/^([a-zA-Z_][a-zA-Z0-9_']*)/);
-  if (!hit) return error({ confirmed: false, message: "Identifier expected." });
+  if (!hit)
+    return error({
+      confirmed: false,
+      message: "Identifier expected.",
+      occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
+    });
   const found = reservedWords.find(w => w === hit[1]);
-  if (found) return error({ confirmed: true, message: `'${found}' is not allowed as an identifier name.` });
+  if (found)
+    return error({
+      confirmed: true,
+      message: `'${found}' is not allowed as an identifier name.`,
+      occurence: { loc: { pos: scanner.pos, end: scanner.pos + found.length } },
+    });
   return ok({
     tokenKind: "Variable",
     name: hit[1],
