@@ -18,16 +18,17 @@ export const binaryExpression: PrimaryTypeNode<"BinaryExpression"> = (expression
           ...toEquationSet(left, right),
           {
             lhs: left.expressionType,
-            rhs: { kind: "Int" },
+            rhs: { kind: "Int", referencedFrom: expression.left },
           },
           {
             lhs: right.expressionType,
-            rhs: { kind: "Int" },
+            rhs: { kind: "Int", referencedFrom: expression.right },
           },
         ]).mapValue(unified =>
           result.ok(
             {
               kind: expression.op.kind === "LessThan" ? "Bool" : "Int",
+              referencedFrom: expression,
             },
             unified,
           ),

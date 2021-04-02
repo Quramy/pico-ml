@@ -1,13 +1,14 @@
-import { IdentifierNode } from "../parser";
+import { IdentifierNode, Position } from "../parser";
 import { TypeEnvironment, TypeScheme, TypeParameterType, TypeParemeterGenerator } from "./types";
 
 export class ParmGenerator implements TypeParemeterGenerator {
   private idx = 0;
-  gen() {
+  gen(node: Position) {
     const id = this.idx++;
     const paramType: TypeParameterType = {
       kind: "TypeParameter",
       id,
+      referencedFrom: node,
     };
     return paramType;
   }

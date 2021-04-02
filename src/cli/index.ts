@@ -94,7 +94,15 @@ function evaluateExpression(code: string, reporter: ErrorReporter) {
   // type check
   const typeResult = getPrimaryType(tree.value);
   if (!typeResult.ok) {
-    console.log(color.red("Type error: " + typeResult.value.message));
+    const message = typeResult.value.messageWithTypes
+      ? typeResult.value.messageWithTypes(createTypePrinter())
+      : typeResult.value.message;
+    reporter.outputError({
+      ...typeResult.value,
+      fileName: "<REPL input>",
+      content: code,
+      message: color.red("Type error: " + message),
+    });
     return;
   }
 

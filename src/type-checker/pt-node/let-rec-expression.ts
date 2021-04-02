@@ -8,8 +8,8 @@ import { createChildEnvironment } from "../type-environment";
 import { schemeFromType } from "../utils";
 
 export const letRecExpression: PrimaryTypeNode<"LetRecExpression"> = (expression, ctx, next) => {
-  const funcType = ctx.generator.gen();
-  const paramType = ctx.generator.gen();
+  const funcType = ctx.generator.gen(expression.binding);
+  const paramType = ctx.generator.gen(expression.binding.param);
   const bodyEnv = createChildEnvironment(
     expression.binding.param,
     schemeFromType(paramType),
@@ -24,6 +24,7 @@ export const letRecExpression: PrimaryTypeNode<"LetRecExpression"> = (expression
           kind: "Function",
           paramType,
           returnType: bindingBody.expressionType,
+          referencedFrom: expression.binding,
         },
       },
     ]).mapValue(unifiedBody => {

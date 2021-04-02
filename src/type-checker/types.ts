@@ -1,8 +1,9 @@
 import { Result, TraverserCallbackFn } from "../structure";
-import { ExpressionNode, IdentifierNode } from "../parser";
+import { ExpressionNode, IdentifierNode, Position } from "../parser";
 
 export interface TypeValueBase<T> {
   readonly kind: T;
+  readonly referencedFrom: Position;
 }
 
 export interface IntType extends TypeValueBase<"Int"> {}
@@ -38,7 +39,7 @@ export interface TypeEnvironment {
 }
 
 export interface TypeParemeterGenerator {
-  gen(): TypeParameterType;
+  gen(node: Position): TypeParameterType;
 }
 
 export interface PrimaryTypeContext {
@@ -56,14 +57,19 @@ export interface TypeSubstitution {
   readonly to: TypeValue;
 }
 
-export type UnifiedResult = Result<readonly TypeSubstitution[]>;
+export interface TypeError {
+  readonly message: string;
+  readonly occurence: Position;
+  readonly messageWithTypes?: (unparser: (type: TypeValue) => string) => string;
+}
+
+export type UnifiedResult = Result<readonly TypeSubstitution[], TypeError>;
 
 export interface PrimaryTypeValue {
   readonly substitutions: readonly TypeSubstitution[];
   readonly expressionType: TypeValue;
 }
-
-export type PrimaryTypeResult = Result<PrimaryTypeValue>;
+export type PrimaryTypeResult = Result<PrimaryTypeValue, TypeError>;
 
 export type PrimaryTypeNode<K extends ExpressionNode["kind"]> = TraverserCallbackFn<
   ExpressionNode,

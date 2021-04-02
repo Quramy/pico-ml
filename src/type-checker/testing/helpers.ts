@@ -10,28 +10,35 @@ import {
   TypeScheme,
 } from "../types";
 
+const referencedFrom = {};
+
 export const int = (): IntType => ({
   kind: "Int",
+  referencedFrom,
 });
 
 export const bool = (): BoolType => ({
   kind: "Bool",
+  referencedFrom,
 });
 
 export const list = (elementType: TypeValue): ListType => ({
   kind: "List",
   elementType,
+  referencedFrom,
 });
 
 export const param = (id: number): TypeParameterType => ({
   kind: "TypeParameter",
   id,
+  referencedFrom,
 });
 
 export const func = (paramType: TypeValue, returnType: TypeValue): FunctionType => ({
   kind: "Function",
   paramType,
   returnType,
+  referencedFrom,
 });
 
 export const scheme = (type: TypeValue, variables: readonly TypeParameterType[]): TypeScheme => ({

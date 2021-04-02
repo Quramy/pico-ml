@@ -5,7 +5,7 @@ import { createChildEnvironment } from "../type-environment";
 import { schemeFromType } from "../utils";
 
 export const functionDefinition: PrimaryTypeNode<"FunctionDefinition"> = (expression, ctx, next) => {
-  const paramType = ctx.generator.gen();
+  const paramType = ctx.generator.gen(expression.param);
   const env = createChildEnvironment(expression.param, schemeFromType(paramType), ctx.env);
   return next(expression.body, { ...ctx, env }).mapValue(body =>
     result.ok(
@@ -14,6 +14,7 @@ export const functionDefinition: PrimaryTypeNode<"FunctionDefinition"> = (expres
           kind: "Function",
           paramType,
           returnType: body.expressionType,
+          referencedFrom: expression,
         },
         ...body.substitutions,
       ),
