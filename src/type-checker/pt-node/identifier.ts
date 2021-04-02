@@ -14,5 +14,5 @@ export const identifier: PrimaryTypeNode<"Identifier"> = (expression, ctx) => {
     from: v,
     to: ctx.generator.gen(expression),
   }));
-  return result.ok(substituteType(typeScheme.type, ...substitutions));
+  return result.ok({ ...substituteType(typeScheme.type, ...substitutions), referencedFrom: expression });
 };
