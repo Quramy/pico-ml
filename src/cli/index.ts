@@ -5,8 +5,13 @@ import { evaluate, getPrintableEvaluationValue } from "../evaluate";
 import { color } from "./color";
 import { ErrorReporter } from "./error-reporter";
 
+function getVersion() {
+  const { version } = require("../../package.json");
+  return version as string;
+}
+
 function welcome() {
-  console.log("Welcome to CoPL REPL.");
+  console.log(`Welcome to PicoML REPL v${getVersion()}.`);
   console.log('Type ".help" for more information.');
 }
 

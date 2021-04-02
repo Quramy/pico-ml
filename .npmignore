@@ -1,0 +1,8 @@
+.git/
+.github/
+.vscode/
+.husky/
+.prettierrc.yml
+src/
+tsconfig.*
+*.test.js

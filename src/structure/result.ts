@@ -2,17 +2,17 @@ export interface ResultErrorBase {
   readonly message: string;
 }
 
-interface ResultOkForm<T> {
+export interface ResultOkForm<T> {
   readonly ok: true;
   readonly value: T;
 }
 
-interface ResultErrorForm<E extends ResultErrorBase> {
+export interface ResultErrorForm<E extends ResultErrorBase> {
   readonly ok: false;
   readonly value: E;
 }
 
-interface ResultCombinator<T, E extends ResultErrorBase> {
+export interface ResultCombinator<T, E extends ResultErrorBase> {
   unwrap(): T;
   map<S>(cb: (value: T) => S): Result<S, E>;
   error<F extends ResultErrorBase>(cb: (error: E) => F): Result<T, F>;
