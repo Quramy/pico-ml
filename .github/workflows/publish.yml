@@ -21,7 +21,7 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
           npm whoami
           npm ci
-          npm ci
+          npm run build
           npm publish
         if: contains(github.ref, 'tags/v')
         env:
