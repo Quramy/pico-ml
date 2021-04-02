@@ -16,6 +16,12 @@ export const binaryExpression: EvaluateNodeFn<"BinaryExpression"> = (expression,
         return map2num(left, right)((l, r) => l * r).error(err => ({ ...err, occurence: expression }));
       case "LessThan":
         return map2num(left, right)((l, r) => l < r).error(err => ({ ...err, occurence: expression }));
+      case "LessEqualThan":
+        return map2num(left, right)((l, r) => l <= r).error(err => ({ ...err, occurence: expression }));
+      case "GreaterThan":
+        return map2num(left, right)((l, r) => l > r).error(err => ({ ...err, occurence: expression }));
+      case "GreaterEqualThan":
+        return map2num(left, right)((l, r) => l >= r).error(err => ({ ...err, occurence: expression }));
       default:
         // @ts-expect-error
         throw new Error(`invalid operation: ${expression.op.kind}`);

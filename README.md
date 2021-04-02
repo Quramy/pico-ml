@@ -23,7 +23,7 @@ pico-ml
 
 ## Language
 
-# BNF
+### BNF
 
 ```
 expr   ::= id |
@@ -50,7 +50,7 @@ int    ::= (digit)+
 
 bool   ::= "true" | "false"
 
-op     ::= "+" | "-" | "*" | "<"
+op     ::= "+" | "-" | "*" | "<" | ">" | "<=" | ">="
 
 letter ::= "a" | ... | "z" | "A" | ... | "Z"
 

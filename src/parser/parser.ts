@@ -40,7 +40,7 @@ import { loc } from "./utils";
  * p_prim       ::= id | "[" "]" | "_"
  * func         ::= "fun" id "->" expr
  * bind         ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
- * comp         ::= cons("<" (cons | cond | match | func | bind))*
+ * comp         ::= cons(("<" | ">" | "<=" | ">=") (cons | cond | match | func | bind))*
  * cons         ::= add("::" (add | cond | match | func | bind))*
  * add          ::= mul(("+"|"-") (mul | cond | match | func | bind))*
  * mul          ::= prfx("*" (prfx | cond | match | func | bind))*
@@ -220,7 +220,7 @@ const pPrim: Parser<MatchPatternElementNode> = oneOf(
 
 const comp: Parser<ExpressionNode> = expect(use(() => cons))(
   leftAssociate(
-    symbolToken("<"),
+    oneOf(symbolToken("<"), symbolToken(">"), symbolToken("<="), symbolToken(">=")),
     oneOf(
       use(() => cons),
       use(() => cond),
@@ -231,7 +231,17 @@ const comp: Parser<ExpressionNode> = expect(use(() => cons))(
   )(
     (left, token, right): BinaryExpressionNode => ({
       kind: "BinaryExpression",
-      op: { kind: "LessThan", token },
+      op: {
+        kind:
+          token.symbol === "<"
+            ? "LessThan"
+            : token.symbol === ">"
+            ? "GreaterThan"
+            : token.symbol === "<="
+            ? "LessEqualThan"
+            : "GreaterEqualThan",
+        token,
+      },
       left,
       right,
       ...loc(left, token, right),

@@ -1,41 +1,43 @@
 import { mapValue } from "../../structure";
+import { BinaryOperation } from "../../parser";
 import { PrimaryTypeNode } from "../types";
 import { result } from "./_result";
 import { unify } from "../unify";
 import { toEquationSet } from "../substitute";
 
+const TYPES_BY_OP: Record<BinaryOperation["kind"], "Bool" | "Int"> = {
+  Add: "Int",
+  Sub: "Int",
+  Multiply: "Int",
+  LessThan: "Bool",
+  LessEqualThan: "Bool",
+  GreaterThan: "Bool",
+  GreaterEqualThan: "Bool",
+};
+
 export const binaryExpression: PrimaryTypeNode<"BinaryExpression"> = (expression, ctx, next) => {
-  switch (expression.op.kind) {
-    case "Add":
-    case "Sub":
-    case "Multiply":
-    case "LessThan":
-      return mapValue(
-        next(expression.left, ctx),
-        next(expression.right, ctx),
-      )((left, right) =>
-        unify([
-          ...toEquationSet(left, right),
-          {
-            lhs: left.expressionType,
-            rhs: { kind: "Int", referencedFrom: expression.left },
-          },
-          {
-            lhs: right.expressionType,
-            rhs: { kind: "Int", referencedFrom: expression.right },
-          },
-        ]).mapValue(unified =>
-          result.ok(
-            {
-              kind: expression.op.kind === "LessThan" ? "Bool" : "Int",
-              referencedFrom: expression,
-            },
-            unified,
-          ),
-        ),
-      );
-    default:
-      // @ts-expect-error
-      throw new Error(`invalid operation ${expression.op.kind}`);
-  }
+  return mapValue(
+    next(expression.left, ctx),
+    next(expression.right, ctx),
+  )((left, right) =>
+    unify([
+      ...toEquationSet(left, right),
+      {
+        lhs: left.expressionType,
+        rhs: { kind: "Int", referencedFrom: expression.left },
+      },
+      {
+        lhs: right.expressionType,
+        rhs: { kind: "Int", referencedFrom: expression.right },
+      },
+    ]).mapValue(unified =>
+      result.ok(
+        {
+          kind: TYPES_BY_OP[expression.op.kind],
+          referencedFrom: expression,
+        },
+        unified,
+      ),
+    ),
+  );
 };
