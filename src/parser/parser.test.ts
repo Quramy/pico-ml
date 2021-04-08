@@ -12,6 +12,8 @@ import {
   LEOperation,
   GTOperation,
   GEOperation,
+  EQOperation,
+  NEOperation,
   SubOperation,
   EmptyListNode,
 } from "./types";
@@ -83,6 +85,22 @@ const ge: GEOperation = {
   token: {
     tokenKind: "Symbol",
     symbol: ">=",
+  },
+};
+
+const eq: EQOperation = {
+  kind: "Equal",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "==",
+  },
+};
+
+const ne: NEOperation = {
+  kind: "NotEqual",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "!=",
   },
 };
 
@@ -166,43 +184,52 @@ const fixture = {
         tail: empty(),
       },
     }),
-  "1<2::[]": () =>
+  "1<2": () =>
     expr({
       kind: "BinaryExpression",
       op: lt,
       left: num(1),
-      right: {
-        kind: "ListConstructor",
-        head: num(2),
-        tail: empty(),
-      },
+      right: num(2),
     }),
-  "1<=2::[]": () =>
+  "1<=2": () =>
     expr({
       kind: "BinaryExpression",
       op: le,
       left: num(1),
-      right: {
-        kind: "ListConstructor",
-        head: num(2),
-        tail: empty(),
-      },
+      right: num(2),
     }),
-  "1>2::[]": () =>
+  "1>2": () =>
     expr({
       kind: "BinaryExpression",
       op: gt,
       left: num(1),
-      right: {
-        kind: "ListConstructor",
-        head: num(2),
-        tail: empty(),
-      },
+      right: num(2),
     }),
-  "1>=2::[]": () =>
+  "1>=2": () =>
     expr({
       kind: "BinaryExpression",
       op: ge,
+      left: num(1),
+      right: num(2),
+    }),
+  "1==2": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: eq,
+      left: num(1),
+      right: num(2),
+    }),
+  "1!=2": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: ne,
+      left: num(1),
+      right: num(2),
+    }),
+  "1<2::[]": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: lt,
       left: num(1),
       right: {
         kind: "ListConstructor",
