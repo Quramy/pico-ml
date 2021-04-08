@@ -13,6 +13,8 @@ const TYPES_BY_OP: Record<BinaryOperation["kind"], "Bool" | "Int"> = {
   LessEqualThan: "Bool",
   GreaterThan: "Bool",
   GreaterEqualThan: "Bool",
+  Equal: "Bool",
+  NotEqual: "Bool",
 };
 
 export const binaryExpression: PrimaryTypeNode<"BinaryExpression"> = (expression, ctx, next) => {

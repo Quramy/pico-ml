@@ -34,6 +34,12 @@ describe(evaluate, () => {
     expect(parseAndEval("1 >= 0")).toBe(true);
     expect(parseAndEval("1 >= 1")).toBe(true);
     expect(parseAndEval("1 >= 2")).toBe(false);
+
+    expect(parseAndEval("1 == 0")).toBe(false);
+    expect(parseAndEval("1 == 1")).toBe(true);
+
+    expect(parseAndEval("1 != 0")).toBe(true);
+    expect(parseAndEval("1 != 1")).toBe(false);
   });
 
   test("cons operation", () => {

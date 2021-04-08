@@ -7,7 +7,26 @@ export interface Position {
   };
 }
 
-export type Symbols = readonly ["(", ")", "+", "-", "*", "<", ">", "<=", ">=", "=", "->", "[", "]", "::", "|", "_"];
+export type Symbols = readonly [
+  "(",
+  ")",
+  "+",
+  "-",
+  "*",
+  "<",
+  ">",
+  "<=",
+  ">=",
+  "==",
+  "!=",
+  "=",
+  "->",
+  "[",
+  "]",
+  "::",
+  "|",
+  "_",
+];
 export type SymbolKind = Symbols[number];
 export type ReservedWords = readonly [
   "if",
@@ -66,6 +85,8 @@ export interface GTOperation extends OperationBase<"GreaterThan"> {}
 export interface LEOperation extends OperationBase<"LessEqualThan"> {}
 
 export interface GEOperation extends OperationBase<"GreaterEqualThan"> {}
+export interface EQOperation extends OperationBase<"Equal"> {}
+export interface NEOperation extends OperationBase<"NotEqual"> {}
 
 export type UnaryOperation = MinusOperation;
 export type BinaryOperation =
@@ -75,7 +96,9 @@ export type BinaryOperation =
   | LTOperation
   | GTOperation
   | LEOperation
-  | GEOperation;
+  | GEOperation
+  | EQOperation
+  | NEOperation;
 
 export interface Node<T extends string> extends Tree<T>, Position {}
 
