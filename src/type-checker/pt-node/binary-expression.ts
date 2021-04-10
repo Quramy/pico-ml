@@ -5,7 +5,7 @@ import { result } from "./_result";
 import { unify } from "../unify";
 import { toEquationSet } from "../substitute";
 
-const TYPES_BY_OP: Record<BinaryOperation["kind"], "Bool" | "Int"> = {
+const RESULT_TYPES_BY_OP: Record<BinaryOperation["kind"], "Bool" | "Int"> = {
   Add: "Int",
   Sub: "Int",
   Multiply: "Int",
@@ -44,7 +44,7 @@ export const binaryExpression: PrimaryTypeNode<"BinaryExpression"> = (expression
     unify([...toEquationSet(left, right), ...getConstraints(expression, left, right)]).mapValue(unified =>
       result.ok(
         {
-          kind: TYPES_BY_OP[expression.op.kind],
+          kind: RESULT_TYPES_BY_OP[expression.op.kind],
           referencedFrom: expression,
         },
         unified,
