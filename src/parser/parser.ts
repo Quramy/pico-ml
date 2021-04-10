@@ -31,7 +31,7 @@ import { loc } from "./utils";
 
 /**
  *
- * expr         ::= comp | cond | match | func | bind
+ * expr         ::= eq | cond | match | func | bind
  * cond         ::= "if" expr "then" expr "else" expr
  * match        ::= "match" expr "wich" pat_clauses
  * pat_clauses  ::= pat_match("|" pat_match)*
@@ -40,6 +40,7 @@ import { loc } from "./utils";
  * p_prim       ::= id | "[" "]" | "_"
  * func         ::= "fun" id "->" expr
  * bind         ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
+ * eq           ::= comp(("==" | "!=") (comp | cond | match | func | bind))*
  * comp         ::= cons(("<" | ">" | "<=" | ">=" | "==" | "!=") (cons | cond | match | func | bind))*
  * cons         ::= add("::" (add | cond | match | func | bind))*
  * add          ::= mul(("+"|"-") (mul | cond | match | func | bind))*
@@ -55,7 +56,7 @@ import { loc } from "./utils";
  *
  */
 const expr: Parser<ExpressionNode> = oneOf(
-  use(() => comp),
+  use(() => eq),
   use(() => cond),
   use(() => match),
   use(() => func),
@@ -218,16 +219,33 @@ const pPrim: Parser<MatchPatternElementNode> = oneOf(
   ),
 );
 
+const eq: Parser<ExpressionNode> = expect(use(() => comp))(
+  leftAssociate(
+    oneOf(symbolToken("=="), symbolToken("!=")),
+    oneOf(
+      use(() => comp),
+      use(() => cond),
+      use(() => match),
+      use(() => func),
+      use(() => bind),
+    ),
+  )(
+    (left, token, right): BinaryExpressionNode => ({
+      kind: "BinaryExpression",
+      op: {
+        kind: token.symbol === "==" ? "Equal" : "NotEqual",
+        token,
+      },
+      left,
+      right,
+      ...loc(left, token, right),
+    }),
+  ),
+);
+
 const comp: Parser<ExpressionNode> = expect(use(() => cons))(
   leftAssociate(
-    oneOf(
-      symbolToken("<"),
-      symbolToken(">"),
-      symbolToken("<="),
-      symbolToken(">="),
-      symbolToken("=="),
-      symbolToken("!="),
-    ),
+    oneOf(symbolToken("<"), symbolToken(">"), symbolToken("<="), symbolToken(">=")),
     oneOf(
       use(() => cons),
       use(() => cond),
@@ -246,11 +264,7 @@ const comp: Parser<ExpressionNode> = expect(use(() => cons))(
             ? "GreaterThan"
             : token.symbol === "<="
             ? "LessEqualThan"
-            : token.symbol === ">="
-            ? "GreaterEqualThan"
-            : token.symbol === "=="
-            ? "Equal"
-            : "NotEqual",
+            : "GreaterEqualThan",
         token,
       },
       left,

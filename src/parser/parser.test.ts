@@ -226,6 +226,13 @@ const fixture = {
       left: num(1),
       right: num(2),
     }),
+  "1<2==1<2": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: eq,
+      left: fixture["1<2"](),
+      right: fixture["1<2"](),
+    }),
   "1<2::[]": () =>
     expr({
       kind: "BinaryExpression",
