@@ -1,4 +1,4 @@
-import { error, ok } from "../structure";
+import { Result, error, ok } from "../structure";
 import { EvaluationValue, Closure, RecClosure, EvaluationList } from "./types";
 
 export function isList(value: EvaluationValue): value is EvaluationList {
@@ -13,6 +13,19 @@ export function isClosure(value: EvaluationValue): value is Closure {
 export function isRecClosure(value: EvaluationValue): value is RecClosure {
   if (isList(value)) return false;
   return typeof value === "object" && value.kind === "Closure" && value.closureModifier === "Recursive";
+}
+
+export function equal(left: EvaluationValue, right: EvaluationValue): Result<boolean> {
+  if (typeof left === "number" && typeof right === "number") return ok(left === right);
+  if (typeof left === "boolean" && typeof right === "boolean") return ok(left === right);
+  if (isList(left) && isList(right)) {
+    if (left.length === 0 && right.length === 0) return ok(true);
+    return ok(left === right);
+  }
+  if (isClosure(left) && isClosure(right)) return ok(left === right);
+  return error({
+    message: "Operand type mismatch.",
+  });
 }
 
 export function map2num(...operands: EvaluationValue[]) {

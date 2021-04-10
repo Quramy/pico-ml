@@ -10,6 +10,8 @@ const fixture: Record<string, () => string> = {
   "0 <= 1": () => "bool",
   "0 > 1": () => "bool",
   "0 >= 1": () => "bool",
+  "true == false": () => "bool",
+  "true != false": () => "bool",
   "1::2::[]": () => "int list",
   "let x = 1 in x": () => "int",
   "fun x -> x": () => "'a -> 'a",
@@ -38,6 +40,7 @@ describe(getPrimaryType, () => {
 
   test("failure", () => {
     expect(parse("1 + false").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 == false").mapValue(getPrimaryType).ok).toBeFalsy();
     expect(parse("true::1::[]").mapValue(getPrimaryType).ok).toBeFalsy();
   });
 });

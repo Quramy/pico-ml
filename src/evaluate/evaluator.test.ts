@@ -34,12 +34,29 @@ describe(evaluate, () => {
     expect(parseAndEval("1 >= 0")).toBe(true);
     expect(parseAndEval("1 >= 1")).toBe(true);
     expect(parseAndEval("1 >= 2")).toBe(false);
+  });
 
+  test("equality", () => {
     expect(parseAndEval("1 == 0")).toBe(false);
     expect(parseAndEval("1 == 1")).toBe(true);
 
     expect(parseAndEval("1 != 0")).toBe(true);
     expect(parseAndEval("1 != 1")).toBe(false);
+
+    expect(parseAndEval("true == true")).toBe(true);
+    expect(parseAndEval("true == false")).toBe(false);
+    expect(parseAndEval("true != true")).toBe(false);
+    expect(parseAndEval("true != false")).toBe(true);
+
+    expect(parseAndEval("[] == []")).toBe(true);
+    expect(parseAndEval("[] != []")).toBe(false);
+    expect(parseAndEval("1::[] == 1::[]")).toBe(false);
+    expect(parseAndEval("1::[] != 1::[]")).toBe(true);
+    expect(parseAndEval("let list = 1::[] in list == list")).toBe(true);
+
+    expect(parseAndEval("(fun x -> x) == (fun x -> x)")).toBe(false);
+    expect(parseAndEval("(fun x -> x) != (fun x -> x)")).toBe(true);
+    expect(parseAndEval("let fn = fun x -> x in fn == fn")).toBe(true);
   });
 
   test("cons operation", () => {

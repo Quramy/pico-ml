@@ -1,6 +1,6 @@
 import { mapValue } from "../../structure";
 import { EvaluateNodeFn } from "../types";
-import { map2num } from "../utils";
+import { map2num, equal } from "../utils";
 
 export const binaryExpression: EvaluateNodeFn<"BinaryExpression"> = (expression, env, next) =>
   mapValue(
@@ -23,9 +23,11 @@ export const binaryExpression: EvaluateNodeFn<"BinaryExpression"> = (expression,
       case "GreaterEqualThan":
         return map2num(left, right)((l, r) => l >= r).error(err => ({ ...err, occurence: expression }));
       case "Equal":
-        return map2num(left, right)((l, r) => l === r).error(err => ({ ...err, occurence: expression }));
+        return equal(left, right).error(err => ({ ...err, occurence: expression }));
       case "NotEqual":
-        return map2num(left, right)((l, r) => l !== r).error(err => ({ ...err, occurence: expression }));
+        return equal(left, right)
+          .map(r => !r)
+          .error(err => ({ ...err, occurence: expression }));
       default:
         // @ts-expect-error
         throw new Error(`invalid operation: ${expression.op.kind}`);
