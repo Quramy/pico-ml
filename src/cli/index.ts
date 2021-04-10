@@ -21,6 +21,7 @@ function createCommands(rl: readline.Interface) {
   const examples: string[][] = [
     ["1 + 1 ;;"],
     ["1 < 2 ;;"],
+    ["true != false ;;"],
     ["if 2 * 2 < 3 then true else false ;;"],
     ["fun x -> x ;;"],
     ["let fn = fun x -> x * 2 in", "fn 2;;"],
@@ -28,9 +29,9 @@ function createCommands(rl: readline.Interface) {
     ["let rec array = fun n -> if n < 1 then [] else (n - 1)::(array(n - 1)) in"],
     [
       "let rec fact = fun n -> if n < 2 then 1 else n * fact(n - 1) in",
-      "let rec array = fun n -> if n < 1 then [] else (n - 1)::(array(n - 1)) in",
+      "let rec range = fun s -> fun e -> if s >= e then [] else s::(range (s + 1) e) in",
       "let rec map = fun f -> fun list -> match list with [] -> [] | x::y -> (f x)::(map f y) in",
-      "map fact (array 7) ;;",
+      "map fact (range 1 7) ;;",
     ],
   ];
 
