@@ -1,18 +1,6 @@
-import { ResultErrorBase, Result, ok, error } from "../structure";
-import { Position } from "../syntax/types";
-import type { Scanner } from "../syntax/scanner";
-
-export interface ParseError extends ResultErrorBase {
-  readonly confirmed: boolean;
-  readonly occurence: Position;
-}
-
-export type ParseValue = Position;
-export type ParseResult<T extends ParseValue = ParseValue> = Result<T, ParseError>;
-
-export interface Parser<T extends ParseValue = ParseValue> {
-  (scanner: Scanner): ParseResult<T>;
-}
+import { Result, ok, error } from "../structure";
+import { Parser, ParseResult, ParseValue, ParseError } from "./types";
+import type { Scanner } from "./scanner";
 
 type UnwrapToParseResult<T> = T extends Parser ? ReturnType<T> : never;
 type UnwrapToParseValue<T> = T extends Parser<infer S> ? S : never;

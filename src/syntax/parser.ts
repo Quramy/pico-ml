@@ -1,4 +1,5 @@
 import { ok } from "../structure";
+import { Parser, ParseResult, use, oneOf, expect, leftAssociate, rightAssociate, loc, Scanner } from "../parser-util";
 import {
   ExpressionNode,
   NumberLiteralNode,
@@ -23,11 +24,8 @@ import {
   MatchOrClauseNode,
   MatchExpressionNode,
   MatchPatternElementNode,
-} from "../syntax/types";
-import { Parser, ParseResult, use, oneOf, expect, leftAssociate, rightAssociate } from "./combinator";
-import { symbolToken, numberToken, keywordToken, variableToken } from "../syntax/tokenizer";
-import { Scanner } from "../syntax/scanner";
-import { loc } from "../syntax/utils";
+} from "./types";
+import { symbolToken, numberToken, keywordToken, variableToken } from "./tokenizer";
 
 /**
  *

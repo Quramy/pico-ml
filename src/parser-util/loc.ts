@@ -1,4 +1,4 @@
-import { Position } from "./types";
+import { Position } from ".";
 
 export function loc(first: Position, ...args: Position[]) {
   if (!args.length) return { loc: first.loc };

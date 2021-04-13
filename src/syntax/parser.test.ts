@@ -1,5 +1,5 @@
 import { unwrap } from "../structure";
-import { parse } from "../syntax/parser";
+import { parse } from "./parser";
 import {
   ExpressionNode,
   NumberLiteralNode,

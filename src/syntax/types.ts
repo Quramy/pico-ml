@@ -1,11 +1,5 @@
 import { Tree } from "../structure";
-
-export interface Position {
-  readonly loc?: {
-    readonly pos: number;
-    readonly end: number;
-  };
-}
+import { Position } from "../parser-util";
 
 export type Symbols = readonly [
   "(",

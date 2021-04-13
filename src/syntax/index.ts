@@ -1,2 +1,2 @@
-export { parse, parseMatchPattern } from "../syntax/parser";
-export * from "../syntax/types";
+export { parse, parseMatchPattern } from "./parser";
+export * from "./types";

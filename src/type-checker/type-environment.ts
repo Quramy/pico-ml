@@ -1,4 +1,5 @@
-import { IdentifierNode, Position } from "../syntax";
+import { Position } from "../parser-util";
+import { IdentifierNode } from "../syntax";
 import { TypeEnvironment, TypeScheme, TypeParameterType, TypeParemeterGenerator } from "./types";
 
 export class ParmGenerator implements TypeParemeterGenerator {

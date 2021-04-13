@@ -1,6 +1,6 @@
-import { numberToken, variableToken, keywordToken } from "../syntax/tokenizer";
-import { Scanner } from "./scanner";
-import { Token } from "../syntax/types";
+import { numberToken, variableToken, keywordToken } from "./tokenizer";
+import { Scanner } from "../parser-util";
+import { Token } from "./types";
 
 test(numberToken.name, () => {
   expect(numberToken(new Scanner("0")).unwrap()).toMatchObject<Token>({
