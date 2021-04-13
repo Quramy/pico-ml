@@ -16,7 +16,7 @@ import {
   NEOperation,
   SubOperation,
   EmptyListNode,
-} from "./types";
+} from "../syntax/types";
 
 const num = (value: number) =>
   ({

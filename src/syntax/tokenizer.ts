@@ -1,4 +1,5 @@
 import { ok, error } from "../structure";
+import { Parser, ParseResult, Scanner } from "../parser-util";
 import {
   SymbolKind,
   SymbolToken,
@@ -8,8 +9,6 @@ import {
   KeywordToken,
   VariableToken,
 } from "./types";
-import type { Scanner } from "./scanner";
-import { Parser, ParseResult } from "./combinator";
 
 const reservedWords: ReservedWords = [
   "if",

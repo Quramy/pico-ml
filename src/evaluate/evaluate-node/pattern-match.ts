@@ -1,4 +1,4 @@
-import { MatchPatternNode, IdentifierNode } from "../../parser";
+import { MatchPatternNode, IdentifierNode } from "../../syntax";
 import { EvaluationValue, Environment } from "../types";
 import { isList } from "../utils";
 import { createChildEnvironment } from "../environment";

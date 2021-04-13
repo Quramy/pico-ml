@@ -1,4 +1,4 @@
-import { IdentifierNode, FunctionDefinitionNode } from "../parser";
+import { IdentifierNode, FunctionDefinitionNode } from "../syntax";
 import { Environment, Closure, RecClosure } from "./types";
 
 export function createClosure(functionDefinition: FunctionDefinitionNode, env: Environment): Closure {

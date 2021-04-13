@@ -1,5 +1,5 @@
 import { numberToken, variableToken, keywordToken } from "./tokenizer";
-import { Scanner } from "./scanner";
+import { Scanner } from "../parser-util";
 import { Token } from "./types";
 
 test(numberToken.name, () => {

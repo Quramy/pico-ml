@@ -1,5 +1,5 @@
 import { createTreeTraverser } from "../structure";
-import { ExpressionNode } from "../parser";
+import { ExpressionNode } from "../syntax";
 import { Environment, EvaluationResult } from "./types";
 import { createRootEnvironment } from "./environment";
 

@@ -1,4 +1,4 @@
-import { parse } from "../parser";
+import { parse } from "../syntax";
 import { evaluate } from "./evaluator";
 
 const parseAndEval = (code: string) => parse(code).mapValue(evaluate).value;

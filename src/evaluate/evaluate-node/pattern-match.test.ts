@@ -1,4 +1,4 @@
-import { parseMatchPattern } from "../../parser";
+import { parseMatchPattern } from "../../syntax";
 import { isMatch } from "./pattern-match";
 import { EvaluationValue } from "../types";
 import { createRootEnvironment } from "../environment";
