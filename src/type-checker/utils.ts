@@ -1,8 +1,8 @@
 import { ok, error, Result } from "../structure";
-import { MatchPatternNode } from "../parser";
+import { MatchPatternNode } from "../syntax";
 import { TypeValue, TypeEnvironment, TypeScheme, TypeParemeterGenerator, TypeEquation, TypeError } from "./types";
 import { createChildEnvironment } from "./type-environment";
-import { MatchExpressionNode, PatternMatchClauseNode, MatchClauseNode } from "../parser/types";
+import { MatchExpressionNode, PatternMatchClauseNode, MatchClauseNode } from "../syntax/types";
 
 export function equal(a: TypeValue, b: TypeValue): boolean {
   switch (a.kind) {

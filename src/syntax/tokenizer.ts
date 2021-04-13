@@ -7,7 +7,7 @@ import {
   ReservedWordKind,
   KeywordToken,
   VariableToken,
-} from "./types";
+} from "../syntax/types";
 import type { Scanner } from "./scanner";
 import { Parser, ParseResult } from "./combinator";
 

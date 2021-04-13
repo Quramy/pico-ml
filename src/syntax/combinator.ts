@@ -1,6 +1,6 @@
 import { ResultErrorBase, Result, ok, error } from "../structure";
-import { Position } from "./types";
-import type { Scanner } from "./scanner";
+import { Position } from "../syntax/types";
+import type { Scanner } from "../syntax/scanner";
 
 export interface ParseError extends ResultErrorBase {
   readonly confirmed: boolean;

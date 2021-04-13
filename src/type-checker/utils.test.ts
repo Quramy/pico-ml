@@ -1,4 +1,4 @@
-import { parseMatchPattern } from "../parser";
+import { parseMatchPattern } from "../syntax";
 import { equal, getTypeEnvForPattern } from "./utils";
 import { int, bool, func, param, list } from "./testing/helpers";
 import { createRootEnvironment, ParmGenerator } from "./type-environment";

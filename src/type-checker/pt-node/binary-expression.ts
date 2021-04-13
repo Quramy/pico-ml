@@ -1,5 +1,5 @@
 import { mapValue } from "../../structure";
-import { BinaryOperation, BinaryExpressionNode } from "../../parser";
+import { BinaryOperation, BinaryExpressionNode } from "../../syntax";
 import { PrimaryTypeNode, TypeEquation, PrimaryTypeValue } from "../types";
 import { result } from "./_result";
 import { unify } from "../unify";

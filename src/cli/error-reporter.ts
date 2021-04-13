@@ -1,5 +1,5 @@
 import path from "path";
-import { Position } from "../parser";
+import { Position } from "../syntax";
 import { pos2location } from "./position-converter";
 import { color } from "./color";
 

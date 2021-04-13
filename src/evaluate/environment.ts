@@ -1,4 +1,4 @@
-import { IdentifierNode } from "../parser";
+import { IdentifierNode } from "../syntax";
 import { Environment, EvaluationValue } from "./types";
 
 export function createRootEnvironment(): Environment {

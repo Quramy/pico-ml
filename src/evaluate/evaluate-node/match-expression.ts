@@ -1,5 +1,5 @@
 import { error } from "../../structure";
-import { MatchClauseNode } from "../../parser";
+import { MatchClauseNode } from "../../syntax";
 import { EvaluateNodeFn, EvaluationResult } from "../types";
 import { isMatch } from "./pattern-match";
 

@@ -1,5 +1,5 @@
 import { Result, TraverserCallbackFn } from "../structure";
-import { ExpressionNode, IdentifierNode, Position } from "../parser";
+import { ExpressionNode, IdentifierNode, Position } from "../syntax";
 
 export interface TypeValueBase<T> {
   readonly kind: T;

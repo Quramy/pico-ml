@@ -1,5 +1,5 @@
 import readline from "readline";
-import { parse } from "../parser";
+import { parse } from "../syntax";
 import { createTypePrinter, getPrimaryType } from "../type-checker";
 import { evaluate, getPrintableEvaluationValue } from "../evaluate";
 import { color } from "./color";

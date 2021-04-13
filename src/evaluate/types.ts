@@ -1,5 +1,5 @@
 import { Result, TraverserCallbackFn } from "../structure";
-import { ExpressionNode, IdentifierNode, FunctionDefinitionNode, Position } from "../parser";
+import { ExpressionNode, IdentifierNode, FunctionDefinitionNode, Position } from "../syntax";
 
 export interface EvaluationError {
   readonly message: string;

@@ -23,11 +23,11 @@ import {
   MatchOrClauseNode,
   MatchExpressionNode,
   MatchPatternElementNode,
-} from "./types";
+} from "../syntax/types";
 import { Parser, ParseResult, use, oneOf, expect, leftAssociate, rightAssociate } from "./combinator";
-import { symbolToken, numberToken, keywordToken, variableToken } from "./tokenizer";
-import { Scanner } from "./scanner";
-import { loc } from "./utils";
+import { symbolToken, numberToken, keywordToken, variableToken } from "../syntax/tokenizer";
+import { Scanner } from "../syntax/scanner";
+import { loc } from "../syntax/utils";
 
 /**
  *

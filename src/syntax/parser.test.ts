@@ -1,5 +1,5 @@
 import { unwrap } from "../structure";
-import { parse } from "./parser";
+import { parse } from "../syntax/parser";
 import {
   ExpressionNode,
   NumberLiteralNode,
@@ -16,7 +16,7 @@ import {
   NEOperation,
   SubOperation,
   EmptyListNode,
-} from "./types";
+} from "../syntax/types";
 
 const num = (value: number) =>
   ({

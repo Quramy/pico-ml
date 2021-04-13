@@ -1,4 +1,4 @@
-import { parse } from "../parser";
+import { parse } from "../syntax";
 import { getPrimaryType } from "./primary-type";
 import { createTypePrinter } from "./unparse";
 

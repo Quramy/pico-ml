@@ -1,4 +1,4 @@
-import { ExpressionNode } from "../parser";
+import { ExpressionNode } from "../syntax";
 import { PrimaryTypeResult, PrimaryTypeContext } from "./types";
 import { createRootEnvironment, ParmGenerator } from "./type-environment";
 import { createTreeTraverser } from "../structure/traverser";
