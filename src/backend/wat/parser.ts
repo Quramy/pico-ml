@@ -1,20 +1,10 @@
 import { ok } from "../../structure";
-import {
-  Parser,
-  ParseResult,
-  loc,
-  expect,
-  option,
-  vec,
-  tryWith,
-  NullPosition,
-  fromMaybyNullPosition,
-} from "../../parser-util";
+import { Parser, ParseResult, loc, expect, option, vec, tryWith, NullPosition, fromOptional } from "../../parser-util";
 import { ModuleNode, IdentifierToken, IdentifierNode, MemoryNode, LimitsNode, Uint32LiteralNode } from "../ast-types";
 import { symbolToken, keywordToken, identifierToken, uintToken } from "./tokenizer";
 
 const toIdNode = (maybeId: NullPosition | IdentifierToken): IdentifierNode | null =>
-  fromMaybyNullPosition(maybeId)(token => ({
+  fromOptional(maybeId)(token => ({
     kind: "Identifier",
     value: token.name,
     loc: token.loc,
@@ -35,7 +25,7 @@ const limits: Parser<LimitsNode> = expect(
   ok({
     kind: "Limits",
     min,
-    max: fromMaybyNullPosition(max)(max => max),
+    max: fromOptional(max)(max => max),
     ...loc(min, max),
   }),
 );
