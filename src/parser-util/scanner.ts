@@ -40,4 +40,9 @@ export class Scanner {
   get pos() {
     return this._pos;
   }
+
+  back(pos: number) {
+    this._pos = pos;
+    return pos;
+  }
 }
