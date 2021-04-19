@@ -32,13 +32,14 @@ export const expect = <T extends readonly Parser[]>(...parsers: T) => <R extends
   };
 };
 
-export const tryWith = <S extends Position, T extends Parser<S>>(parser: T) => (scanner: Scanner): ParseResult<S> => {
+export const tryWith = <T extends Parser>(parser: T) => (scanner: Scanner): UnwrapToParseResult<T> => {
   const posToBack = scanner.pos;
   const r = parser(scanner);
   if (!r.ok) {
     scanner.back(posToBack);
+    return r.error(v => ({ ...v, confirmed: false })) as any;
   }
-  return r;
+  return r as any;
 };
 
 export const option = <T extends Parser>(parser: T) => (

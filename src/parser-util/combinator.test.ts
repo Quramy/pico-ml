@@ -1,6 +1,6 @@
 import { ok, error } from "../structure";
-import { Parser, Position } from "./types";
-import { option, vec } from "./combinator";
+import { Parser, Position, ParseResult } from "./types";
+import { option, vec, oneOf, expect as exp, tryWith } from "./combinator";
 import { Scanner } from "./scanner";
 import { isNullPosition } from "./null-position";
 
@@ -28,6 +28,9 @@ const testParser: (x: string) => Parser<TestNode> = x => scanner => {
 };
 
 const dot = testParser(".");
+const plus = testParser("+");
+const lp = testParser("(");
+const rp = testParser(")");
 
 describe(option, () => {
   const optDot = option(dot);
@@ -42,5 +45,24 @@ describe(vec, () => {
   it("should parse sequence", () => {
     expect(dotVec(new Scanner("")).unwrap()).toMatchObject({ values: [] });
     expect(dotVec(new Scanner("..")).unwrap().values.length).toBe(2);
+  });
+});
+
+describe(tryWith, () => {
+  const parser: Parser<TestNode> = oneOf(
+    tryWith(exp(lp, dot, rp)((_, d): ParseResult<TestNode> => ok(d))),
+    tryWith(exp(lp, plus, rp)((_, p): ParseResult<TestNode> => ok(p))),
+  );
+  it("should cancel and rollback scanner state", () => {
+    expect(
+      parser(new Scanner("(+)"))
+        .map(node => node.value)
+        .unwrap(),
+    ).toBe("+");
+    expect(
+      parser(new Scanner("(.)"))
+        .map(node => node.value)
+        .unwrap(),
+    ).toBe(".");
   });
 });

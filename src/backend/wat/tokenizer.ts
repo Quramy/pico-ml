@@ -1,5 +1,5 @@
 import { ok, error } from "../../structure";
-import { Parser, ParseResult, Scanner } from "../../parser-util";
+import { Parser, ParseResult, Scanner, oneOf } from "../../parser-util";
 import { SymbolKind, SymbolToken, ReservedWordKind, KeywordToken, IdentifierToken, IntToken } from "../ast-types";
 
 export const symbolToken: (sym: SymbolKind) => Parser<SymbolToken> = sym => {
@@ -20,7 +20,7 @@ export const symbolToken: (sym: SymbolKind) => Parser<SymbolToken> = sym => {
 
 export const keywordToken: (keyword: ReservedWordKind) => Parser<KeywordToken> = keyword => {
   return scanner => {
-    if (!scanner.startsWith(keyword) || !scanner.match(/^($|[^a-zA-Z0-9\$_])/, keyword.length))
+    if (!scanner.startsWith(keyword) || !scanner.match(/^($|[^a-zA-Z0-9\.\$_])/, keyword.length))
       return error({
         confirmed: false,
         message: `'${keyword}' expected.`,
@@ -33,6 +33,9 @@ export const keywordToken: (keyword: ReservedWordKind) => Parser<KeywordToken> =
     });
   };
 };
+
+export const keywordsToken = <T extends ReservedWordKind>(keywords: readonly T[]) =>
+  oneOf(...keywords.map(x => keywordToken(x))) as Parser<KeywordToken<T>>;
 
 export const identifierToken: Parser<IdentifierToken> = scanner => {
   const hit = scanner.match(/^(\$[a-zA-Z0-9\!#\$%&'\*\+\-\.\/:<=>\?@\\\^_`\|\~]+)/);
