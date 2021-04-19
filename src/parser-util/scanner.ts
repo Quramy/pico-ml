@@ -2,16 +2,20 @@ export class Scanner {
   private _pos = 0;
   constructor(readonly input: string) {}
 
-  private head() {
-    return this.input.slice(this._pos).trimLeft();
+  private head(n = 0) {
+    if (n > 0) {
+      return this.input.slice(this._pos).trimLeft().slice(n);
+    } else {
+      return this.input.slice(this._pos).trimLeft();
+    }
   }
 
-  startsWith(word: string) {
-    return this.head().startsWith(word);
+  startsWith(word: string, offset = 0) {
+    return this.head(offset).startsWith(word);
   }
 
-  match(regexp: RegExp) {
-    return this.head().match(regexp);
+  match(regexp: RegExp, offset = 0) {
+    return this.head(offset).match(regexp);
   }
 
   leadingWhitespace() {

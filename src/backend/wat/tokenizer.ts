@@ -20,7 +20,7 @@ export const symbolToken: (sym: SymbolKind) => Parser<SymbolToken> = sym => {
 
 export const keywordToken: (keyword: ReservedWordKind) => Parser<KeywordToken> = keyword => {
   return scanner => {
-    if (!scanner.match(new RegExp(`^${keyword}($|[^a-zA-Z0-9\$_])`)))
+    if (!scanner.startsWith(keyword) || !scanner.match(/^($|[^a-zA-Z0-9\$_])/, keyword.length))
       return error({
         confirmed: false,
         message: `'${keyword}' expected.`,
@@ -35,8 +35,7 @@ export const keywordToken: (keyword: ReservedWordKind) => Parser<KeywordToken> =
 };
 
 export const identifierToken: Parser<IdentifierToken> = scanner => {
-  // const hit = scanner.match(/^($[a-zA-Z0-9\!#\$%&'\*\+\-\.\/:<=>\?@\\\^_`\|\~]+)/);
-  const hit = scanner.match(/^(\$[a-zA-Z0-9]+)/);
+  const hit = scanner.match(/^(\$[a-zA-Z0-9\!#\$%&'\*\+\-\.\/:<=>\?@\\\^_`\|\~]+)/);
   if (!hit)
     return error({
       confirmed: false,
