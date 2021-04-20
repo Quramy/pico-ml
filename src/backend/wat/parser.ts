@@ -1,7 +1,5 @@
-import { ok } from "../../structure";
 import {
   Parser,
-  ParseResult,
   loc,
   oneOf,
   expect,
@@ -35,13 +33,11 @@ import {
 import { symbolToken, keywordToken, identifierToken, uintToken, intToken, keywordsToken } from "./tokenizer";
 import { getNumericInstructionKinds, getVariableInstructionKinds } from "../instructions-map";
 
-const identifier: Parser<IdentifierNode> = expect(identifierToken)(t =>
-  ok({
-    kind: "Identifier",
-    value: t.name,
-    loc: t.loc,
-  }),
-);
+const identifier: Parser<IdentifierNode> = expect(identifierToken)(t => ({
+  kind: "Identifier",
+  value: t.name,
+  loc: t.loc,
+}));
 
 const toIdNode = (maybeId: NullPosition | IdentifierToken): IdentifierNode | null =>
   fromOptional(maybeId)(token => ({
@@ -50,31 +46,26 @@ const toIdNode = (maybeId: NullPosition | IdentifierToken): IdentifierNode | nul
     loc: token.loc,
   }));
 
-const u32: Parser<Uint32LiteralNode> = expect(uintToken)(token =>
-  ok({
-    kind: "Uint32Literal",
-    value: token.value,
-    ...loc(token),
-  }),
-);
+const u32: Parser<Uint32LiteralNode> = expect(uintToken)(token => ({
+  kind: "Uint32Literal",
+  value: token.value,
+  ...loc(token),
+}));
 
-const i32: Parser<Int32LiteralNode> = expect(intToken)(token =>
-  ok({
-    kind: "Int32Literal",
-    value: token.value,
-    ...loc(token),
-  }),
-);
+const i32: Parser<Int32LiteralNode> = expect(intToken)(token => ({
+  kind: "Int32Literal",
+  value: token.value,
+  ...loc(token),
+}));
 
 const index: Parser<IndexNode> = oneOf(identifier, u32);
 
 const valType: Parser<ValueTypeNode> = expect(keywordToken("i32"))(
-  (t): ParseResult<ValueTypeNode> =>
-    ok({
-      kind: "ValueType",
-      valueKind: "i32",
-      ...loc(t),
-    }),
+  (t): ValueTypeNode => ({
+    kind: "ValueType",
+    valueKind: "i32",
+    ...loc(t),
+  }),
 );
 
 const param: Parser<ParamTypeNode> = tryWith(
@@ -85,13 +76,12 @@ const param: Parser<ParamTypeNode> = tryWith(
     valType,
     symbolToken(")"),
   )(
-    (tLp, tParam, tMaybeId, valueType, tRp): ParseResult<ParamTypeNode> =>
-      ok({
-        kind: "ParamType",
-        id: toIdNode(tMaybeId),
-        valueType,
-        ...loc(tLp, tParam, tMaybeId, valueType, tRp),
-      }),
+    (tLp, tParam, tMaybeId, valueType, tRp): ParamTypeNode => ({
+      kind: "ParamType",
+      id: toIdNode(tMaybeId),
+      valueType,
+      ...loc(tLp, tParam, tMaybeId, valueType, tRp),
+    }),
   ),
 );
 
@@ -102,12 +92,11 @@ const result: Parser<ValueTypeNode> = tryWith(
     keywordToken("i32"),
     symbolToken(")"),
   )(
-    (tLp, tResult, tVk, tRp): ParseResult<ValueTypeNode> =>
-      ok({
-        kind: "ValueType",
-        valueKind: "i32",
-        ...loc(tLp, tResult, tVk, tRp),
-      }),
+    (tLp, tResult, tVk, tRp): ValueTypeNode => ({
+      kind: "ValueType",
+      valueKind: "i32",
+      ...loc(tLp, tResult, tVk, tRp),
+    }),
   ),
 );
 
@@ -119,13 +108,12 @@ const funcType: Parser<FuncTypeNode> = tryWith(
     vec(result),
     symbolToken(")"),
   )(
-    (tLp, tFunc, params, results, tRp): ParseResult<FuncTypeNode> =>
-      ok({
-        kind: "FuncType",
-        params: params.values,
-        results: results.values,
-        ...loc(tLp, tFunc, params, results, tRp),
-      }),
+    (tLp, tFunc, params, results, tRp): FuncTypeNode => ({
+      kind: "FuncType",
+      params: params.values,
+      results: results.values,
+      ...loc(tLp, tFunc, params, results, tRp),
+    }),
   ),
 );
 
@@ -137,13 +125,12 @@ const typedef: Parser<TypeNode> = tryWith(
     funcType,
     symbolToken(")"),
   )(
-    (tLp, tType, tMaybeId, funcType, tRp): ParseResult<TypeNode> =>
-      ok({
-        kind: "Type",
-        id: toIdNode(tMaybeId),
-        funcType,
-        ...loc(tLp, tType, tMaybeId, funcType, tRp),
-      }),
+    (tLp, tType, tMaybeId, funcType, tRp): TypeNode => ({
+      kind: "Type",
+      id: toIdNode(tMaybeId),
+      funcType,
+      ...loc(tLp, tType, tMaybeId, funcType, tRp),
+    }),
   ),
 );
 
@@ -153,7 +140,7 @@ const typeUseRef: Parser<IndexNode> = tryWith(
     keywordToken("type"),
     index,
     symbolToken(")"),
-  )((tLp, tType, idx, tRp): ParseResult<IndexNode> => ok({ ...idx, ...loc(tLp, tType, idx, tRp) })),
+  )((tLp, tType, idx, tRp): IndexNode => ({ ...idx, ...loc(tLp, tType, idx, tRp) })),
 );
 
 const funcSig: Parser<FuncSigNode> = tryWith(
@@ -162,14 +149,13 @@ const funcSig: Parser<FuncSigNode> = tryWith(
     vec(param),
     vec(result),
   )(
-    (mayBeIndex, params, results): ParseResult<FuncSigNode> =>
-      ok({
-        kind: "FuncSig",
-        type: fromOptional(mayBeIndex)(idx => idx),
-        params: params.values,
-        results: results.values,
-        ...loc(mayBeIndex, params, results),
-      }),
+    (mayBeIndex, params, results): FuncSigNode => ({
+      kind: "FuncSig",
+      type: fromOptional(mayBeIndex)(idx => idx),
+      params: params.values,
+      results: results.values,
+      ...loc(mayBeIndex, params, results),
+    }),
   ),
 );
 
@@ -178,13 +164,12 @@ const variableInstr: Parser<VariableInstructionNode> = tryWith(
     keywordsToken(getVariableInstructionKinds()),
     vec(index),
   )(
-    (tInstrKind, params): ParseResult<VariableInstructionNode> =>
-      ok({
-        kind: "VariableInstruction",
-        instructionKind: tInstrKind.keyword,
-        parameters: params.values,
-        ...loc(tInstrKind, params),
-      }),
+    (tInstrKind, params): VariableInstructionNode => ({
+      kind: "VariableInstruction",
+      instructionKind: tInstrKind.keyword,
+      parameters: params.values,
+      ...loc(tInstrKind, params),
+    }),
   ),
 );
 
@@ -193,13 +178,12 @@ const numericInstr: Parser<NumericInstructionNode> = tryWith(
     keywordsToken(getNumericInstructionKinds()),
     vec(i32),
   )(
-    (tInstrKind, params): ParseResult<NumericInstructionNode> =>
-      ok({
-        kind: "NumericInstruction",
-        instructionKind: tInstrKind.keyword,
-        parameters: params.values,
-        ...loc(tInstrKind, params),
-      }),
+    (tInstrKind, params): NumericInstructionNode => ({
+      kind: "NumericInstruction",
+      instructionKind: tInstrKind.keyword,
+      parameters: params.values,
+      ...loc(tInstrKind, params),
+    }),
   ),
 );
 
@@ -211,13 +195,12 @@ const local: Parser<LocalVarNode> = tryWith(
     valType,
     symbolToken(")"),
   )(
-    (tLp, tLocal, tMaybeId, valueType, tRp): ParseResult<LocalVarNode> =>
-      ok({
-        kind: "LocalVar",
-        id: toIdNode(tMaybeId),
-        valueType,
-        ...loc(tLp, tLocal, tMaybeId, valueType, tRp),
-      }),
+    (tLp, tLocal, tMaybeId, valueType, tRp): LocalVarNode => ({
+      kind: "LocalVar",
+      id: toIdNode(tMaybeId),
+      valueType,
+      ...loc(tLp, tLocal, tMaybeId, valueType, tRp),
+    }),
   ),
 );
 
@@ -233,29 +216,26 @@ const func: Parser<FuncNode> = tryWith(
     vec(instr),
     symbolToken(")"),
   )(
-    (tLp, tFunc, tMaybeId, signature, locals, instructions, tRp): ParseResult<FuncNode> =>
-      ok({
-        kind: "Func",
-        id: toIdNode(tMaybeId),
-        signature,
-        locals: locals.values,
-        instructions: instructions.values,
-        ...loc(tLp, tFunc, tMaybeId, signature, locals, instructions, tRp),
-      }),
+    (tLp, tFunc, tMaybeId, signature, locals, instructions, tRp): FuncNode => ({
+      kind: "Func",
+      id: toIdNode(tMaybeId),
+      signature,
+      locals: locals.values,
+      instructions: instructions.values,
+      ...loc(tLp, tFunc, tMaybeId, signature, locals, instructions, tRp),
+    }),
   ),
 );
 
 const limits: Parser<LimitsNode> = expect(
   u32,
   option(u32),
-)((min, max) =>
-  ok({
-    kind: "Limits",
-    min,
-    max: fromOptional(max)(max => max),
-    ...loc(min, max),
-  }),
-);
+)((min, max) => ({
+  kind: "Limits",
+  min,
+  max: fromOptional(max)(max => max),
+  ...loc(min, max),
+}));
 
 const mem: Parser<MemoryNode> = tryWith(
   expect(
@@ -265,13 +245,12 @@ const mem: Parser<MemoryNode> = tryWith(
     limits,
     symbolToken(")"),
   )(
-    (tLp, tMemory, tMaybeId, limits, tRp): ParseResult<MemoryNode> =>
-      ok({
-        kind: "Memory",
-        id: toIdNode(tMaybeId),
-        limits,
-        ...loc(tLp, tMemory, tMaybeId, limits, tRp),
-      }),
+    (tLp, tMemory, tMaybeId, limits, tRp): MemoryNode => ({
+      kind: "Memory",
+      id: toIdNode(tMaybeId),
+      limits,
+      ...loc(tLp, tMemory, tMaybeId, limits, tRp),
+    }),
   ),
 );
 
@@ -284,13 +263,12 @@ const mod: Parser<ModuleNode> = expect(
   vec(moduleField),
   symbolToken(")"),
 )(
-  (tLp, tModule, maybeId, memValues, tRp): ParseResult<ModuleNode> =>
-    ok({
-      kind: "Module",
-      id: toIdNode(maybeId),
-      body: memValues.values,
-      ...loc(tLp, tModule, maybeId, memValues, tRp),
-    }),
+  (tLp, tModule, maybeId, memValues, tRp): ModuleNode => ({
+    kind: "Module",
+    id: toIdNode(maybeId),
+    body: memValues.values,
+    ...loc(tLp, tModule, maybeId, memValues, tRp),
+  }),
 );
 
 export const parseType = typedef;

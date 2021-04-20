@@ -12,10 +12,10 @@ export const use = <T extends ParseValue>(cb: () => Parser<T>) => {
   return (scanner: Scanner) => cb()(scanner) as ParseResult<T>;
 };
 
-export const expect = <T extends readonly Parser[]>(...parsers: T) => <R extends ParseResult<any>>(
+export const expect = <T extends readonly Parser[]>(...parsers: T) => <R extends ParseValue>(
   cb: (...args: [...UnwrapToParseResultTuple<T>, Scanner]) => R,
 ) => {
-  return (scanner: Scanner): R => {
+  return (scanner: Scanner): ParseResult<R> => {
     const results: any[] = [];
     let i = 0;
     for (const parser of parsers) {
@@ -24,11 +24,11 @@ export const expect = <T extends readonly Parser[]>(...parsers: T) => <R extends
         return error({
           ...result.value,
           confirmed: i !== 0,
-        }) as R;
+        }) as ParseResult<R>;
       results.push(result.value);
       i++;
     }
-    return cb(...([...results, scanner] as any));
+    return ok(cb(...([...results, scanner] as any)));
   };
 };
 
@@ -96,10 +96,14 @@ export const vec = <T extends Parser, S extends UnwrapToParseValue<T>>(parser: T
   return p;
 };
 
-export const leftAssociate = <T extends readonly Parser[]>(...parsers: T) => <L extends ParseValue>(
-  cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => L,
-) => {
-  return (first: L, scanner: Scanner) => {
+export const leftAssociate = <S extends Parser, L extends UnwrapToParseValue<S>>(leftParser: S) => <
+  T extends readonly Parser[]
+>(
+  ...parsers: T
+) => (cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => L) => {
+  return (scanner: Scanner): ParseResult<L> => {
+    const first = leftParser(scanner) as ParseResult<L>;
+    if (!first.ok) return first;
     const inner = (node: L): Result<L, ParseError> => {
       const results: ParseValue[] = [];
       let i = 0;
@@ -111,17 +115,18 @@ export const leftAssociate = <T extends readonly Parser[]>(...parsers: T) => <L 
       }
       return inner(cb(node, ...(results as any)));
     };
-    return inner(first);
+    return inner(first.value);
   };
 };
 
-export const rightAssociate = <T extends readonly Parser[]>(...parsers: T) => <
-  L extends ParseValue,
-  R extends ParseValue
+export const rightAssociate = <S extends Parser, L extends UnwrapToParseValue<S>>(leftParser: S) => <
+  T extends readonly Parser[]
 >(
-  cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => R,
-) => {
-  return (first: L, scanner: Scanner) => {
+  ...parsers: T
+) => <R extends ParseValue>(cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => R) => {
+  return (scanner: Scanner) => {
+    const first = leftParser(scanner) as ParseResult<L>;
+    if (!first.ok) return first;
     const inner = (node: L): Result<R | L, ParseError> => {
       const results: ParseValue[] = [];
       let i = 0;
@@ -135,6 +140,6 @@ export const rightAssociate = <T extends readonly Parser[]>(...parsers: T) => <
       const last = results[results.length - 1];
       return ok(cb(node, ...([...mid, inner(last as any).value] as any)));
     };
-    return inner(first);
+    return inner(first.value);
   };
 };

@@ -1,5 +1,5 @@
 import { ok, error } from "../structure";
-import { Parser, Position, ParseResult } from "./types";
+import { Parser, Position } from "./types";
 import { option, vec, oneOf, expect as exp, tryWith } from "./combinator";
 import { Scanner } from "./scanner";
 import { isNullPosition } from "./null-position";
@@ -50,8 +50,8 @@ describe(vec, () => {
 
 describe(tryWith, () => {
   const parser: Parser<TestNode> = oneOf(
-    tryWith(exp(lp, dot, rp)((_, d): ParseResult<TestNode> => ok(d))),
-    tryWith(exp(lp, plus, rp)((_, p): ParseResult<TestNode> => ok(p))),
+    tryWith(exp(lp, dot, rp)((_, d): TestNode => d)),
+    tryWith(exp(lp, plus, rp)((_, p): TestNode => p)),
   );
   it("should cancel and rollback scanner state", () => {
     expect(
