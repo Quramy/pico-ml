@@ -15,7 +15,7 @@ export function encodeUnsigned(value: number): Uint8Array {
   return new Uint8Array(buf);
 }
 
-export function encodeSinged(value: number): Uint8Array {
+export function encodeSigned(value: number): Uint8Array {
   value |= 0;
   const buf: number[] = [];
   while (true) {

@@ -28,12 +28,14 @@ export interface MemType {
 export type UInt32Index = number;
 
 export interface VariableInstruction {
-  readonly kind: VariableInstructionKind;
+  readonly kind: "VariableInstruction";
+  readonly instructionKind: VariableInstructionKind;
   readonly parameters: readonly number[];
 }
 
 export interface NumericInstruction {
-  readonly kind: NumericInstructionKind;
+  readonly kind: "NumericInstruction";
+  readonly instructionKind: NumericInstructionKind;
   readonly parameters: readonly number[];
 }
 

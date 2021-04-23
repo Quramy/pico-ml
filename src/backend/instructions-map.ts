@@ -1,9 +1,9 @@
 export const variableInstructions = {
-  "local.get": { code: 0x20, args: ["LocalIdx"] },
-  "local.set": { code: 0x21, args: ["LocalIdx"] },
-  "local.tee": { code: 0x22, args: ["LocalIdx"] },
-  "global.get": { code: 0x23, args: ["GlobalIdx"] },
-  "global.set": { code: 0x24, args: ["GlobalIdx"] },
+  "local.get": { code: 0x20, args: ["locals"] },
+  "local.set": { code: 0x21, args: ["locals"] },
+  "local.tee": { code: 0x22, args: ["locals"] },
+  "global.get": { code: 0x23, args: ["globals"] },
+  "global.set": { code: 0x24, args: ["globals"] },
 } as const;
 
 export const numericInstructions = {

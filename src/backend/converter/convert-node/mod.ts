@@ -1,25 +1,65 @@
-import { ModuleNode } from "../../ast-types";
-import { Module, MemType, FuncType } from "../../structure-types";
+import { Result, ok, all, error } from "../../../structure";
+import { ModuleNode, MemoryNode, TypeNode, FuncNode, IdentifierNode } from "../../ast-types";
+import { Module, Func } from "../../structure-types";
 import { convertType } from "./typedef";
 import { convertMemory } from "./memory";
+import { RefereneceContext } from "../ref";
+import { convertFunc } from "./func";
 
-export function convertModule(node: ModuleNode): Module {
-  const mems: MemType[] = [];
-  const types: FuncType[] = [];
+function countup(nodes: readonly { readonly id?: IdentifierNode | null }[], map: Map<string, number>) {
+  nodes.forEach((n, index) => {
+    if (n.id) {
+      map.set(n.id.value, index);
+    }
+  });
+}
+
+export function convertModule(node: ModuleNode): Result<Module> {
+  const refCtx: RefereneceContext = {
+    types: new Map(),
+    funcs: new Map(),
+    globals: new Map(),
+    elem: new Map(),
+    mems: new Map(),
+    tables: new Map(),
+  };
+
+  const memNodes: MemoryNode[] = [];
+  const typedefNodes: TypeNode[] = [];
+  const funcNodes: FuncNode[] = [];
   for (const field of node.body) {
     switch (field.kind) {
       case "Type":
-        types.push(convertType(field));
+        typedefNodes.push(field);
         break;
       case "Memory":
-        mems.push(convertMemory(field));
+        memNodes.push(field);
+        break;
+      case "Func":
+        funcNodes.push(field);
         break;
     }
   }
-  return {
+
+  countup(typedefNodes, refCtx.types);
+  countup(funcNodes, refCtx.funcs);
+  countup(memNodes, refCtx.mems);
+
+  const mems = all(memNodes.map(node => convertMemory(node)));
+  if (!mems.ok) return error(mems.value);
+  const types = all(typedefNodes.map(node => convertType(node)));
+  if (!types.ok) return error(types.value);
+
+  const funcConvertResult = funcNodes.reduce(
+    (acc, node) => acc.mapValue(state => convertFunc(node, state, refCtx)),
+    ok({ funcs: [] as readonly Func[], types: types.value }),
+  );
+  if (!funcConvertResult.ok) return error(funcConvertResult.value);
+
+  return ok({
     kind: "Module",
-    types,
-    mems,
-    funcs: [],
-  };
+    types: funcConvertResult.value.types,
+    mems: mems.value,
+    funcs: funcConvertResult.value.funcs,
+  });
 }
