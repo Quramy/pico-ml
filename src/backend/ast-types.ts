@@ -1,6 +1,6 @@
 import { Tree } from "../structure";
 import { Position } from "../parser-util";
-import { NumericInstructionKind, VariableInstructionKind } from "./instructions-map";
+import { NumericInstructionKind, VariableInstructionKind, ControlInstructionKind } from "./instructions-map";
 
 interface Node<T extends string> extends Tree<T>, Position {}
 
@@ -22,8 +22,17 @@ export type ReservedWords = [
   "result",
   "local",
   "i32",
+  "if",
+  "else",
+  "end",
+  "block",
+  "loop",
 ];
-export type ReservedWordKind = ReservedWords[number] | VariableInstructionKind | NumericInstructionKind;
+export type ReservedWordKind =
+  | ReservedWords[number]
+  | VariableInstructionKind
+  | NumericInstructionKind
+  | ControlInstructionKind;
 
 export interface TokenBase<T extends string> extends Position {
   readonly tokenKind: T;
@@ -88,6 +97,25 @@ export interface FuncSigNode extends Node<"FuncSig"> {
   readonly results: readonly ValueTypeNode[];
 }
 
+export interface BlockTypeNode extends Node<"BlockType"> {
+  readonly type: IndexNode | null;
+  readonly results: readonly ValueTypeNode[];
+}
+
+export interface IfInstructionNode extends Node<"IfInstruction"> {
+  readonly blockType: BlockTypeNode;
+  readonly id: IdentifierNode | null;
+  readonly elseId: IdentifierNode | null;
+  readonly endId: IdentifierNode | null;
+  readonly thenExpr: readonly InstructionNode[];
+  readonly elseExpr: readonly InstructionNode[];
+}
+
+export interface ControlInstructionNode extends Node<"ControlInstruction"> {
+  readonly instructionKind: ControlInstructionKind;
+  readonly parameters: readonly IndexNode[];
+}
+
 export interface VariableInstructionNode extends Node<"VariableInstruction"> {
   readonly instructionKind: VariableInstructionKind;
   readonly parameters: readonly IndexNode[];
@@ -98,7 +126,10 @@ export interface NumericInstructionNode extends Node<"NumericInstruction"> {
   readonly parameters: readonly Int32LiteralNode[];
 }
 
-export type InstructionNode = VariableInstructionNode | NumericInstructionNode;
+export type StructuredControleInstructionNode = IfInstructionNode;
+export type PlainInstructionNode = ControlInstructionNode | VariableInstructionNode | NumericInstructionNode;
+
+export type InstructionNode = StructuredControleInstructionNode | PlainInstructionNode;
 
 export interface LocalVarNode extends Node<"LocalVar"> {
   readonly id: IdentifierNode | null;

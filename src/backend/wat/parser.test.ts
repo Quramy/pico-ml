@@ -4,6 +4,8 @@ import {
   parseFuncSig,
   parseModule,
   parseMemory,
+  parseIfInstr,
+  parseControlInstr,
   parseVariableInstr,
   parseNumericInstr,
   parseFunc,
@@ -39,6 +41,36 @@ describe(parseFuncSig, () => {
     expect(use(parseFuncSig)("(type $fn)")).toMatchObject(f.funcSig([], [], f.identifier("fn")));
     expect(use(parseFuncSig)("(param i32)")).toMatchObject(f.funcSig([f.paramType(f.valueType("i32"))], []));
     expect(use(parseFuncSig)("(result i32)")).toMatchObject(f.funcSig([], [f.valueType("i32")]));
+  });
+});
+
+describe(parseIfInstr, () => {
+  const instr = f.numericInstr("i32.const", [f.int32(0)]);
+  test("success", () => {
+    expect(use(parseIfInstr)("if (result i32) i32.const 0 else i32.const 0 end")).toMatchObject(
+      f.ifInstr(f.blockType([f.valueType("i32")]), [instr], [instr]),
+    );
+    expect(use(parseIfInstr)("if (type $result) i32.const 0 else i32.const 0 end")).toMatchObject(
+      f.ifInstr(f.blockType([], f.identifier("result")), [instr], [instr]),
+    );
+    expect(use(parseIfInstr)("if $a (result i32) i32.const 0 else $a i32.const 0 end $a")).toMatchObject(
+      f.ifInstr(f.blockType([f.valueType("i32")]), [instr], [instr], f.identifier("a")),
+    );
+    expect(
+      use(parseIfInstr)("if (result i32) if (result i32) i32.const 0 else i32.const 0 end else i32.const 0 end"),
+    ).toMatchObject(
+      f.ifInstr(
+        f.blockType([f.valueType("i32")]),
+        [f.ifInstr(f.blockType([f.valueType("i32")]), [instr], [instr])],
+        [instr],
+      ),
+    );
+  });
+});
+
+describe(parseControlInstr, () => {
+  test("success", () => {
+    expect(use(parseControlInstr)("call 0")).toMatchObject(f.controlInstr("call", [f.uint32(0)]));
   });
 });
 

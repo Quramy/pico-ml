@@ -23,8 +23,11 @@ import {
   ExportedMemoryNode,
   ExportedSecNode,
   ExportNode,
+  BlockTypeNode,
+  ControlInstructionNode,
+  IfInstructionNode,
 } from "./ast-types";
-import { NumericInstructionKind, VariableInstructionKind } from "./instructions-map";
+import { NumericInstructionKind, VariableInstructionKind, ControlInstructionKind } from "./instructions-map";
 
 export function uint32(value: number, pos?: Position): Uint32LiteralNode {
   return {
@@ -136,6 +139,47 @@ export function funcSig(
     type: index ?? null,
     params,
     results,
+    loc: pos?.loc,
+  };
+}
+
+export function blockType(results: readonly ValueTypeNode[], index?: IndexNode | null, pos?: Position): BlockTypeNode {
+  return {
+    kind: "BlockType",
+    type: index ?? null,
+    results,
+    loc: pos?.loc,
+  };
+}
+
+export function ifInstr(
+  blockType: BlockTypeNode,
+  thenExpr: readonly InstructionNode[],
+  elseExpr: readonly InstructionNode[],
+  id?: IdentifierNode | null,
+  pos?: Position,
+): IfInstructionNode {
+  return {
+    kind: "IfInstruction",
+    blockType,
+    thenExpr,
+    elseExpr,
+    id: id ?? null,
+    elseId: id ?? null,
+    endId: id ?? null,
+    loc: pos?.loc,
+  };
+}
+
+export function controlInstr(
+  instructionKind: ControlInstructionKind,
+  params?: readonly IndexNode[],
+  pos?: Position,
+): ControlInstructionNode {
+  return {
+    kind: "ControlInstruction",
+    instructionKind,
+    parameters: params ?? [],
     loc: pos?.loc,
   };
 }

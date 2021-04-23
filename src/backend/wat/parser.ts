@@ -1,5 +1,6 @@
 import {
   Parser,
+  use,
   loc,
   oneOf,
   expect,
@@ -31,9 +32,16 @@ import {
   FuncNode,
   ExportedSecNode,
   ExportNode,
+  IfInstructionNode,
+  BlockTypeNode,
+  ControlInstructionNode,
 } from "../ast-types";
 import { symbolToken, keywordToken, identifierToken, uintToken, intToken, keywordsToken, strToken } from "./tokenizer";
-import { getNumericInstructionKinds, getVariableInstructionKinds } from "../instructions-map";
+import {
+  getNumericInstructionKinds,
+  getVariableInstructionKinds,
+  getControlInstructionKinds,
+} from "../instructions-map";
 
 const identifier: Parser<IdentifierNode> = expect(identifierToken)(t => ({
   kind: "Identifier",
@@ -161,6 +169,59 @@ const funcSig: Parser<FuncSigNode> = tryWith(
   ),
 );
 
+const blockType: Parser<BlockTypeNode> = tryWith(
+  expect(
+    option(typeUseRef),
+    vec(result),
+  )(
+    (mayBeIndex, results): BlockTypeNode => ({
+      kind: "BlockType",
+      type: fromOptional(mayBeIndex)(idx => idx),
+      results: results.values,
+      ...loc(mayBeIndex, results),
+    }),
+  ),
+);
+
+const ifInstr: Parser<IfInstructionNode> = tryWith(
+  expect(
+    keywordToken("if"),
+    option(identifierToken),
+    blockType,
+    vec(use(() => instr)),
+    keywordToken("else"),
+    option(identifierToken),
+    vec(use(() => instr)),
+    keywordToken("end"),
+    option(identifierToken),
+  )(
+    (tIf, tMaybeLabelId, blockType, thenExpr, tElse, tMaybeElseId, elseExpr, tEnd, tMaybeEndId): IfInstructionNode => ({
+      kind: "IfInstruction",
+      id: toIdNode(tMaybeLabelId),
+      elseId: toIdNode(tMaybeElseId),
+      endId: toIdNode(tMaybeEndId),
+      blockType,
+      thenExpr: thenExpr.values,
+      elseExpr: elseExpr.values,
+      ...loc(tIf, tMaybeLabelId, blockType, thenExpr, tElse, tMaybeElseId, elseExpr, tEnd, tMaybeEndId),
+    }),
+  ),
+);
+
+const controlInstr: Parser<ControlInstructionNode> = tryWith(
+  expect(
+    keywordsToken(getControlInstructionKinds()),
+    vec(index),
+  )(
+    (tInstrKind, params): ControlInstructionNode => ({
+      kind: "ControlInstruction",
+      instructionKind: tInstrKind.keyword,
+      parameters: params.values,
+      ...loc(tInstrKind, params),
+    }),
+  ),
+);
+
 const variableInstr: Parser<VariableInstructionNode> = tryWith(
   expect(
     keywordsToken(getVariableInstructionKinds()),
@@ -206,7 +267,7 @@ const local: Parser<LocalVarNode> = tryWith(
   ),
 );
 
-const instr: Parser<InstructionNode> = oneOf(numericInstr, variableInstr);
+const instr: Parser<InstructionNode> = oneOf(ifInstr, controlInstr, numericInstr, variableInstr);
 
 const func: Parser<FuncNode> = tryWith(
   expect(
@@ -307,6 +368,8 @@ const mod: Parser<ModuleNode> = expect(
 
 export const parseType = typedef;
 export const parseFuncSig = funcSig;
+export const parseIfInstr = ifInstr;
+export const parseControlInstr = controlInstr;
 export const parseVariableInstr = variableInstr;
 export const parseNumericInstr = numericInstr;
 export const parseFunc = func;

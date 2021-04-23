@@ -1,4 +1,4 @@
-import { VariableInstructionKind, NumericInstructionKind } from "./instructions-map";
+import { VariableInstructionKind, NumericInstructionKind, ControlInstructionKind } from "./instructions-map";
 
 export interface Limits {
   readonly kind: "Limits";
@@ -27,6 +27,19 @@ export interface MemType {
 
 export type UInt32Index = number;
 
+export interface IfInstruction {
+  readonly kind: "IfInstruction";
+  readonly blockType: null | ValType | UInt32Index;
+  readonly thenExpr: readonly Instruction[];
+  readonly elseExpr: readonly Instruction[];
+}
+
+export interface ControlInstruction {
+  readonly kind: "ControlInstruction";
+  readonly instructionKind: ControlInstructionKind;
+  readonly parameters: readonly number[];
+}
+
 export interface VariableInstruction {
   readonly kind: "VariableInstruction";
   readonly instructionKind: VariableInstructionKind;
@@ -39,7 +52,7 @@ export interface NumericInstruction {
   readonly parameters: readonly number[];
 }
 
-export type Instruction = VariableInstruction | NumericInstruction;
+export type Instruction = IfInstruction | ControlInstruction | VariableInstruction | NumericInstruction;
 
 export type Expr = readonly Instruction[];
 

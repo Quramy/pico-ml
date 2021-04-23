@@ -1,3 +1,21 @@
+export const structuredInstructions = {
+  block: { code: 0x02 },
+  loop: { code: 0x03 },
+  if: { code: 0x04 },
+  else: { code: 0x05 },
+  end: { code: 0x0b },
+} as const;
+
+export const controlInstructions = {
+  unreachable: { code: 0x00, args: [] },
+  nop: { code: 0x01, args: [] },
+  br: { code: 0x0c, args: ["labels"] },
+  br_if: { code: 0x0d, args: ["labels"] },
+  return: { code: 0x0f, args: [] },
+  call: { code: 0x10, args: ["funcs"] },
+  call_indirect: { code: 0x11, args: ["types", "tables"] },
+} as const;
+
 export const variableInstructions = {
   "local.get": { code: 0x20, args: ["locals"] },
   "local.set": { code: 0x21, args: ["locals"] },
@@ -41,12 +59,16 @@ export const numericInstructions = {
   "i32.rotr": { code: 0x78, args: [] },
 } as const;
 
+export type ControlInstructionKind = keyof typeof controlInstructions;
+export type ControlInstructionParamKind = typeof controlInstructions[ControlInstructionKind]["args"][number];
+
 export type VariableInstructionKind = keyof typeof variableInstructions;
 export type VariableInstructionParamKind = typeof variableInstructions[VariableInstructionKind]["args"][number];
 
 export type NumericInstructionKind = keyof typeof numericInstructions;
 export type NumericInstructionParamKind = typeof numericInstructions[NumericInstructionKind]["args"][number];
 
+export const getControlInstructionKinds = () => Object.keys(controlInstructions) as readonly ControlInstructionKind[];
 export const getVariableInstructionKinds = () =>
   Object.keys(variableInstructions) as readonly VariableInstructionKind[];
 export const getNumericInstructionKinds = () => Object.keys(numericInstructions) as readonly NumericInstructionKind[];
