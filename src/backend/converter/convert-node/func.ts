@@ -1,14 +1,8 @@
 import { Result, ok, error, all } from "../../../structure";
-import {
-  FuncNode,
-  IdentifierNode,
-  InstructionNode,
-  VariableInstructionNode,
-  NumericInstructionNode,
-} from "../../ast-types";
+import { FuncNode, InstructionNode, VariableInstructionNode, NumericInstructionNode } from "../../ast-types";
 import { Func, FuncType, Instruction } from "../../structure-types";
 import { funcType } from "../../structure-factory";
-import { RefereneceContext, findIndex } from "../ref";
+import { RefereneceContext, findIndex, createIndex } from "../ref";
 import {
   variableInstructions,
   getVariableInstructionKinds,
@@ -21,7 +15,7 @@ export interface State {
   readonly types: readonly FuncType[];
 }
 
-export function compareFuncType(typeA: FuncType, typeB: FuncType): boolean {
+function compareFuncType(typeA: FuncType, typeB: FuncType): boolean {
   if (typeA.kind !== typeB.kind) return false;
   if (typeA.paramType.length !== typeB.paramType.length) return false;
   if (typeA.resultType.length !== typeB.resultType.length) return false;
@@ -32,14 +26,6 @@ export function compareFuncType(typeA: FuncType, typeB: FuncType): boolean {
     if (typeA.resultType[i].kind !== typeB.resultType[i].kind) return false;
   }
   return true;
-}
-
-function countup(nodes: readonly { readonly id?: IdentifierNode | null }[], map: Map<string, number>) {
-  nodes.forEach((n, index) => {
-    if (n.id) {
-      map.set(n.id.value, index);
-    }
-  });
 }
 
 function isVariableInstr(node: InstructionNode): node is VariableInstructionNode {
@@ -104,12 +90,12 @@ export function convertFunc(node: FuncNode, prev: State, refCtx: RefereneceConte
     } else {
       typeidx = foundIdx;
     }
-    countup([...signature.params, ...node.locals], locals);
+    createIndex([...signature.params, ...node.locals], locals);
   } else {
     const found = findIndex(refCtx.types, signature.type);
     if (!found.ok) return error(found.value);
     typeidx = found.value;
-    countup(node.locals, locals);
+    createIndex(node.locals, locals);
   }
 
   return all(node.instructions.map(instr => convertInstr(instr, { ...refCtx, locals })))

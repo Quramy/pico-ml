@@ -54,7 +54,7 @@ function funcType(ft: FuncType): Uint8Array {
   return new Uint8Array([0x60, ...vec(ft.paramType.map(numType)), ...vec(ft.resultType.map(numType))]);
 }
 
-function types(funcTypes: readonly FuncType[]): Uint8Array {
+function typeSec(funcTypes: readonly FuncType[]): Uint8Array {
   return section(1, vec(funcTypes.map(funcType)));
 }
 
@@ -66,11 +66,11 @@ function limits({ min, max }: Limits): Uint8Array {
   }
 }
 
-function funcsec(funcs: readonly Func[]): Uint8Array {
+function funcSec(funcs: readonly Func[]): Uint8Array {
   return section(3, vec(funcs.map(func => uint32(func.type))));
 }
 
-function mems(memTypes: readonly MemType[]): Uint8Array {
+function memSec(memTypes: readonly MemType[]): Uint8Array {
   return section(5, vec(memTypes.map(m => limits(m.limits))));
 }
 
@@ -105,7 +105,7 @@ function expr(expression: Expr): Uint8Array {
   return new Uint8Array([...flat(instructions), 0x0b]);
 }
 
-function codesec(funcs: readonly Func[]): Uint8Array {
+function codeSec(funcs: readonly Func[]): Uint8Array {
   return section(
     10,
     vec(
@@ -122,11 +122,11 @@ export function unparse(mod: Module): Uint8Array {
   const head = new Uint8Array([...magic, ...version]);
   const ret = new Uint8Array([
     ...head,
-    ...types(mod.types),
-    ...funcsec(mod.funcs),
-    ...mems(mod.mems),
+    ...typeSec(mod.types),
+    ...funcSec(mod.funcs),
+    ...memSec(mod.mems),
     ...exportSec(mod.exports),
-    ...codesec(mod.funcs),
+    ...codeSec(mod.funcs),
   ]);
   return ret;
 }
