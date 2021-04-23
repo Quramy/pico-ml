@@ -8,6 +8,10 @@ export interface Position {
   };
 }
 
+export interface NullPosition extends Position {
+  readonly _brand: "NullPosition";
+}
+
 export interface ParseError extends ResultErrorBase {
   readonly confirmed: boolean;
   readonly occurence: Position;

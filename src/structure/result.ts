@@ -55,6 +55,18 @@ export function mapValue<U extends Result<any, any>[]>(...results: U) {
   };
 }
 
+export function all<T, E extends ResultErrorBase>(results: readonly Result<T, E>[]): Result<readonly T[], E> {
+  const values: T[] = [];
+  for (const result of results) {
+    if (result.ok) {
+      values.push(result.value);
+    } else {
+      return (result as any) as Result<readonly T[], E>;
+    }
+  }
+  return ok(values) as Result<readonly T[], E>;
+}
+
 export function ok<T, E extends ResultErrorBase = ResultErrorBase>(value: T): Result<T, E> {
   const r: Result<T, any> = {
     ok: true,

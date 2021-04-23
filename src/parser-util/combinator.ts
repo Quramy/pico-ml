@@ -1,6 +1,8 @@
 import { Result, ok, error } from "../structure";
-import { Parser, ParseResult, ParseValue, ParseError } from "./types";
+import { Position, Parser, ParseResult, ParseValue, ParseError, NullPosition } from "./types";
 import type { Scanner } from "./scanner";
+import { nullPosition } from "./null-position";
+import { loc } from "./loc";
 
 type UnwrapToParseResult<T> = T extends Parser ? ReturnType<T> : never;
 type UnwrapToParseValue<T> = T extends Parser<infer S> ? S : never;
@@ -30,6 +32,27 @@ export const expect = <T extends readonly Parser[]>(...parsers: T) => <R extends
   };
 };
 
+export const tryWith = <T extends Parser>(parser: T) => (scanner: Scanner): UnwrapToParseResult<T> => {
+  const posToBack = scanner.pos;
+  const r = parser(scanner);
+  if (!r.ok) {
+    scanner.back(posToBack);
+    return r.error(v => ({ ...v, confirmed: false })) as any;
+  }
+  return r as any;
+};
+
+export const option = <T extends Parser>(parser: T) => (
+  scanner: Scanner,
+): ParseResult<UnwrapToParseValue<T> | NullPosition> => {
+  const r = parser(scanner);
+  if (!r.ok) {
+    return ok(nullPosition(scanner));
+  } else {
+    return ok(r.value) as any;
+  }
+};
+
 type CompositeParser<U extends readonly Parser[]> = (
   scanner: Scanner,
 ) => { [P in keyof U]: UnwrapToParseResult<U[P]> }[number];
@@ -57,6 +80,20 @@ export const oneOf = <U extends readonly Parser[]>(...parsers: U) => {
     });
   };
   return parser;
+};
+
+export const vec = <T extends Parser, S extends UnwrapToParseValue<T>>(parser: T) => {
+  const p: Parser<{ values: readonly S[] } & Position> = (scanner: Scanner) => {
+    const values: S[] = [];
+    while (true) {
+      const r = parser(scanner);
+      if (!r.ok) break;
+      values.push(r.value as S);
+    }
+    const _loc = values.length ? loc(...values).loc : { pos: scanner.pos, end: scanner.pos };
+    return ok({ values, loc: _loc });
+  };
+  return p;
 };
 
 export const leftAssociate = <S extends Parser, L extends UnwrapToParseValue<S>>(leftParser: S) => <

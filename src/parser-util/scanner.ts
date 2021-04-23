@@ -2,16 +2,29 @@ export class Scanner {
   private _pos = 0;
   constructor(readonly input: string) {}
 
-  private head() {
-    return this.input.slice(this._pos).trimLeft();
+  private head(n = 0) {
+    if (n > 0) {
+      return this.input.slice(this._pos).trimLeft().slice(n);
+    } else {
+      return this.input.slice(this._pos).trimLeft();
+    }
   }
 
-  startsWith(word: string) {
-    return this.head().startsWith(word);
+  slice(length: number) {
+    return this.head().slice(0, length);
   }
 
-  match(regexp: RegExp) {
-    return this.head().match(regexp);
+  hasNext(offset = 0) {
+    const l = this.pos + this.leadingWhitespace() + offset;
+    return l < this.input.length;
+  }
+
+  startsWith(word: string, offset = 0) {
+    return this.head(offset).startsWith(word);
+  }
+
+  match(regexp: RegExp, offset = 0) {
+    return this.head(offset).match(regexp);
   }
 
   leadingWhitespace() {
@@ -39,5 +52,10 @@ export class Scanner {
 
   get pos() {
     return this._pos;
+  }
+
+  back(pos: number) {
+    this._pos = pos;
+    return pos;
   }
 }
