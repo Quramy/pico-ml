@@ -1,12 +1,29 @@
-import { Module, Limits, MemType, FuncType, ValType, Func, Expr } from "../structure-types";
+import { Module, Limits, MemType, FuncType, ValType, Func, Expr, Export } from "../structure-types";
 import { encodeUnsigned, encodeSigned } from "./leb";
 import { variableInstructions, numericInstructions } from "../instructions-map";
+import { encodeString } from "./str";
 
 const magic = [0x00, 0x61, 0x73, 0x6d];
 const version = [0x01, 0x00, 0x00, 0x00];
 
+const exportTypes = {
+  Func: 0x00,
+  Table: 0x01,
+  Memory: 0x02,
+  Global: 0x03,
+};
+
 function uint32(value: number) {
   return encodeUnsigned(value);
+}
+
+function int32(value: number) {
+  return encodeSigned(value);
+}
+
+function name(value: string) {
+  const c = encodeString(value);
+  return new Uint8Array([...uint32(c.byteLength), ...c]);
 }
 
 function flat(elements: readonly Uint8Array[]) {
@@ -57,6 +74,13 @@ function mems(memTypes: readonly MemType[]): Uint8Array {
   return section(5, vec(memTypes.map(m => limits(m.limits))));
 }
 
+function exportSec(exports: readonly Export[]): Uint8Array {
+  return section(
+    7,
+    vec(exports.map(e => new Uint8Array([...name(e.name), exportTypes[e.exportKind], ...uint32(e.index)]))),
+  );
+}
+
 function expr(expression: Expr): Uint8Array {
   const instructions = expression.map(instr => {
     if (instr.kind === "VariableInstruction") {
@@ -69,7 +93,7 @@ function expr(expression: Expr): Uint8Array {
         ...flat(
           instr.parameters.map((p, argIdx) => {
             if (args[argIdx] === "SignedInteger") {
-              return encodeSigned(p);
+              return int32(p);
             }
             return undefined as never;
           }),
@@ -101,6 +125,7 @@ export function unparse(mod: Module): Uint8Array {
     ...types(mod.types),
     ...funcsec(mod.funcs),
     ...mems(mod.mems),
+    ...exportSec(mod.exports),
     ...codesec(mod.funcs),
   ]);
   return ret;

@@ -1,10 +1,11 @@
 import { Result, ok, all, error } from "../../../structure";
-import { ModuleNode, MemoryNode, TypeNode, FuncNode, IdentifierNode } from "../../ast-types";
+import { ModuleNode, MemoryNode, TypeNode, FuncNode, IdentifierNode, ExportNode } from "../../ast-types";
 import { Module, Func } from "../../structure-types";
 import { convertType } from "./typedef";
 import { convertMemory } from "./memory";
 import { RefereneceContext } from "../ref";
 import { convertFunc } from "./func";
+import { convertExport } from "./export";
 
 function countup(nodes: readonly { readonly id?: IdentifierNode | null }[], map: Map<string, number>) {
   nodes.forEach((n, index) => {
@@ -27,6 +28,7 @@ export function convertModule(node: ModuleNode): Result<Module> {
   const memNodes: MemoryNode[] = [];
   const typedefNodes: TypeNode[] = [];
   const funcNodes: FuncNode[] = [];
+  const exportNodes: ExportNode[] = [];
   for (const field of node.body) {
     switch (field.kind) {
       case "Type":
@@ -37,6 +39,9 @@ export function convertModule(node: ModuleNode): Result<Module> {
         break;
       case "Func":
         funcNodes.push(field);
+        break;
+      case "Export":
+        exportNodes.push(field);
         break;
     }
   }
@@ -56,10 +61,14 @@ export function convertModule(node: ModuleNode): Result<Module> {
   );
   if (!funcConvertResult.ok) return error(funcConvertResult.value);
 
+  const exports = all(exportNodes.map(node => convertExport(node, refCtx)));
+  if (!exports.ok) return error(exports.value);
+
   return ok({
     kind: "Module",
     types: funcConvertResult.value.types,
     mems: mems.value,
     funcs: funcConvertResult.value.funcs,
+    exports: exports.value,
   });
 }

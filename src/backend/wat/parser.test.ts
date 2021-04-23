@@ -7,6 +7,7 @@ import {
   parseVariableInstr,
   parseNumericInstr,
   parseFunc,
+  parseExport,
 } from "./parser";
 import * as f from "../ast-factory";
 
@@ -93,6 +94,17 @@ describe(parseMemory, () => {
     expect(use(parseMemory)("(memory 1)")).toMatchObject(f.memory(f.limits(f.uint32(1))));
     expect(use(parseMemory)("(memory 1 2)")).toMatchObject(f.memory(f.limits(f.uint32(1), f.uint32(2))));
     expect(use(parseMemory)("(memory $mem 1)")).toMatchObject(f.memory(f.limits(f.uint32(1)), f.identifier("mem")));
+  });
+});
+
+describe(parseExport, () => {
+  test("success", () => {
+    expect(use(parseExport)('(export "main" (func $main))')).toMatchObject(
+      f.exportNode("main", f.exportedFunc(f.identifier("main"))),
+    );
+    expect(use(parseExport)('(export "main" (memory $main))')).toMatchObject(
+      f.exportNode("main", f.exportedMemory(f.identifier("main"))),
+    );
   });
 });
 

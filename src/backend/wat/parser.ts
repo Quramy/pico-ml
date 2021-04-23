@@ -29,8 +29,10 @@ import {
   InstructionNode,
   LocalVarNode,
   FuncNode,
+  ExportedSecNode,
+  ExportNode,
 } from "../ast-types";
-import { symbolToken, keywordToken, identifierToken, uintToken, intToken, keywordsToken } from "./tokenizer";
+import { symbolToken, keywordToken, identifierToken, uintToken, intToken, keywordsToken, strToken } from "./tokenizer";
 import { getNumericInstructionKinds, getVariableInstructionKinds } from "../instructions-map";
 
 const identifier: Parser<IdentifierNode> = expect(identifierToken)(t => ({
@@ -254,7 +256,39 @@ const mem: Parser<MemoryNode> = tryWith(
   ),
 );
 
-const moduleField = oneOf(typedef, func, mem);
+const exportSec: Parser<ExportedSecNode> = tryWith(
+  expect(
+    symbolToken("("),
+    oneOf(keywordToken("func"), keywordToken("memory")),
+    index,
+    symbolToken(")"),
+  )(
+    (tLp, tKeyword, index, tRp): ExportedSecNode => ({
+      kind: tKeyword.keyword === "func" ? "ExportedFunc" : "ExportedMemory",
+      index,
+      ...loc(tLp, tKeyword, index, tRp),
+    }),
+  ),
+);
+
+const exportNode: Parser<ExportNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("export"),
+    strToken,
+    exportSec,
+    symbolToken(")"),
+  )(
+    (tLp, tExport, tName, exportSec, tRp): ExportNode => ({
+      kind: "Export",
+      name: tName.value,
+      sec: exportSec,
+      ...loc(tLp, tExport, tName, exportSec, tRp),
+    }),
+  ),
+);
+
+const moduleField = oneOf(typedef, func, mem, exportNode);
 
 const mod: Parser<ModuleNode> = expect(
   symbolToken("("),
@@ -277,5 +311,6 @@ export const parseVariableInstr = variableInstr;
 export const parseNumericInstr = numericInstr;
 export const parseFunc = func;
 export const parseMemory = mem;
+export const parseExport = exportNode;
 export const parseModule = mod;
 export const parse = (code: string) => parseModule(new Scanner(code));

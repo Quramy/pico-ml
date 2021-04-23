@@ -1,6 +1,14 @@
 import { ok, error } from "../../structure";
 import { Parser, ParseResult, Scanner, oneOf } from "../../parser-util";
-import { SymbolKind, SymbolToken, ReservedWordKind, KeywordToken, IdentifierToken, IntToken } from "../ast-types";
+import {
+  SymbolKind,
+  SymbolToken,
+  ReservedWordKind,
+  KeywordToken,
+  IdentifierToken,
+  IntToken,
+  StringToken,
+} from "../ast-types";
 
 export const symbolToken: (sym: SymbolKind) => Parser<SymbolToken> = sym => {
   return (scanner: Scanner) => {
@@ -69,3 +77,35 @@ const intTokenGen = (signed: boolean): Parser<IntToken> => scanner => {
 
 export const intToken = intTokenGen(true);
 export const uintToken = intTokenGen(false);
+
+export const strToken: Parser<StringToken> = scanner => {
+  if (!scanner.startsWith('"')) {
+    return error({
+      confirmed: false,
+      message: "String expected.",
+      occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
+    });
+  }
+  let offset = 0;
+  while (scanner.hasNext(++offset)) {
+    if (scanner.startsWith("\\", offset) && scanner.startsWith('"', offset + 1)) {
+      offset++;
+      continue;
+    }
+    if (scanner.startsWith('"', offset)) break;
+  }
+  const value = scanner
+    .slice(offset)
+    .slice(1)
+    .replace("\\\t", "\t")
+    .replace("\\\n", "\n")
+    .replace("\\\r", "\r")
+    .replace('\\"', '"')
+    .replace("\\'", "'")
+    .replace("\\\\", "\\");
+  return ok({
+    tokenKind: "String",
+    value,
+    loc: scanner.consume(offset + 1),
+  });
+};

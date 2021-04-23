@@ -10,6 +10,15 @@ export class Scanner {
     }
   }
 
+  slice(length: number) {
+    return this.head().slice(0, length);
+  }
+
+  hasNext(offset = 0) {
+    const l = this.pos + this.leadingWhitespace() + offset;
+    return l < this.input.length;
+  }
+
   startsWith(word: string, offset = 0) {
     return this.head(offset).startsWith(word);
   }

@@ -19,6 +19,10 @@ import {
   LocalVarNode,
   InstructionNode,
   FuncNode,
+  ExportedFuncNode,
+  ExportedMemoryNode,
+  ExportedSecNode,
+  ExportNode,
 } from "./ast-types";
 import { NumericInstructionKind, VariableInstructionKind } from "./instructions-map";
 
@@ -175,6 +179,31 @@ export function func(
     signature,
     locals,
     instructions,
+    loc: pos?.loc,
+  };
+}
+
+export function exportedFunc(index: IndexNode, pos?: Position): ExportedFuncNode {
+  return {
+    kind: "ExportedFunc",
+    index,
+    loc: pos?.loc,
+  };
+}
+
+export function exportedMemory(index: IndexNode, pos?: Position): ExportedMemoryNode {
+  return {
+    kind: "ExportedMemory",
+    index,
+    loc: pos?.loc,
+  };
+}
+
+export function exportNode(name: string, sec: ExportedSecNode, pos?: Position): ExportNode {
+  return {
+    kind: "Export",
+    name,
+    sec,
     loc: pos?.loc,
   };
 }

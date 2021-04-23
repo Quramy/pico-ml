@@ -8,7 +8,7 @@ import {
 } from "../../ast-types";
 import { Func, FuncType, Instruction } from "../../structure-types";
 import { funcType } from "../../structure-factory";
-import { RefereneceContext } from "../ref";
+import { RefereneceContext, findIndex } from "../ref";
 import {
   variableInstructions,
   getVariableInstructionKinds,
@@ -56,14 +56,7 @@ export function convertInstr(node: InstructionNode, refCtx: RefereneceContext): 
     return all(
       node.parameters.map((p, i) => {
         if (!args[i]) return error({ message: `${node.instructionKind} can not have ${i}th param` }) as Result<number>;
-        let n: number | undefined = undefined;
-        if (p.kind === "Identifier") {
-          n = refCtx[args[i]]?.get(p.value);
-          if (n == null) return error({ message: `No ${args[i]} identifier "${p.value}"` }) as Result<number>;
-        } else {
-          n = p.value;
-        }
-        return ok(n);
+        return findIndex(refCtx[args[i]]!, p);
       }),
     ).map(
       parameters =>
@@ -112,14 +105,10 @@ export function convertFunc(node: FuncNode, prev: State, refCtx: RefereneceConte
       typeidx = foundIdx;
     }
     countup([...signature.params, ...node.locals], locals);
-  } else if (signature.type.kind === "Identifier") {
-    typeidx = refCtx.types.get(signature.type.value);
-    if (typeidx == null) {
-      return error({ message: `No type identifier "${signature.type.value}"` });
-    }
-    countup(node.locals, locals);
   } else {
-    typeidx = signature.type.value;
+    const found = findIndex(refCtx.types, signature.type);
+    if (!found.ok) return error(found.value);
+    typeidx = found.value;
     countup(node.locals, locals);
   }
 

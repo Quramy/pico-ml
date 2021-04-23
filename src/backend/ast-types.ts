@@ -10,7 +10,19 @@ export type SymbolKind = Symbols[number];
 export type ValueTypes = ["i32"];
 export type ValueTypeKind = ValueTypes[number];
 
-export type ReservedWords = ["module", "type", "memory", "table", "func", "param", "result", "local", "i32"];
+export type ReservedWords = [
+  "import",
+  "export",
+  "module",
+  "type",
+  "memory",
+  "table",
+  "func",
+  "param",
+  "result",
+  "local",
+  "i32",
+];
 export type ReservedWordKind = ReservedWords[number] | VariableInstructionKind | NumericInstructionKind;
 
 export interface TokenBase<T extends string> extends Position {
@@ -27,6 +39,10 @@ export interface KeywordToken<K extends ReservedWordKind = ReservedWordKind> ext
 
 export interface IntToken extends TokenBase<"Int"> {
   readonly value: number;
+}
+
+export interface StringToken extends TokenBase<"String"> {
+  readonly value: string;
 }
 
 export interface IdentifierToken extends TokenBase<"Identifier"> {
@@ -106,7 +122,22 @@ export interface MemoryNode extends Node<"Memory"> {
   readonly limits: LimitsNode;
 }
 
-export type ModuleBodyNode = TypeNode | FuncNode | MemoryNode;
+export interface ExportedFuncNode extends Node<"ExportedFunc"> {
+  readonly index: IndexNode;
+}
+
+export interface ExportedMemoryNode extends Node<"ExportedMemory"> {
+  readonly index: IndexNode;
+}
+
+export type ExportedSecNode = ExportedFuncNode | ExportedMemoryNode;
+
+export interface ExportNode extends Node<"Export"> {
+  readonly name: string;
+  readonly sec: ExportedSecNode;
+}
+
+export type ModuleBodyNode = TypeNode | FuncNode | MemoryNode | ExportNode;
 
 export interface ModuleNode extends Node<"Module"> {
   readonly id: IdentifierNode | null;

@@ -50,9 +50,17 @@ export interface Func {
   readonly body: Expr;
 }
 
+export interface Export {
+  readonly kind: "Export";
+  readonly name: string;
+  readonly exportKind: "Func" | "Memory";
+  readonly index: number;
+}
+
 export interface Module {
   readonly kind: "Module";
   readonly types: readonly FuncType[];
   readonly funcs: readonly Func[];
   readonly mems: readonly MemType[];
+  readonly exports: readonly Export[];
 }
