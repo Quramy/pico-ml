@@ -1,6 +1,22 @@
-import { Module, Limits, MemType, FuncType, ValType, Func, Expr, Export } from "../structure-types";
+import {
+  Module,
+  Limits,
+  MemType,
+  FuncType,
+  ValType,
+  Func,
+  Expr,
+  Export,
+  Instruction,
+  BlockType,
+} from "../structure-types";
 import { encodeUnsigned, encodeSigned } from "./leb";
-import { variableInstructions, numericInstructions } from "../instructions-map";
+import {
+  variableInstructions,
+  numericInstructions,
+  controlInstructions,
+  structuredInstructions,
+} from "../instructions-map";
 import { encodeString } from "./str";
 
 const magic = [0x00, 0x61, 0x73, 0x6d];
@@ -81,9 +97,22 @@ function exportSec(exports: readonly Export[]): Uint8Array {
   );
 }
 
-function expr(expression: Expr): Uint8Array {
-  const instructions = expression.map(instr => {
-    if (instr.kind === "VariableInstruction") {
+function blockType(bt: BlockType): Uint8Array {
+  if (!bt) {
+    return new Uint8Array([0x40]);
+  } else if (typeof bt === "number") {
+    return int32(bt);
+  } else {
+    return numType(bt);
+  }
+}
+
+function instructions(instrs: readonly Instruction[]): readonly Uint8Array[] {
+  return instrs.map(instr => {
+    if (instr.kind === "ControlInstruction") {
+      const { code } = controlInstructions[instr.instructionKind];
+      return new Uint8Array([code, ...flat(instr.parameters.map(idx => uint32(idx)))]);
+    } else if (instr.kind === "VariableInstruction") {
       const { code } = variableInstructions[instr.instructionKind];
       return new Uint8Array([code, ...flat(instr.parameters.map(idx => uint32(idx)))]);
     } else if (instr.kind === "NumericInstruction") {
@@ -99,10 +128,25 @@ function expr(expression: Expr): Uint8Array {
           }),
         ),
       ]);
+    } else if (instr.kind === "IfInstruction") {
+      const thenExpr = instructions(instr.thenExpr);
+      const elseExpr = instructions(instr.elseExpr);
+      return new Uint8Array([
+        structuredInstructions.if.code,
+        ...blockType(instr.blockType),
+        ...flat(thenExpr),
+        structuredInstructions.else.code,
+        ...flat(elseExpr),
+        structuredInstructions.end.code,
+      ]);
     }
-    return undefined as never;
+    // @ts-expect-error
+    throw new Error(`${instr.kind}`);
   });
-  return new Uint8Array([...flat(instructions), 0x0b]);
+}
+
+function expr(expression: Expr): Uint8Array {
+  return new Uint8Array([...flat(instructions(expression)), 0x0b]);
 }
 
 function codeSec(funcs: readonly Func[]): Uint8Array {

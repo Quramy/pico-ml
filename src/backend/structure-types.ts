@@ -27,9 +27,11 @@ export interface MemType {
 
 export type UInt32Index = number;
 
+export type BlockType = null | ValType | UInt32Index;
+
 export interface IfInstruction {
   readonly kind: "IfInstruction";
-  readonly blockType: null | ValType | UInt32Index;
+  readonly blockType: BlockType;
   readonly thenExpr: readonly Instruction[];
   readonly elseExpr: readonly Instruction[];
 }
