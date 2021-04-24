@@ -60,12 +60,12 @@ export const numericInstructions = {
 } as const;
 
 export const memoryInstructions = {
-  "i32.load": { code: 0x28, defaultAlign: 1 },
-  "i32.load8_s": { code: 0x2c, defaultAlign: 1 },
-  "i32.load8_u": { code: 0x2d, defaultAlign: 1 },
-  "i32.store": { code: 0x36, defaultAlign: 1 },
-  "i32.store8": { code: 0x3a, defaultAlign: 1 },
-  "i32.store16": { code: 0x3b, defaultAlign: 1 },
+  "i32.load": { code: 0x28, defaultAlign: 2 },
+  "i32.load8_s": { code: 0x2c, defaultAlign: 0 },
+  "i32.load8_u": { code: 0x2d, defaultAlign: 0 },
+  "i32.store": { code: 0x36, defaultAlign: 2 },
+  "i32.store8": { code: 0x3a, defaultAlign: 0 },
+  "i32.store16": { code: 0x3b, defaultAlign: 0 },
 } as const;
 
 export type ControlInstructionKind = keyof typeof controlInstructions;
