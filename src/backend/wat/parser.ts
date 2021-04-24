@@ -1,15 +1,15 @@
 import {
   Parser,
+  Scanner,
+  NullPosition,
   use,
-  loc,
   oneOf,
+  tryWith,
   expect,
   option,
   vec,
-  tryWith,
-  NullPosition,
   fromOptional,
-  Scanner,
+  loc,
 } from "../../parser-util";
 import {
   ModuleNode,
@@ -36,21 +36,22 @@ import {
   BlockTypeNode,
   ControlInstructionNode,
   MemoryInstructionNode,
+  FuncTypeRefNode,
 } from "../ast-types";
 import {
   symbolToken,
   keywordToken,
+  keywordsToken,
   identifierToken,
   uintToken,
   intToken,
-  keywordsToken,
   strToken,
   memArgToken,
 } from "./tokenizer";
 import {
-  getNumericInstructionKinds,
-  getVariableInstructionKinds,
   getControlInstructionKinds,
+  getVariableInstructionKinds,
+  getNumericInstructionKinds,
   getMemoryInstructionKinds,
 } from "../instructions-map";
 
@@ -219,10 +220,20 @@ const ifInstr: Parser<IfInstructionNode> = tryWith(
   ),
 );
 
+const funcTypeRef: Parser<FuncTypeRefNode> = tryWith(
+  expect(typeUseRef)(
+    (type): FuncTypeRefNode => ({
+      kind: "FuncTypeRef",
+      type,
+      loc: type.loc,
+    }),
+  ),
+);
+
 const controlInstr: Parser<ControlInstructionNode> = tryWith(
   expect(
     keywordsToken(getControlInstructionKinds()),
-    vec(index),
+    vec(oneOf(index, funcTypeRef)),
   )(
     (tInstrKind, params): ControlInstructionNode => ({
       kind: "ControlInstruction",
@@ -385,11 +396,11 @@ const mod: Parser<ModuleNode> = expect(
   vec(moduleField),
   symbolToken(")"),
 )(
-  (tLp, tModule, maybeId, memValues, tRp): ModuleNode => ({
+  (tLp, tModule, maybeId, fields, tRp): ModuleNode => ({
     kind: "Module",
     id: toIdNode(maybeId),
-    body: memValues.values,
-    ...loc(tLp, tModule, maybeId, memValues, tRp),
+    body: fields.values,
+    ...loc(tLp, tModule, maybeId, fields, tRp),
   }),
 );
 

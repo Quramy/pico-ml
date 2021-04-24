@@ -99,6 +99,10 @@ export interface TypeNode extends Node<"Type"> {
 
 export type IndexNode = Uint32LiteralNode | IdentifierNode;
 
+export interface FuncTypeRefNode extends Node<"FuncTypeRef"> {
+  readonly type: IndexNode;
+}
+
 export interface FuncSigNode extends Node<"FuncSig"> {
   readonly type: IndexNode | null;
   readonly params: readonly ParamTypeNode[];
@@ -121,7 +125,7 @@ export interface IfInstructionNode extends Node<"IfInstruction"> {
 
 export interface ControlInstructionNode extends Node<"ControlInstruction"> {
   readonly instructionKind: ControlInstructionKind;
-  readonly parameters: readonly IndexNode[];
+  readonly parameters: readonly (IndexNode | FuncTypeRefNode)[];
 }
 
 export interface VariableInstructionNode extends Node<"VariableInstruction"> {

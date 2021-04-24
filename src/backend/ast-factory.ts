@@ -27,6 +27,7 @@ import {
   ControlInstructionNode,
   IfInstructionNode,
   MemoryInstructionNode,
+  FuncTypeRefNode,
 } from "./ast-types";
 import {
   NumericInstructionKind,
@@ -134,6 +135,14 @@ export function typedef(funcType: FuncTypeNode, id?: IdentifierNode | null, pos?
   };
 }
 
+export function funcTypeRef(type: IndexNode, pos?: Position): FuncTypeRefNode {
+  return {
+    kind: "FuncTypeRef",
+    type,
+    loc: pos?.loc,
+  };
+}
+
 export function funcSig(
   params: readonly ParamTypeNode[],
   results: readonly ValueTypeNode[],
@@ -179,7 +188,7 @@ export function ifInstr(
 
 export function controlInstr(
   instructionKind: ControlInstructionKind,
-  params?: readonly IndexNode[],
+  params?: readonly (IndexNode | FuncTypeRefNode)[],
   pos?: Position,
 ): ControlInstructionNode {
   return {

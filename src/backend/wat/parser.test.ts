@@ -72,6 +72,9 @@ describe(parseIfInstr, () => {
 describe(parseControlInstr, () => {
   test("success", () => {
     expect(use(parseControlInstr)("call 0")).toMatchObject(f.controlInstr("call", [f.uint32(0)]));
+    expect(use(parseControlInstr)("call_indirect 0 (type 1)")).toMatchObject(
+      f.controlInstr("call_indirect", [f.uint32(0), f.funcTypeRef(f.uint32(1))]),
+    );
   });
 });
 

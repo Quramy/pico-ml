@@ -53,7 +53,7 @@ const controlInstruction: ConvertInstrFn<"ControlInstruction"> = (node, { refCtx
   return all(
     node.parameters.map((p, i) => {
       if (!args[i]) return error({ message: `${node.instructionKind} can not have ${i}th param` }) as Result<number>;
-      return findIndex(refCtx[args[i]]!, p);
+      return findIndex(refCtx[args[i]]!, p.kind === "FuncTypeRef" ? p.type : p);
     }),
   ).map(
     parameters =>
