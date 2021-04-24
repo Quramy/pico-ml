@@ -1,4 +1,9 @@
-import { VariableInstructionKind, NumericInstructionKind, ControlInstructionKind } from "./instructions-map";
+import {
+  VariableInstructionKind,
+  NumericInstructionKind,
+  ControlInstructionKind,
+  MemoryInstructionKind,
+} from "./instructions-map";
 
 export interface Limits {
   readonly kind: "Limits";
@@ -54,7 +59,19 @@ export interface NumericInstruction {
   readonly parameters: readonly number[];
 }
 
-export type Instruction = IfInstruction | ControlInstruction | VariableInstruction | NumericInstruction;
+export interface MemoryInstruction {
+  readonly kind: "MemoryInstruction";
+  readonly instructionKind: MemoryInstructionKind;
+  readonly offset: number;
+  readonly align: number;
+}
+
+export type Instruction =
+  | IfInstruction
+  | ControlInstruction
+  | VariableInstruction
+  | NumericInstruction
+  | MemoryInstruction;
 
 export type Expr = readonly Instruction[];
 

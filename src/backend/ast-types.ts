@@ -1,6 +1,11 @@
 import { Tree } from "../structure";
 import { Position } from "../parser-util";
-import { NumericInstructionKind, VariableInstructionKind, ControlInstructionKind } from "./instructions-map";
+import {
+  ControlInstructionKind,
+  NumericInstructionKind,
+  VariableInstructionKind,
+  MemoryInstructionKind,
+} from "./instructions-map";
 
 interface Node<T extends string> extends Tree<T>, Position {}
 
@@ -27,12 +32,15 @@ export type ReservedWords = [
   "end",
   "block",
   "loop",
+  "offset=",
+  "align=",
 ];
 export type ReservedWordKind =
   | ReservedWords[number]
+  | ControlInstructionKind
   | VariableInstructionKind
   | NumericInstructionKind
-  | ControlInstructionKind;
+  | MemoryInstructionKind;
 
 export interface TokenBase<T extends string> extends Position {
   readonly tokenKind: T;
@@ -126,8 +134,18 @@ export interface NumericInstructionNode extends Node<"NumericInstruction"> {
   readonly parameters: readonly Int32LiteralNode[];
 }
 
+export interface MemoryInstructionNode extends Node<"MemoryInstruction"> {
+  readonly instructionKind: MemoryInstructionKind;
+  readonly offset: Uint32LiteralNode | null;
+  readonly align: Uint32LiteralNode | null;
+}
+
 export type StructuredControleInstructionNode = IfInstructionNode;
-export type PlainInstructionNode = ControlInstructionNode | VariableInstructionNode | NumericInstructionNode;
+export type PlainInstructionNode =
+  | ControlInstructionNode
+  | VariableInstructionNode
+  | NumericInstructionNode
+  | MemoryInstructionNode;
 
 export type InstructionNode = StructuredControleInstructionNode | PlainInstructionNode;
 

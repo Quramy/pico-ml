@@ -26,8 +26,14 @@ import {
   BlockTypeNode,
   ControlInstructionNode,
   IfInstructionNode,
+  MemoryInstructionNode,
 } from "./ast-types";
-import { NumericInstructionKind, VariableInstructionKind, ControlInstructionKind } from "./instructions-map";
+import {
+  NumericInstructionKind,
+  VariableInstructionKind,
+  ControlInstructionKind,
+  MemoryInstructionKind,
+} from "./instructions-map";
 
 export function uint32(value: number, pos?: Position): Uint32LiteralNode {
   return {
@@ -206,6 +212,21 @@ export function numericInstr(
     kind: "NumericInstruction",
     instructionKind,
     parameters: params ?? [],
+    loc: pos?.loc,
+  };
+}
+
+export function memoryInstr(
+  instructionKind: MemoryInstructionKind,
+  offset?: Uint32LiteralNode | null,
+  align?: Uint32LiteralNode | null,
+  pos?: Position,
+): MemoryInstructionNode {
+  return {
+    kind: "MemoryInstruction",
+    instructionKind,
+    offset: offset ?? null,
+    align: align ?? null,
     loc: pos?.loc,
   };
 }

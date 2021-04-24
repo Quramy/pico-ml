@@ -59,6 +59,15 @@ export const numericInstructions = {
   "i32.rotr": { code: 0x78, args: [] },
 } as const;
 
+export const memoryInstructions = {
+  "i32.load": { code: 0x28, defaultAlign: 1 },
+  "i32.load8_s": { code: 0x2c, defaultAlign: 1 },
+  "i32.load8_u": { code: 0x2d, defaultAlign: 1 },
+  "i32.store": { code: 0x36, defaultAlign: 1 },
+  "i32.store8": { code: 0x3a, defaultAlign: 1 },
+  "i32.store16": { code: 0x3b, defaultAlign: 1 },
+} as const;
+
 export type ControlInstructionKind = keyof typeof controlInstructions;
 export type ControlInstructionParamKind = typeof controlInstructions[ControlInstructionKind]["args"][number];
 
@@ -68,7 +77,11 @@ export type VariableInstructionParamKind = typeof variableInstructions[VariableI
 export type NumericInstructionKind = keyof typeof numericInstructions;
 export type NumericInstructionParamKind = typeof numericInstructions[NumericInstructionKind]["args"][number];
 
+export type MemoryInstructionKind = keyof typeof memoryInstructions;
+
 export const getControlInstructionKinds = () => Object.keys(controlInstructions) as readonly ControlInstructionKind[];
 export const getVariableInstructionKinds = () =>
   Object.keys(variableInstructions) as readonly VariableInstructionKind[];
 export const getNumericInstructionKinds = () => Object.keys(numericInstructions) as readonly NumericInstructionKind[];
+
+export const getMemoryInstructionKinds = () => Object.keys(memoryInstructions) as readonly MemoryInstructionKind[];

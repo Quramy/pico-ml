@@ -1,13 +1,26 @@
 import { Result, ok, error, all, mapValue, TraverserCallbackFn, createTreeTraverser } from "../../../structure";
 import { FuncNode, InstructionNode } from "../../ast-types";
-import { Func, FuncType, Instruction, ValType, UInt32Index } from "../../structure-types";
-import { funcType } from "../../structure-factory";
+import { Func, FuncType, Instruction, ValType, UInt32Index, ResultType } from "../../structure-types";
 import { RefereneceContext, findIndex, createIndex } from "../ref";
-import { variableInstructions, numericInstructions, controlInstructions } from "../../instructions-map";
+import {
+  variableInstructions,
+  numericInstructions,
+  controlInstructions,
+  memoryInstructions,
+} from "../../instructions-map";
+import { convertMaybeUint32 } from "./uint32";
 
 export interface State {
   readonly funcs: readonly Func[];
   readonly types: readonly FuncType[];
+}
+
+function funcType(params: ResultType, results: ResultType): FuncType {
+  return {
+    kind: "FuncType",
+    paramType: params,
+    resultType: results,
+  };
 }
 
 function compareFuncType(typeA: FuncType, typeB: FuncType): boolean {
@@ -86,6 +99,21 @@ const numericInstruction: ConvertInstrFn<"NumericInstruction"> = node => {
   );
 };
 
+const memoryInstruction: ConvertInstrFn<"MemoryInstruction"> = node => {
+  const { defaultAlign } = memoryInstructions[node.instructionKind];
+  return mapValue(
+    convertMaybeUint32(node.offset),
+    convertMaybeUint32(node.align),
+  )((offset, align) =>
+    ok({
+      kind: "MemoryInstruction",
+      instructionKind: node.instructionKind,
+      offset: offset ?? 0,
+      align: align ?? defaultAlign,
+    }),
+  );
+};
+
 const ifInstruction: ConvertInstrFn<"IfInstruction"> = (node, ctx, next) => {
   let blockType: ValType | UInt32Index | null = null;
   if (!node.blockType.type && node.blockType.results.length === 0) {
@@ -127,6 +155,7 @@ export const convertInstr = createTreeTraverser<InstructionNode, ConvertInstrCon
   controlInstruction,
   variableInstruction,
   numericInstruction,
+  memoryInstruction,
 });
 
 export function convertFunc(node: FuncNode, prev: State, refCtx: RefereneceContext): Result<State> {

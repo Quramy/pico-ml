@@ -16,6 +16,7 @@ import {
   numericInstructions,
   controlInstructions,
   structuredInstructions,
+  memoryInstructions,
 } from "../instructions-map";
 import { encodeString } from "./str";
 
@@ -128,6 +129,9 @@ function instructions(instrs: readonly Instruction[]): readonly Uint8Array[] {
           }),
         ),
       ]);
+    } else if (instr.kind === "MemoryInstruction") {
+      const { code } = memoryInstructions[instr.instructionKind];
+      return new Uint8Array([code, ...uint32(instr.align), ...uint32(instr.offset)]);
     } else if (instr.kind === "IfInstruction") {
       const thenExpr = instructions(instr.thenExpr);
       const elseExpr = instructions(instr.elseExpr);

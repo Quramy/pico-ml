@@ -10,6 +10,7 @@ import {
   parseNumericInstr,
   parseFunc,
   parseExport,
+  parseMemoryInstr,
 } from "./parser";
 import * as f from "../ast-factory";
 
@@ -86,6 +87,14 @@ describe(parseVariableInstr, () => {
 describe(parseNumericInstr, () => {
   test("success", () => {
     expect(use(parseNumericInstr)("i32.const 0")).toMatchObject(f.numericInstr("i32.const", [f.int32(0)]));
+  });
+});
+
+describe(parseMemoryInstr, () => {
+  test("success", () => {
+    expect(use(parseMemoryInstr)("i32.load")).toMatchObject(f.memoryInstr("i32.load"));
+    expect(use(parseMemoryInstr)("i32.load offset=0")).toMatchObject(f.memoryInstr("i32.load", f.uint32(0)));
+    expect(use(parseMemoryInstr)("i32.load align=4")).toMatchObject(f.memoryInstr("i32.load", null, f.uint32(4)));
   });
 });
 

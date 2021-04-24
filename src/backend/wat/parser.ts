@@ -35,12 +35,23 @@ import {
   IfInstructionNode,
   BlockTypeNode,
   ControlInstructionNode,
+  MemoryInstructionNode,
 } from "../ast-types";
-import { symbolToken, keywordToken, identifierToken, uintToken, intToken, keywordsToken, strToken } from "./tokenizer";
+import {
+  symbolToken,
+  keywordToken,
+  identifierToken,
+  uintToken,
+  intToken,
+  keywordsToken,
+  strToken,
+  memArgToken,
+} from "./tokenizer";
 import {
   getNumericInstructionKinds,
   getVariableInstructionKinds,
   getControlInstructionKinds,
+  getMemoryInstructionKinds,
 } from "../instructions-map";
 
 const identifier: Parser<IdentifierNode> = expect(identifierToken)(t => ({
@@ -250,6 +261,22 @@ const numericInstr: Parser<NumericInstructionNode> = tryWith(
   ),
 );
 
+const memoryInstr: Parser<MemoryInstructionNode> = tryWith(
+  expect(
+    keywordsToken(getMemoryInstructionKinds()),
+    option(expect(memArgToken("offset="), u32)((t, v) => ({ ...v, ...loc(t, v) }))),
+    option(expect(memArgToken("align="), u32)((t, v) => ({ ...v, ...loc(t, v) }))),
+  )(
+    (tInstrKind, maybeOffset, maybeAlign): MemoryInstructionNode => ({
+      kind: "MemoryInstruction",
+      instructionKind: tInstrKind.keyword,
+      offset: fromOptional(maybeOffset)(n => n),
+      align: fromOptional(maybeAlign)(n => n),
+      ...loc(tInstrKind, maybeOffset, maybeAlign),
+    }),
+  ),
+);
+
 const local: Parser<LocalVarNode> = tryWith(
   expect(
     symbolToken("("),
@@ -267,7 +294,7 @@ const local: Parser<LocalVarNode> = tryWith(
   ),
 );
 
-const instr: Parser<InstructionNode> = oneOf(ifInstr, controlInstr, numericInstr, variableInstr);
+const instr: Parser<InstructionNode> = oneOf(ifInstr, controlInstr, numericInstr, variableInstr, memoryInstr);
 
 const func: Parser<FuncNode> = tryWith(
   expect(
@@ -372,6 +399,7 @@ export const parseIfInstr = ifInstr;
 export const parseControlInstr = controlInstr;
 export const parseVariableInstr = variableInstr;
 export const parseNumericInstr = numericInstr;
+export const parseMemoryInstr = memoryInstr;
 export const parseFunc = func;
 export const parseMemory = mem;
 export const parseExport = exportNode;
