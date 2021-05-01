@@ -37,6 +37,9 @@ import {
   FunctionIndexListNode,
   ElemNode,
   ExprNode,
+  MutValueTypeNode,
+  GlobalTypeNode,
+  GlobalNode,
 } from "./ast-types";
 import {
   NumericInstructionKind,
@@ -100,6 +103,14 @@ export function valueType(valueKind: ValueTypeKind, pos?: Position): ValueTypeNo
   return {
     kind: "ValueType",
     valueKind,
+    loc: pos?.loc,
+  };
+}
+
+export function mutValueType(valueType: ValueTypeNode, pos?: Position): MutValueTypeNode {
+  return {
+    kind: "MutValueType",
+    valueType,
     loc: pos?.loc,
   };
 }
@@ -297,6 +308,21 @@ export function functionIndexList(indices: readonly IndexNode[], pos?: Position)
   return {
     kind: "FunctionIndexList",
     indices,
+    loc: pos?.loc,
+  };
+}
+
+export function globalNode(
+  type: GlobalTypeNode,
+  expr: ExprNode,
+  id?: IdentifierNode | null,
+  pos?: Position,
+): GlobalNode {
+  return {
+    kind: "Global",
+    id: id ?? null,
+    expr,
+    type,
     loc: pos?.loc,
   };
 }

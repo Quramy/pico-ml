@@ -12,8 +12,10 @@ import {
   TableType,
   Elem,
   FunctionIndexList,
+  Global,
+  GlobalType,
 } from "../structure-types";
-import { encodeUnsigned, encodeSigned } from "./leb";
+
 import {
   variableInstructions,
   numericInstructions,
@@ -21,6 +23,8 @@ import {
   structuredInstructions,
   memoryInstructions,
 } from "../instructions-map";
+
+import { encodeUnsigned, encodeSigned } from "./leb";
 import { encodeString } from "./str";
 
 const magic = [0x00, 0x61, 0x73, 0x6d];
@@ -74,8 +78,8 @@ function funcType(ft: FuncType): Uint8Array {
   return new Uint8Array([0x60, ...vec(ft.paramType.map(numType)), ...vec(ft.resultType.map(numType))]);
 }
 
-function typeSec(funcTypes: readonly FuncType[]): Uint8Array {
-  return section(1, vec(funcTypes.map(funcType)));
+function globalType(globalType: GlobalType): Uint8Array {
+  return new Uint8Array([...numType(globalType.valueType), globalType.mutKind === "Const" ? 0x00 : 0x01]);
 }
 
 function limits({ min, max }: Limits): Uint8Array {
@@ -84,33 +88,6 @@ function limits({ min, max }: Limits): Uint8Array {
   } else {
     return new Uint8Array([0x01, ...uint32(min), ...uint32(max)]);
   }
-}
-
-function funcSec(funcs: readonly Func[]): Uint8Array {
-  return section(3, vec(funcs.map(func => uint32(func.type))));
-}
-
-function tableSec(tableTypes: readonly TableType[]): Uint8Array {
-  return section(
-    4,
-    vec(
-      tableTypes.map(tableType => {
-        const marker = tableType.refType === "Funcref" ? 0x70 : 0x6f;
-        return new Uint8Array([marker, ...limits(tableType.limits)]);
-      }),
-    ),
-  );
-}
-
-function memSec(memTypes: readonly MemType[]): Uint8Array {
-  return section(5, vec(memTypes.map(m => limits(m.limits))));
-}
-
-function exportSec(exports: readonly Export[]): Uint8Array {
-  return section(
-    7,
-    vec(exports.map(e => new Uint8Array([...name(e.name), exportTypes[e.exportKind], ...uint32(e.index)]))),
-  );
 }
 
 function blockType(bt: BlockType): Uint8Array {
@@ -172,6 +149,41 @@ function funcIdx(elemList: FunctionIndexList): Uint8Array {
   return new Uint8Array([0x00, ...expr(elemList.offsetExpr), ...vec(elemList.indices.map(i => uint32(i)))]);
 }
 
+function typeSec(funcTypes: readonly FuncType[]): Uint8Array {
+  return section(1, vec(funcTypes.map(funcType)));
+}
+
+function funcSec(funcs: readonly Func[]): Uint8Array {
+  return section(3, vec(funcs.map(func => uint32(func.type))));
+}
+
+function tableSec(tableTypes: readonly TableType[]): Uint8Array {
+  return section(
+    4,
+    vec(
+      tableTypes.map(tableType => {
+        const marker = tableType.refType === "Funcref" ? 0x70 : 0x6f;
+        return new Uint8Array([marker, ...limits(tableType.limits)]);
+      }),
+    ),
+  );
+}
+
+function memSec(memTypes: readonly MemType[]): Uint8Array {
+  return section(5, vec(memTypes.map(m => limits(m.limits))));
+}
+
+function globalSec(globals: readonly Global[]): Uint8Array {
+  return section(6, vec(globals.map(g => new Uint8Array([...globalType(g.type), ...expr(g.expr)]))));
+}
+
+function exportSec(exports: readonly Export[]): Uint8Array {
+  return section(
+    7,
+    vec(exports.map(e => new Uint8Array([...name(e.name), exportTypes[e.exportKind], ...uint32(e.index)]))),
+  );
+}
+
 function elemSec(elems: readonly Elem[]): Uint8Array {
   return section(9, vec(elems.map(elem => funcIdx(elem.elemList))));
 }
@@ -197,6 +209,7 @@ export function unparse(mod: Module): Uint8Array {
     ...funcSec(mod.funcs),
     ...tableSec(mod.tables),
     ...memSec(mod.mems),
+    ...globalSec(mod.globals),
     ...exportSec(mod.exports),
     ...elemSec(mod.elems),
     ...codeSec(mod.funcs),

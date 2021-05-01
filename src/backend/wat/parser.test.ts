@@ -13,30 +13,9 @@ import {
   parseMemoryInstr,
   parseElem,
   parseTable,
+  parseGlobal,
 } from "./parser";
 import * as f from "../ast-factory";
-
-describe(parseType, () => {
-  test("success", () => {
-    expect(use(parseType)("(type (func))")).toMatchObject(f.typedef(f.funcType([], [])));
-    expect(use(parseType)("(type (func (param i32)))")).toMatchObject(
-      f.typedef(f.funcType([f.paramType(f.valueType("i32"))], [])),
-    );
-    expect(use(parseType)("(type (func (result i32)))")).toMatchObject(f.typedef(f.funcType([], [f.valueType("i32")])));
-    expect(use(parseType)("(type (func (param i32) (result i32)))")).toMatchObject(
-      f.typedef(f.funcType([f.paramType(f.valueType("i32"))], [f.valueType("i32")])),
-    );
-    expect(use(parseType)("(type (func (param $a i32) (param $b i32) (result i32)))")).toMatchObject(
-      f.typedef(
-        f.funcType(
-          [f.paramType(f.valueType("i32"), f.identifier("a")), f.paramType(f.valueType("i32"), f.identifier("b"))],
-          [f.valueType("i32")],
-        ),
-      ),
-    );
-    expect(use(parseType)("(type $fn (func))")).toMatchObject(f.typedef(f.funcType([], []), f.identifier("fn")));
-  });
-});
 
 describe(parseFuncSig, () => {
   test("success", () => {
@@ -103,6 +82,28 @@ describe(parseMemoryInstr, () => {
   });
 });
 
+describe(parseType, () => {
+  test("success", () => {
+    expect(use(parseType)("(type (func))")).toMatchObject(f.typedef(f.funcType([], [])));
+    expect(use(parseType)("(type (func (param i32)))")).toMatchObject(
+      f.typedef(f.funcType([f.paramType(f.valueType("i32"))], [])),
+    );
+    expect(use(parseType)("(type (func (result i32)))")).toMatchObject(f.typedef(f.funcType([], [f.valueType("i32")])));
+    expect(use(parseType)("(type (func (param i32) (result i32)))")).toMatchObject(
+      f.typedef(f.funcType([f.paramType(f.valueType("i32"))], [f.valueType("i32")])),
+    );
+    expect(use(parseType)("(type (func (param $a i32) (param $b i32) (result i32)))")).toMatchObject(
+      f.typedef(
+        f.funcType(
+          [f.paramType(f.valueType("i32"), f.identifier("a")), f.paramType(f.valueType("i32"), f.identifier("b"))],
+          [f.valueType("i32")],
+        ),
+      ),
+    );
+    expect(use(parseType)("(type $fn (func))")).toMatchObject(f.typedef(f.funcType([], []), f.identifier("fn")));
+  });
+});
+
 describe(parseFunc, () => {
   test("success", () => {
     expect(use(parseFunc)("(func)")).toMatchObject(f.func(f.funcSig([], []), [], []));
@@ -135,17 +136,6 @@ describe(parseFunc, () => {
   });
 });
 
-describe(parseMemory, () => {
-  test("success", () => {
-    expect(use(parseMemory)("(memory 1)")).toMatchObject(f.memory(f.limits(f.uint32(1))));
-    expect(use(parseMemory)("(memory 1 2)")).toMatchObject(f.memory(f.limits(f.uint32(1), f.uint32(2))));
-    expect(use(parseMemory)("(memory $mem 1)")).toMatchObject(f.memory(f.limits(f.uint32(1)), f.identifier("mem")));
-    expect(use(parseMemory)("(memory $mem 1 2)")).toMatchObject(
-      f.memory(f.limits(f.uint32(1), f.uint32(2)), f.identifier("mem")),
-    );
-  });
-});
-
 describe(parseTable, () => {
   test("success", () => {
     expect(use(parseTable)("(table funcref (elem 1))")).toMatchObject(
@@ -163,10 +153,24 @@ describe(parseTable, () => {
   });
 });
 
-describe(parseElem, () => {
+describe(parseMemory, () => {
   test("success", () => {
-    expect(use(parseElem)("(elem (offset i32.const 0) func 0)")).toMatchObject(
-      f.elem(f.functionIndexList([f.uint32(0)]), [f.numericInstr("i32.const", [f.int32(0)])]),
+    expect(use(parseMemory)("(memory 1)")).toMatchObject(f.memory(f.limits(f.uint32(1))));
+    expect(use(parseMemory)("(memory 1 2)")).toMatchObject(f.memory(f.limits(f.uint32(1), f.uint32(2))));
+    expect(use(parseMemory)("(memory $mem 1)")).toMatchObject(f.memory(f.limits(f.uint32(1)), f.identifier("mem")));
+    expect(use(parseMemory)("(memory $mem 1 2)")).toMatchObject(
+      f.memory(f.limits(f.uint32(1), f.uint32(2)), f.identifier("mem")),
+    );
+  });
+});
+
+describe(parseGlobal, () => {
+  test("success", () => {
+    expect(use(parseGlobal)("(global i32 i32.const 0)")).toMatchObject(
+      f.globalNode(f.valueType("i32"), [f.numericInstr("i32.const", [f.int32(0)])]),
+    );
+    expect(use(parseGlobal)("(global $g (mut i32) i32.const 0)")).toMatchObject(
+      f.globalNode(f.mutValueType(f.valueType("i32")), [f.numericInstr("i32.const", [f.int32(0)])], f.identifier("g")),
     );
   });
 });
@@ -178,6 +182,14 @@ describe(parseExport, () => {
     );
     expect(use(parseExport)('(export "main" (memory $main))')).toMatchObject(
       f.exportNode("main", f.exportedMemory(f.identifier("main"))),
+    );
+  });
+});
+
+describe(parseElem, () => {
+  test("success", () => {
+    expect(use(parseElem)("(elem (offset i32.const 0) func 0)")).toMatchObject(
+      f.elem(f.functionIndexList([f.uint32(0)]), [f.numericInstr("i32.const", [f.int32(0)])]),
     );
   });
 });

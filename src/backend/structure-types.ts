@@ -5,12 +5,6 @@ import {
   MemoryInstructionKind,
 } from "./instructions-map";
 
-export interface Limits {
-  readonly kind: "Limits";
-  min: number;
-  max: number | null;
-}
-
 export interface Int32Type {
   readonly kind: "Int32Type";
 }
@@ -19,21 +13,12 @@ export type ValType = Int32Type;
 
 export type ResultType = readonly ValType[];
 
-export interface FuncType {
-  readonly kind: "FuncType";
-  readonly paramType: ResultType;
-  readonly resultType: ResultType;
-}
+export type MutationKind = "Const" | "Var";
 
-export interface MemType {
-  readonly kind: "MemType";
-  readonly limits: Limits;
-}
-
-export interface TableType {
-  readonly kind: "TableType";
-  readonly limits: Limits;
-  readonly refType: "Funcref" | "Externref";
+export interface GlobalType {
+  readonly kind: "GlobalType";
+  readonly valueType: ValType;
+  readonly mutKind: MutationKind;
 }
 
 export type UInt32Index = number;
@@ -81,11 +66,10 @@ export type Instruction =
 
 export type Expr = readonly Instruction[];
 
-export interface Func {
-  readonly kind: "Func";
-  readonly type: UInt32Index;
-  readonly locals: readonly ValType[];
-  readonly body: Expr;
+export interface Limits {
+  readonly kind: "Limits";
+  min: number;
+  max: number | null;
 }
 
 export interface FunctionIndexList {
@@ -96,24 +80,55 @@ export interface FunctionIndexList {
 
 export type ElemList = FunctionIndexList;
 
-export interface Elem {
-  readonly kind: "Elem";
-  readonly elemList: ElemList;
+export interface FuncType {
+  readonly kind: "FuncType";
+  readonly paramType: ResultType;
+  readonly resultType: ResultType;
+}
+
+export interface Func {
+  readonly kind: "Func";
+  readonly type: UInt32Index;
+  readonly locals: readonly ValType[];
+  readonly body: Expr;
+}
+
+export interface TableType {
+  readonly kind: "TableType";
+  readonly limits: Limits;
+  readonly refType: "Funcref" | "Externref";
+}
+
+export interface MemType {
+  readonly kind: "MemType";
+  readonly limits: Limits;
+}
+
+export interface Global {
+  readonly kind: "Global";
+  readonly type: GlobalType;
+  readonly expr: Expr;
 }
 
 export interface Export {
   readonly kind: "Export";
   readonly name: string;
-  readonly exportKind: "Func" | "Memory";
+  readonly exportKind: "Func" | "Memory" | "Table" | "Global";
   readonly index: number;
+}
+
+export interface Elem {
+  readonly kind: "Elem";
+  readonly elemList: ElemList;
 }
 
 export interface Module {
   readonly kind: "Module";
   readonly types: readonly FuncType[];
   readonly funcs: readonly Func[];
-  readonly mems: readonly MemType[];
   readonly tables: readonly TableType[];
-  readonly elems: readonly Elem[];
+  readonly mems: readonly MemType[];
+  readonly globals: readonly Global[];
   readonly exports: readonly Export[];
+  readonly elems: readonly Elem[];
 }

@@ -16,6 +16,7 @@ export type ValueTypes = ["i32"];
 export type ValueTypeKind = ValueTypes[number];
 
 export type ReservedWords = [
+  "global",
   "import",
   "export",
   "module",
@@ -35,6 +36,7 @@ export type ReservedWords = [
   "block",
   "loop",
   "offset",
+  "mut",
   "offset=",
   "align=",
 ];
@@ -83,6 +85,10 @@ export interface IdentifierNode extends Node<"Identifier"> {
 
 export interface ValueTypeNode extends Node<"ValueType"> {
   readonly valueKind: ValueTypeKind;
+}
+
+export interface MutValueTypeNode extends Node<"MutValueType"> {
+  readonly valueType: ValueTypeNode;
 }
 
 export interface ParamTypeNode extends Node<"ParamType"> {
@@ -185,6 +191,14 @@ export interface LimitsNode extends Node<"Limits"> {
   readonly max: Uint32LiteralNode | null;
 }
 
+export type GlobalTypeNode = ValueTypeNode | MutValueTypeNode;
+
+export interface GlobalNode extends Node<"Global"> {
+  readonly id: IdentifierNode | null;
+  readonly type: GlobalTypeNode;
+  readonly expr: ExprNode;
+}
+
 export interface MemoryNode extends Node<"Memory"> {
   readonly id: IdentifierNode | null;
   readonly limits: LimitsNode;
@@ -217,6 +231,10 @@ export interface ExportedFuncNode extends Node<"ExportedFunc"> {
   readonly index: IndexNode;
 }
 
+export interface ExportedGlobalNode extends Node<"ExportedGlobal"> {
+  readonly index: IndexNode;
+}
+
 export interface ExportedMemoryNode extends Node<"ExportedMemory"> {
   readonly index: IndexNode;
 }
@@ -225,14 +243,14 @@ export interface ExportedTableNode extends Node<"ExportedTable"> {
   readonly index: IndexNode;
 }
 
-export type ExportedSecNode = ExportedFuncNode | ExportedMemoryNode | ExportedTableNode;
+export type ExportedSecNode = ExportedFuncNode | ExportedGlobalNode | ExportedMemoryNode | ExportedTableNode;
 
 export interface ExportNode extends Node<"Export"> {
   readonly name: string;
   readonly sec: ExportedSecNode;
 }
 
-export type ModuleBodyNode = TypeNode | FuncNode | MemoryNode | ExportNode | TableNode | ElemNode;
+export type ModuleBodyNode = TypeNode | FuncNode | TableNode | MemoryNode | GlobalNode | ExportNode | ElemNode;
 
 export interface ModuleNode extends Node<"Module"> {
   readonly id: IdentifierNode | null;

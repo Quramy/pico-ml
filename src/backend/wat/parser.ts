@@ -40,6 +40,8 @@ import {
   TableNode,
   FunctionIndexListNode,
   ElemNode,
+  MutValueTypeNode,
+  GlobalNode,
 } from "../ast-types";
 import {
   symbolToken,
@@ -106,6 +108,21 @@ const param: Parser<ParamTypeNode> = tryWith(
       id: toIdNode(tMaybeId),
       valueType,
       ...loc(tLp, tParam, tMaybeId, valueType, tRp),
+    }),
+  ),
+);
+
+const mutValue: Parser<MutValueTypeNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("mut"),
+    valType,
+    symbolToken(")"),
+  )(
+    (tLp, tMut, valueType, tRp): MutValueTypeNode => ({
+      kind: "MutValueType",
+      valueType,
+      ...loc(tLp, tMut, valueType, tRp),
     }),
   ),
 );
@@ -358,6 +375,25 @@ const mem: Parser<MemoryNode> = tryWith(
   ),
 );
 
+const globalNode: Parser<GlobalNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("global"),
+    option(identifierToken),
+    oneOf(valType, mutValue),
+    vec(instr),
+    symbolToken(")"),
+  )(
+    (tLp, tGlobal, maybeId, type, instructions, tRp): GlobalNode => ({
+      kind: "Global",
+      id: toIdNode(maybeId),
+      type,
+      expr: instructions.values,
+      ...loc(tLp, tGlobal, maybeId, type, instructions, tRp),
+    }),
+  ),
+);
+
 const funcIndicesForTable: Parser<FunctionIndexListNode> = tryWith(
   expect(
     symbolToken("("),
@@ -460,12 +496,19 @@ const elem: Parser<ElemNode> = tryWith(
 const exportSec: Parser<ExportedSecNode> = tryWith(
   expect(
     symbolToken("("),
-    oneOf(keywordToken("func"), keywordToken("memory")),
+    oneOf(keywordToken("func"), keywordToken("memory"), keywordToken("table"), keywordToken("global")),
     index,
     symbolToken(")"),
   )(
     (tLp, tKeyword, index, tRp): ExportedSecNode => ({
-      kind: tKeyword.keyword === "func" ? "ExportedFunc" : "ExportedMemory",
+      kind:
+        tKeyword.keyword === "func"
+          ? "ExportedFunc"
+          : tKeyword.keyword === "memory"
+          ? "ExportedMemory"
+          : tKeyword.keyword === "table"
+          ? "ExportedTable"
+          : "ExportedGlobal",
       index,
       ...loc(tLp, tKeyword, index, tRp),
     }),
@@ -489,7 +532,7 @@ const exportNode: Parser<ExportNode> = tryWith(
   ),
 );
 
-const moduleField = oneOf(typedef, func, mem, table, elem, exportNode);
+const moduleField = oneOf(typedef, func, table, mem, globalNode, exportNode, elem);
 
 const mod: Parser<ModuleNode> = expect(
   symbolToken("("),
@@ -506,17 +549,21 @@ const mod: Parser<ModuleNode> = expect(
   }),
 );
 
-export const parseType = typedef;
 export const parseFuncSig = funcSig;
 export const parseIfInstr = ifInstr;
 export const parseControlInstr = controlInstr;
 export const parseVariableInstr = variableInstr;
 export const parseNumericInstr = numericInstr;
 export const parseMemoryInstr = memoryInstr;
+
+export const parseType = typedef;
 export const parseFunc = func;
-export const parseMemory = mem;
 export const parseTable = table;
-export const parseElem = elem;
+export const parseMemory = mem;
+export const parseGlobal = globalNode;
 export const parseExport = exportNode;
+export const parseElem = elem;
+
 export const parseModule = mod;
+
 export const parse = (code: string) => parseModule(new Scanner(code));

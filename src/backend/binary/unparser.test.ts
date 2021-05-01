@@ -84,6 +84,30 @@ describe(unparse, () => {
       expect([...new Int32Array(mem.buffer)].slice(0, 2)).toEqual([10, -500]);
     });
 
+    test("Global variable  example", async () => {
+      const source = `
+        (module
+          (global $delta i32 i32.const 10)
+          (global $state (mut i32) i32.const 0)
+          (func $increment
+            global.get $delta
+            global.get $state
+            i32.add
+            global.set $state
+          )
+          (export "main" (func $increment))
+          (export "count" (global $state))
+        )
+      `;
+      const buf = parse(source).mapValue(convertModule).map(unparse).unwrap();
+      const { instance } = await WebAssembly.instantiate(buf, {});
+      expect((instance.exports["count"] as WebAssembly.Global).value as number).toBe(0);
+      (instance.exports["main"] as Function)();
+      expect((instance.exports["count"] as WebAssembly.Global).value as number).toBe(10);
+      (instance.exports["main"] as Function)();
+      expect((instance.exports["count"] as WebAssembly.Global).value as number).toBe(20);
+    });
+
     test("Table and call_indirect example", async () => {
       const source = `
         (module
@@ -100,6 +124,7 @@ describe(unparse, () => {
           )
           (table $tbl funcref (elem $fn))
           (export "main" (func $main))
+          (export "table" (table $tbl))
         )
       `;
       const buf = parse(source).mapValue(convertModule).map(unparse).unwrap();
