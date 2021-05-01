@@ -37,6 +37,9 @@ import {
   ControlInstructionNode,
   MemoryInstructionNode,
   FuncTypeRefNode,
+  TableNode,
+  FunctionIndexListNode,
+  ElemNode,
 } from "../ast-types";
 import {
   symbolToken,
@@ -355,6 +358,105 @@ const mem: Parser<MemoryNode> = tryWith(
   ),
 );
 
+const funcIndicesForTable: Parser<FunctionIndexListNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("elem"),
+    vec(index),
+    symbolToken(")"),
+  )(
+    (tLp, tElem, indices, tRp): FunctionIndexListNode => ({
+      kind: "FunctionIndexList",
+      indices: indices.values,
+      ...loc(tLp, tElem, indices, tRp),
+    }),
+  ),
+);
+
+const funcIndicesForElem: Parser<FunctionIndexListNode> = tryWith(
+  expect(
+    keywordToken("func"),
+    vec(index),
+  )(
+    (tFunc, indices): FunctionIndexListNode => ({
+      kind: "FunctionIndexList",
+      indices: indices.values,
+      ...loc(tFunc, indices),
+    }),
+  ),
+);
+
+const tableWithType: Parser<TableNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("table"),
+    option(identifierToken),
+    limits,
+    keywordToken("funcref"),
+    symbolToken(")"),
+  )(
+    (tLp, tTable, maybeId, limits, tFuncref, tRp): TableNode => ({
+      kind: "Table",
+      elemList: null,
+      id: toIdNode(maybeId),
+      tableType: {
+        kind: "TableType",
+        limits,
+        refType: {
+          kind: "RefType",
+          refKind: "Funcref",
+          ...loc(tFuncref),
+        },
+        ...loc(limits),
+      },
+      ...loc(tLp, tTable, maybeId, limits, tFuncref, tRp),
+    }),
+  ),
+);
+
+const tableWithFunctionIndex: Parser<TableNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("table"),
+    option(identifierToken),
+    keywordToken("funcref"),
+    funcIndicesForTable,
+    symbolToken(")"),
+  )(
+    (tLp, tTable, maybeId, tFuncref, elementList, tRp): TableNode => ({
+      kind: "Table",
+      id: toIdNode(maybeId),
+      elemList: elementList,
+      tableType: null,
+      ...loc(tLp, tTable, maybeId, tFuncref, elementList, tRp),
+    }),
+  ),
+);
+
+const table = oneOf(tableWithType, tableWithFunctionIndex);
+
+const elem: Parser<ElemNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("elem"),
+    option(identifierToken),
+    symbolToken("("),
+    keywordToken("offset"),
+    vec(instr),
+    symbolToken(")"),
+    funcIndicesForElem,
+    symbolToken(")"),
+  )(
+    (tLp, tElem, maybeId, tLpInner, tOffset, instructions, tRpInner, indices, tRp): ElemNode => ({
+      kind: "Elem",
+      id: toIdNode(maybeId),
+      elemList: indices,
+      offsetExpr: instructions.values,
+      ...loc(tLp, tElem, maybeId, tLpInner, tOffset, instructions, tRpInner, indices, tRp),
+    }),
+  ),
+);
+
 const exportSec: Parser<ExportedSecNode> = tryWith(
   expect(
     symbolToken("("),
@@ -387,7 +489,7 @@ const exportNode: Parser<ExportNode> = tryWith(
   ),
 );
 
-const moduleField = oneOf(typedef, func, mem, exportNode);
+const moduleField = oneOf(typedef, func, mem, table, elem, exportNode);
 
 const mod: Parser<ModuleNode> = expect(
   symbolToken("("),
@@ -413,6 +515,8 @@ export const parseNumericInstr = numericInstr;
 export const parseMemoryInstr = memoryInstr;
 export const parseFunc = func;
 export const parseMemory = mem;
+export const parseTable = table;
+export const parseElem = elem;
 export const parseExport = exportNode;
 export const parseModule = mod;
 export const parse = (code: string) => parseModule(new Scanner(code));

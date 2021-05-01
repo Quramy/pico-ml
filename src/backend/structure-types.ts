@@ -30,6 +30,12 @@ export interface MemType {
   readonly limits: Limits;
 }
 
+export interface TableType {
+  readonly kind: "TableType";
+  readonly limits: Limits;
+  readonly refType: "Funcref" | "Externref";
+}
+
 export type UInt32Index = number;
 
 export type BlockType = null | ValType | UInt32Index;
@@ -82,6 +88,19 @@ export interface Func {
   readonly body: Expr;
 }
 
+export interface FunctionIndexList {
+  readonly kind: "FunctionIndexList";
+  readonly offsetExpr: Expr;
+  readonly indices: readonly number[];
+}
+
+export type ElemList = FunctionIndexList;
+
+export interface Elem {
+  readonly kind: "Elem";
+  readonly elemList: ElemList;
+}
+
 export interface Export {
   readonly kind: "Export";
   readonly name: string;
@@ -94,5 +113,7 @@ export interface Module {
   readonly types: readonly FuncType[];
   readonly funcs: readonly Func[];
   readonly mems: readonly MemType[];
+  readonly tables: readonly TableType[];
+  readonly elems: readonly Elem[];
   readonly exports: readonly Export[];
 }

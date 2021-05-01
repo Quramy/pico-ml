@@ -13,7 +13,7 @@ export const controlInstructions = {
   br_if: { code: 0x0d, args: ["labels"] },
   return: { code: 0x0f, args: [] },
   call: { code: 0x10, args: ["funcs"] },
-  call_indirect: { code: 0x11, args: ["types", "tables"] },
+  call_indirect: { code: 0x11, args: ["tables", "types"] },
 } as const;
 
 export const variableInstructions = {

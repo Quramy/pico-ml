@@ -83,5 +83,28 @@ describe(unparse, () => {
       memSet(4, -500);
       expect([...new Int32Array(mem.buffer)].slice(0, 2)).toEqual([10, -500]);
     });
+
+    test("Table and call_indirect example", async () => {
+      const source = `
+        (module
+          (type $fn_inner (func (param i32) (result i32)))
+          (func $fn (param $a i32) (result i32)
+            i32.const 2
+            local.get $a
+            i32.mul
+          )
+          (func $main (param $a i32) (result i32)
+            local.get $a
+            i32.const 0
+            call_indirect $tbl (type $fn_inner)
+          )
+          (table $tbl funcref (elem $fn))
+          (export "main" (func $main))
+        )
+      `;
+      const buf = parse(source).mapValue(convertModule).map(unparse).unwrap();
+      const { instance } = await WebAssembly.instantiate(buf, {});
+      expect((instance.exports["main"] as Function)(10)).toBe(20);
+    });
   });
 });

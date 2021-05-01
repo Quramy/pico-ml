@@ -9,6 +9,9 @@ import {
   Export,
   Instruction,
   BlockType,
+  TableType,
+  Elem,
+  FunctionIndexList,
 } from "../structure-types";
 import { encodeUnsigned, encodeSigned } from "./leb";
 import {
@@ -87,6 +90,18 @@ function funcSec(funcs: readonly Func[]): Uint8Array {
   return section(3, vec(funcs.map(func => uint32(func.type))));
 }
 
+function tableSec(tableTypes: readonly TableType[]): Uint8Array {
+  return section(
+    4,
+    vec(
+      tableTypes.map(tableType => {
+        const marker = tableType.refType === "Funcref" ? 0x70 : 0x6f;
+        return new Uint8Array([marker, ...limits(tableType.limits)]);
+      }),
+    ),
+  );
+}
+
 function memSec(memTypes: readonly MemType[]): Uint8Array {
   return section(5, vec(memTypes.map(m => limits(m.limits))));
 }
@@ -153,6 +168,14 @@ function expr(expression: Expr): Uint8Array {
   return new Uint8Array([...flat(instructions(expression)), 0x0b]);
 }
 
+function funcIdx(elemList: FunctionIndexList): Uint8Array {
+  return new Uint8Array([0x00, ...expr(elemList.offsetExpr), ...vec(elemList.indices.map(i => uint32(i)))]);
+}
+
+function elemSec(elems: readonly Elem[]): Uint8Array {
+  return section(9, vec(elems.map(elem => funcIdx(elem.elemList))));
+}
+
 function codeSec(funcs: readonly Func[]): Uint8Array {
   return section(
     10,
@@ -172,8 +195,10 @@ export function unparse(mod: Module): Uint8Array {
     ...head,
     ...typeSec(mod.types),
     ...funcSec(mod.funcs),
+    ...tableSec(mod.tables),
     ...memSec(mod.mems),
     ...exportSec(mod.exports),
+    ...elemSec(mod.elems),
     ...codeSec(mod.funcs),
   ]);
   return ret;

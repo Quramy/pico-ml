@@ -11,6 +11,8 @@ import {
   parseFunc,
   parseExport,
   parseMemoryInstr,
+  parseElem,
+  parseTable,
 } from "./parser";
 import * as f from "../ast-factory";
 
@@ -138,6 +140,34 @@ describe(parseMemory, () => {
     expect(use(parseMemory)("(memory 1)")).toMatchObject(f.memory(f.limits(f.uint32(1))));
     expect(use(parseMemory)("(memory 1 2)")).toMatchObject(f.memory(f.limits(f.uint32(1), f.uint32(2))));
     expect(use(parseMemory)("(memory $mem 1)")).toMatchObject(f.memory(f.limits(f.uint32(1)), f.identifier("mem")));
+    expect(use(parseMemory)("(memory $mem 1 2)")).toMatchObject(
+      f.memory(f.limits(f.uint32(1), f.uint32(2)), f.identifier("mem")),
+    );
+  });
+});
+
+describe(parseTable, () => {
+  test("success", () => {
+    expect(use(parseTable)("(table funcref (elem 1))")).toMatchObject(
+      f.tableWithElemList(f.functionIndexList([f.uint32(1)])),
+    );
+    expect(use(parseTable)("(table $table funcref (elem 1 3))")).toMatchObject(
+      f.tableWithElemList(f.functionIndexList([f.uint32(1), f.uint32(3)]), f.identifier("table")),
+    );
+    expect(use(parseTable)("(table 1 funcref)")).toMatchObject(
+      f.tableWithType(f.tableType(f.refType("Funcref"), f.limits(f.uint32(1)))),
+    );
+    expect(use(parseTable)("(table $table 1 2 funcref)")).toMatchObject(
+      f.tableWithType(f.tableType(f.refType("Funcref"), f.limits(f.uint32(1), f.uint32(2))), f.identifier("table")),
+    );
+  });
+});
+
+describe(parseElem, () => {
+  test("success", () => {
+    expect(use(parseElem)("(elem (offset i32.const 0) func 0)")).toMatchObject(
+      f.elem(f.functionIndexList([f.uint32(0)]), [f.numericInstr("i32.const", [f.int32(0)])]),
+    );
   });
 });
 

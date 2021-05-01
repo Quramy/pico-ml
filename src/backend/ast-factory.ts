@@ -28,6 +28,15 @@ import {
   IfInstructionNode,
   MemoryInstructionNode,
   FuncTypeRefNode,
+  ExportedTableNode,
+  RefKind,
+  RefTypeNode,
+  TableTypeNode,
+  TableNode,
+  ElementListNode,
+  FunctionIndexListNode,
+  ElemNode,
+  ExprNode,
 } from "./ast-types";
 import {
   NumericInstructionKind,
@@ -100,6 +109,14 @@ export function paramType(valueType: ValueTypeNode, id?: IdentifierNode | null, 
     kind: "ParamType",
     id: id ?? null,
     valueType,
+    loc: pos?.loc,
+  };
+}
+
+export function refType(refKind: RefKind, pos?: Position): RefTypeNode {
+  return {
+    kind: "RefType",
+    refKind,
     loc: pos?.loc,
   };
 }
@@ -257,6 +274,58 @@ export function func(
   };
 }
 
+export function tableType(refType: RefTypeNode, limits: LimitsNode, pos?: Position): TableTypeNode {
+  return {
+    kind: "TableType",
+    refType,
+    limits,
+    loc: pos?.loc,
+  };
+}
+
+export function tableWithType(tableType: TableTypeNode, id?: IdentifierNode | null, pos?: Position): TableNode {
+  return {
+    kind: "Table",
+    id: id ?? null,
+    tableType,
+    elemList: null,
+    loc: pos?.loc,
+  };
+}
+
+export function functionIndexList(indices: readonly IndexNode[], pos?: Position): FunctionIndexListNode {
+  return {
+    kind: "FunctionIndexList",
+    indices,
+    loc: pos?.loc,
+  };
+}
+
+export function elem(
+  elemList: ElementListNode,
+  offsetExpr: ExprNode,
+  id?: IdentifierNode | null,
+  pos?: Position,
+): ElemNode {
+  return {
+    kind: "Elem",
+    elemList,
+    offsetExpr,
+    id: id ?? null,
+    loc: pos?.loc,
+  };
+}
+
+export function tableWithElemList(elemList: ElementListNode, id?: IdentifierNode | null, pos?: Position): TableNode {
+  return {
+    kind: "Table",
+    elemList,
+    id: id ?? null,
+    tableType: null,
+    loc: pos?.loc,
+  };
+}
+
 export function exportedFunc(index: IndexNode, pos?: Position): ExportedFuncNode {
   return {
     kind: "ExportedFunc",
@@ -268,6 +337,14 @@ export function exportedFunc(index: IndexNode, pos?: Position): ExportedFuncNode
 export function exportedMemory(index: IndexNode, pos?: Position): ExportedMemoryNode {
   return {
     kind: "ExportedMemory",
+    index,
+    loc: pos?.loc,
+  };
+}
+
+export function exportedTable(index: IndexNode, pos?: Position): ExportedTableNode {
+  return {
+    kind: "ExportedTable",
     index,
     loc: pos?.loc,
   };

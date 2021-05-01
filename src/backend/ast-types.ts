@@ -22,7 +22,9 @@ export type ReservedWords = [
   "type",
   "memory",
   "table",
+  "elem",
   "func",
+  "funcref",
   "param",
   "result",
   "local",
@@ -32,6 +34,7 @@ export type ReservedWords = [
   "end",
   "block",
   "loop",
+  "offset",
   "offset=",
   "align=",
 ];
@@ -153,6 +156,8 @@ export type PlainInstructionNode =
 
 export type InstructionNode = StructuredControleInstructionNode | PlainInstructionNode;
 
+export type ExprNode = readonly InstructionNode[];
+
 export interface LocalVarNode extends Node<"LocalVar"> {
   readonly id: IdentifierNode | null;
   readonly valueType: ValueTypeNode;
@@ -165,6 +170,16 @@ export interface FuncNode extends Node<"Func"> {
   readonly instructions: readonly InstructionNode[];
 }
 
+export type RefKind = "Funcref" | "Externref";
+
+export interface RefTypeNode extends Node<"RefType"> {
+  readonly refKind: RefKind;
+}
+
+export interface HeapTypeNode extends Node<"HeapType"> {
+  readonly refKind: "Func" | "Extern";
+}
+
 export interface LimitsNode extends Node<"Limits"> {
   readonly min: Uint32LiteralNode;
   readonly max: Uint32LiteralNode | null;
@@ -175,6 +190,29 @@ export interface MemoryNode extends Node<"Memory"> {
   readonly limits: LimitsNode;
 }
 
+export interface TableTypeNode extends Node<"TableType"> {
+  readonly limits: LimitsNode;
+  readonly refType: RefTypeNode;
+}
+
+export interface FunctionIndexListNode extends Node<"FunctionIndexList"> {
+  readonly indices: readonly IndexNode[];
+}
+
+export type ElementListNode = FunctionIndexListNode;
+
+export interface ElemNode extends Node<"Elem"> {
+  readonly id: IdentifierNode | null;
+  readonly offsetExpr: ExprNode;
+  readonly elemList: ElementListNode;
+}
+
+export interface TableNode extends Node<"Table"> {
+  readonly id: IdentifierNode | null;
+  readonly tableType: TableTypeNode | null;
+  readonly elemList: ElementListNode | null;
+}
+
 export interface ExportedFuncNode extends Node<"ExportedFunc"> {
   readonly index: IndexNode;
 }
@@ -183,14 +221,18 @@ export interface ExportedMemoryNode extends Node<"ExportedMemory"> {
   readonly index: IndexNode;
 }
 
-export type ExportedSecNode = ExportedFuncNode | ExportedMemoryNode;
+export interface ExportedTableNode extends Node<"ExportedTable"> {
+  readonly index: IndexNode;
+}
+
+export type ExportedSecNode = ExportedFuncNode | ExportedMemoryNode | ExportedTableNode;
 
 export interface ExportNode extends Node<"Export"> {
   readonly name: string;
   readonly sec: ExportedSecNode;
 }
 
-export type ModuleBodyNode = TypeNode | FuncNode | MemoryNode | ExportNode;
+export type ModuleBodyNode = TypeNode | FuncNode | MemoryNode | ExportNode | TableNode | ElemNode;
 
 export interface ModuleNode extends Node<"Module"> {
   readonly id: IdentifierNode | null;
