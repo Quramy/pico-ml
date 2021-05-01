@@ -23,8 +23,30 @@ import {
   ExportedMemoryNode,
   ExportedSecNode,
   ExportNode,
+  BlockTypeNode,
+  ControlInstructionNode,
+  IfInstructionNode,
+  MemoryInstructionNode,
+  FuncTypeRefNode,
+  ExportedTableNode,
+  RefKind,
+  RefTypeNode,
+  TableTypeNode,
+  TableNode,
+  ElementListNode,
+  FunctionIndexListNode,
+  ElemNode,
+  ExprNode,
+  MutValueTypeNode,
+  GlobalTypeNode,
+  GlobalNode,
 } from "./ast-types";
-import { NumericInstructionKind, VariableInstructionKind } from "./instructions-map";
+import {
+  NumericInstructionKind,
+  VariableInstructionKind,
+  ControlInstructionKind,
+  MemoryInstructionKind,
+} from "./instructions-map";
 
 export function uint32(value: number, pos?: Position): Uint32LiteralNode {
   return {
@@ -85,11 +107,27 @@ export function valueType(valueKind: ValueTypeKind, pos?: Position): ValueTypeNo
   };
 }
 
+export function mutValueType(valueType: ValueTypeNode, pos?: Position): MutValueTypeNode {
+  return {
+    kind: "MutValueType",
+    valueType,
+    loc: pos?.loc,
+  };
+}
+
 export function paramType(valueType: ValueTypeNode, id?: IdentifierNode | null, pos?: Position): ParamTypeNode {
   return {
     kind: "ParamType",
     id: id ?? null,
     valueType,
+    loc: pos?.loc,
+  };
+}
+
+export function refType(refKind: RefKind, pos?: Position): RefTypeNode {
+  return {
+    kind: "RefType",
+    refKind,
     loc: pos?.loc,
   };
 }
@@ -125,6 +163,14 @@ export function typedef(funcType: FuncTypeNode, id?: IdentifierNode | null, pos?
   };
 }
 
+export function funcTypeRef(type: IndexNode, pos?: Position): FuncTypeRefNode {
+  return {
+    kind: "FuncTypeRef",
+    type,
+    loc: pos?.loc,
+  };
+}
+
 export function funcSig(
   params: readonly ParamTypeNode[],
   results: readonly ValueTypeNode[],
@@ -136,6 +182,47 @@ export function funcSig(
     type: index ?? null,
     params,
     results,
+    loc: pos?.loc,
+  };
+}
+
+export function blockType(results: readonly ValueTypeNode[], index?: IndexNode | null, pos?: Position): BlockTypeNode {
+  return {
+    kind: "BlockType",
+    type: index ?? null,
+    results,
+    loc: pos?.loc,
+  };
+}
+
+export function ifInstr(
+  blockType: BlockTypeNode,
+  thenExpr: readonly InstructionNode[],
+  elseExpr: readonly InstructionNode[],
+  id?: IdentifierNode | null,
+  pos?: Position,
+): IfInstructionNode {
+  return {
+    kind: "IfInstruction",
+    blockType,
+    thenExpr,
+    elseExpr,
+    id: id ?? null,
+    elseId: id ?? null,
+    endId: id ?? null,
+    loc: pos?.loc,
+  };
+}
+
+export function controlInstr(
+  instructionKind: ControlInstructionKind,
+  params?: readonly (IndexNode | FuncTypeRefNode)[],
+  pos?: Position,
+): ControlInstructionNode {
+  return {
+    kind: "ControlInstruction",
+    instructionKind,
+    parameters: params ?? [],
     loc: pos?.loc,
   };
 }
@@ -166,6 +253,21 @@ export function numericInstr(
   };
 }
 
+export function memoryInstr(
+  instructionKind: MemoryInstructionKind,
+  offset?: Uint32LiteralNode | null,
+  align?: Uint32LiteralNode | null,
+  pos?: Position,
+): MemoryInstructionNode {
+  return {
+    kind: "MemoryInstruction",
+    instructionKind,
+    offset: offset ?? null,
+    align: align ?? null,
+    loc: pos?.loc,
+  };
+}
+
 export function func(
   signature: FuncSigNode,
   locals: readonly LocalVarNode[],
@@ -183,6 +285,73 @@ export function func(
   };
 }
 
+export function tableType(refType: RefTypeNode, limits: LimitsNode, pos?: Position): TableTypeNode {
+  return {
+    kind: "TableType",
+    refType,
+    limits,
+    loc: pos?.loc,
+  };
+}
+
+export function tableWithType(tableType: TableTypeNode, id?: IdentifierNode | null, pos?: Position): TableNode {
+  return {
+    kind: "Table",
+    id: id ?? null,
+    tableType,
+    elemList: null,
+    loc: pos?.loc,
+  };
+}
+
+export function functionIndexList(indices: readonly IndexNode[], pos?: Position): FunctionIndexListNode {
+  return {
+    kind: "FunctionIndexList",
+    indices,
+    loc: pos?.loc,
+  };
+}
+
+export function globalNode(
+  type: GlobalTypeNode,
+  expr: ExprNode,
+  id?: IdentifierNode | null,
+  pos?: Position,
+): GlobalNode {
+  return {
+    kind: "Global",
+    id: id ?? null,
+    expr,
+    type,
+    loc: pos?.loc,
+  };
+}
+
+export function elem(
+  elemList: ElementListNode,
+  offsetExpr: ExprNode,
+  id?: IdentifierNode | null,
+  pos?: Position,
+): ElemNode {
+  return {
+    kind: "Elem",
+    elemList,
+    offsetExpr,
+    id: id ?? null,
+    loc: pos?.loc,
+  };
+}
+
+export function tableWithElemList(elemList: ElementListNode, id?: IdentifierNode | null, pos?: Position): TableNode {
+  return {
+    kind: "Table",
+    elemList,
+    id: id ?? null,
+    tableType: null,
+    loc: pos?.loc,
+  };
+}
+
 export function exportedFunc(index: IndexNode, pos?: Position): ExportedFuncNode {
   return {
     kind: "ExportedFunc",
@@ -194,6 +363,14 @@ export function exportedFunc(index: IndexNode, pos?: Position): ExportedFuncNode
 export function exportedMemory(index: IndexNode, pos?: Position): ExportedMemoryNode {
   return {
     kind: "ExportedMemory",
+    index,
+    loc: pos?.loc,
+  };
+}
+
+export function exportedTable(index: IndexNode, pos?: Position): ExportedTableNode {
+  return {
+    kind: "ExportedTable",
     index,
     loc: pos?.loc,
   };

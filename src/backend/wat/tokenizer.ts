@@ -26,6 +26,23 @@ export const symbolToken: (sym: SymbolKind) => Parser<SymbolToken> = sym => {
   };
 };
 
+export const memArgToken: (keyword: "offset=" | "align=") => Parser<KeywordToken> = keyword => {
+  return scanner => {
+    if (!scanner.startsWith(keyword)) {
+      return error({
+        confirmed: false,
+        message: `'${keyword}' expected.`,
+        occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
+      });
+    }
+    return ok({
+      tokenKind: "Keyword",
+      keyword,
+      loc: scanner.consume(keyword.length),
+    });
+  };
+};
+
 export const keywordToken: (keyword: ReservedWordKind) => Parser<KeywordToken> = keyword => {
   return scanner => {
     if (!scanner.startsWith(keyword) || !scanner.match(/^($|[^a-zA-Z0-9\.\$_])/, keyword.length))

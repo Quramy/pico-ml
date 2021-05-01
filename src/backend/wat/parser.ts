@@ -1,14 +1,15 @@
 import {
   Parser,
-  loc,
+  Scanner,
+  NullPosition,
+  use,
   oneOf,
+  tryWith,
   expect,
   option,
   vec,
-  tryWith,
-  NullPosition,
   fromOptional,
-  Scanner,
+  loc,
 } from "../../parser-util";
 import {
   ModuleNode,
@@ -31,9 +32,33 @@ import {
   FuncNode,
   ExportedSecNode,
   ExportNode,
+  IfInstructionNode,
+  BlockTypeNode,
+  ControlInstructionNode,
+  MemoryInstructionNode,
+  FuncTypeRefNode,
+  TableNode,
+  FunctionIndexListNode,
+  ElemNode,
+  MutValueTypeNode,
+  GlobalNode,
 } from "../ast-types";
-import { symbolToken, keywordToken, identifierToken, uintToken, intToken, keywordsToken, strToken } from "./tokenizer";
-import { getNumericInstructionKinds, getVariableInstructionKinds } from "../instructions-map";
+import {
+  symbolToken,
+  keywordToken,
+  keywordsToken,
+  identifierToken,
+  uintToken,
+  intToken,
+  strToken,
+  memArgToken,
+} from "./tokenizer";
+import {
+  getControlInstructionKinds,
+  getVariableInstructionKinds,
+  getNumericInstructionKinds,
+  getMemoryInstructionKinds,
+} from "../instructions-map";
 
 const identifier: Parser<IdentifierNode> = expect(identifierToken)(t => ({
   kind: "Identifier",
@@ -83,6 +108,21 @@ const param: Parser<ParamTypeNode> = tryWith(
       id: toIdNode(tMaybeId),
       valueType,
       ...loc(tLp, tParam, tMaybeId, valueType, tRp),
+    }),
+  ),
+);
+
+const mutValue: Parser<MutValueTypeNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("mut"),
+    valType,
+    symbolToken(")"),
+  )(
+    (tLp, tMut, valueType, tRp): MutValueTypeNode => ({
+      kind: "MutValueType",
+      valueType,
+      ...loc(tLp, tMut, valueType, tRp),
     }),
   ),
 );
@@ -161,6 +201,69 @@ const funcSig: Parser<FuncSigNode> = tryWith(
   ),
 );
 
+const blockType: Parser<BlockTypeNode> = tryWith(
+  expect(
+    option(typeUseRef),
+    vec(result),
+  )(
+    (mayBeIndex, results): BlockTypeNode => ({
+      kind: "BlockType",
+      type: fromOptional(mayBeIndex)(idx => idx),
+      results: results.values,
+      ...loc(mayBeIndex, results),
+    }),
+  ),
+);
+
+const ifInstr: Parser<IfInstructionNode> = tryWith(
+  expect(
+    keywordToken("if"),
+    option(identifierToken),
+    blockType,
+    vec(use(() => instr)),
+    keywordToken("else"),
+    option(identifierToken),
+    vec(use(() => instr)),
+    keywordToken("end"),
+    option(identifierToken),
+  )(
+    (tIf, tMaybeLabelId, blockType, thenExpr, tElse, tMaybeElseId, elseExpr, tEnd, tMaybeEndId): IfInstructionNode => ({
+      kind: "IfInstruction",
+      id: toIdNode(tMaybeLabelId),
+      elseId: toIdNode(tMaybeElseId),
+      endId: toIdNode(tMaybeEndId),
+      blockType,
+      thenExpr: thenExpr.values,
+      elseExpr: elseExpr.values,
+      ...loc(tIf, tMaybeLabelId, blockType, thenExpr, tElse, tMaybeElseId, elseExpr, tEnd, tMaybeEndId),
+    }),
+  ),
+);
+
+const funcTypeRef: Parser<FuncTypeRefNode> = tryWith(
+  expect(typeUseRef)(
+    (type): FuncTypeRefNode => ({
+      kind: "FuncTypeRef",
+      type,
+      loc: type.loc,
+    }),
+  ),
+);
+
+const controlInstr: Parser<ControlInstructionNode> = tryWith(
+  expect(
+    keywordsToken(getControlInstructionKinds()),
+    vec(oneOf(index, funcTypeRef)),
+  )(
+    (tInstrKind, params): ControlInstructionNode => ({
+      kind: "ControlInstruction",
+      instructionKind: tInstrKind.keyword,
+      parameters: params.values,
+      ...loc(tInstrKind, params),
+    }),
+  ),
+);
+
 const variableInstr: Parser<VariableInstructionNode> = tryWith(
   expect(
     keywordsToken(getVariableInstructionKinds()),
@@ -189,6 +292,22 @@ const numericInstr: Parser<NumericInstructionNode> = tryWith(
   ),
 );
 
+const memoryInstr: Parser<MemoryInstructionNode> = tryWith(
+  expect(
+    keywordsToken(getMemoryInstructionKinds()),
+    option(expect(memArgToken("offset="), u32)((t, v) => ({ ...v, ...loc(t, v) }))),
+    option(expect(memArgToken("align="), u32)((t, v) => ({ ...v, ...loc(t, v) }))),
+  )(
+    (tInstrKind, maybeOffset, maybeAlign): MemoryInstructionNode => ({
+      kind: "MemoryInstruction",
+      instructionKind: tInstrKind.keyword,
+      offset: fromOptional(maybeOffset)(n => n),
+      align: fromOptional(maybeAlign)(n => n),
+      ...loc(tInstrKind, maybeOffset, maybeAlign),
+    }),
+  ),
+);
+
 const local: Parser<LocalVarNode> = tryWith(
   expect(
     symbolToken("("),
@@ -206,7 +325,7 @@ const local: Parser<LocalVarNode> = tryWith(
   ),
 );
 
-const instr: Parser<InstructionNode> = oneOf(numericInstr, variableInstr);
+const instr: Parser<InstructionNode> = oneOf(ifInstr, controlInstr, numericInstr, variableInstr, memoryInstr);
 
 const func: Parser<FuncNode> = tryWith(
   expect(
@@ -256,15 +375,140 @@ const mem: Parser<MemoryNode> = tryWith(
   ),
 );
 
+const globalNode: Parser<GlobalNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("global"),
+    option(identifierToken),
+    oneOf(valType, mutValue),
+    vec(instr),
+    symbolToken(")"),
+  )(
+    (tLp, tGlobal, maybeId, type, instructions, tRp): GlobalNode => ({
+      kind: "Global",
+      id: toIdNode(maybeId),
+      type,
+      expr: instructions.values,
+      ...loc(tLp, tGlobal, maybeId, type, instructions, tRp),
+    }),
+  ),
+);
+
+const funcIndicesForTable: Parser<FunctionIndexListNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("elem"),
+    vec(index),
+    symbolToken(")"),
+  )(
+    (tLp, tElem, indices, tRp): FunctionIndexListNode => ({
+      kind: "FunctionIndexList",
+      indices: indices.values,
+      ...loc(tLp, tElem, indices, tRp),
+    }),
+  ),
+);
+
+const funcIndicesForElem: Parser<FunctionIndexListNode> = tryWith(
+  expect(
+    keywordToken("func"),
+    vec(index),
+  )(
+    (tFunc, indices): FunctionIndexListNode => ({
+      kind: "FunctionIndexList",
+      indices: indices.values,
+      ...loc(tFunc, indices),
+    }),
+  ),
+);
+
+const tableWithType: Parser<TableNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("table"),
+    option(identifierToken),
+    limits,
+    keywordToken("funcref"),
+    symbolToken(")"),
+  )(
+    (tLp, tTable, maybeId, limits, tFuncref, tRp): TableNode => ({
+      kind: "Table",
+      elemList: null,
+      id: toIdNode(maybeId),
+      tableType: {
+        kind: "TableType",
+        limits,
+        refType: {
+          kind: "RefType",
+          refKind: "Funcref",
+          ...loc(tFuncref),
+        },
+        ...loc(limits),
+      },
+      ...loc(tLp, tTable, maybeId, limits, tFuncref, tRp),
+    }),
+  ),
+);
+
+const tableWithFunctionIndex: Parser<TableNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("table"),
+    option(identifierToken),
+    keywordToken("funcref"),
+    funcIndicesForTable,
+    symbolToken(")"),
+  )(
+    (tLp, tTable, maybeId, tFuncref, elementList, tRp): TableNode => ({
+      kind: "Table",
+      id: toIdNode(maybeId),
+      elemList: elementList,
+      tableType: null,
+      ...loc(tLp, tTable, maybeId, tFuncref, elementList, tRp),
+    }),
+  ),
+);
+
+const table = oneOf(tableWithType, tableWithFunctionIndex);
+
+const elem: Parser<ElemNode> = tryWith(
+  expect(
+    symbolToken("("),
+    keywordToken("elem"),
+    option(identifierToken),
+    symbolToken("("),
+    keywordToken("offset"),
+    vec(instr),
+    symbolToken(")"),
+    funcIndicesForElem,
+    symbolToken(")"),
+  )(
+    (tLp, tElem, maybeId, tLpInner, tOffset, instructions, tRpInner, indices, tRp): ElemNode => ({
+      kind: "Elem",
+      id: toIdNode(maybeId),
+      elemList: indices,
+      offsetExpr: instructions.values,
+      ...loc(tLp, tElem, maybeId, tLpInner, tOffset, instructions, tRpInner, indices, tRp),
+    }),
+  ),
+);
+
 const exportSec: Parser<ExportedSecNode> = tryWith(
   expect(
     symbolToken("("),
-    oneOf(keywordToken("func"), keywordToken("memory")),
+    oneOf(keywordToken("func"), keywordToken("memory"), keywordToken("table"), keywordToken("global")),
     index,
     symbolToken(")"),
   )(
     (tLp, tKeyword, index, tRp): ExportedSecNode => ({
-      kind: tKeyword.keyword === "func" ? "ExportedFunc" : "ExportedMemory",
+      kind:
+        tKeyword.keyword === "func"
+          ? "ExportedFunc"
+          : tKeyword.keyword === "memory"
+          ? "ExportedMemory"
+          : tKeyword.keyword === "table"
+          ? "ExportedTable"
+          : "ExportedGlobal",
       index,
       ...loc(tLp, tKeyword, index, tRp),
     }),
@@ -288,7 +532,7 @@ const exportNode: Parser<ExportNode> = tryWith(
   ),
 );
 
-const moduleField = oneOf(typedef, func, mem, exportNode);
+const moduleField = oneOf(typedef, func, table, mem, globalNode, exportNode, elem);
 
 const mod: Parser<ModuleNode> = expect(
   symbolToken("("),
@@ -297,20 +541,29 @@ const mod: Parser<ModuleNode> = expect(
   vec(moduleField),
   symbolToken(")"),
 )(
-  (tLp, tModule, maybeId, memValues, tRp): ModuleNode => ({
+  (tLp, tModule, maybeId, fields, tRp): ModuleNode => ({
     kind: "Module",
     id: toIdNode(maybeId),
-    body: memValues.values,
-    ...loc(tLp, tModule, maybeId, memValues, tRp),
+    body: fields.values,
+    ...loc(tLp, tModule, maybeId, fields, tRp),
   }),
 );
 
-export const parseType = typedef;
 export const parseFuncSig = funcSig;
+export const parseIfInstr = ifInstr;
+export const parseControlInstr = controlInstr;
 export const parseVariableInstr = variableInstr;
 export const parseNumericInstr = numericInstr;
+export const parseMemoryInstr = memoryInstr;
+
+export const parseType = typedef;
 export const parseFunc = func;
+export const parseTable = table;
 export const parseMemory = mem;
+export const parseGlobal = globalNode;
 export const parseExport = exportNode;
+export const parseElem = elem;
+
 export const parseModule = mod;
+
 export const parse = (code: string) => parseModule(new Scanner(code));

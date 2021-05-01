@@ -1,18 +1,26 @@
-import { Result, ok, error, all } from "../../../structure";
-import { FuncNode, InstructionNode, VariableInstructionNode, NumericInstructionNode } from "../../ast-types";
-import { Func, FuncType, Instruction } from "../../structure-types";
-import { funcType } from "../../structure-factory";
+import { Result, ok, error, all, mapValue, TraverserCallbackFn, createTreeTraverser } from "../../../structure";
+import { FuncNode, InstructionNode } from "../../ast-types";
+import { Func, FuncType, Instruction, ValType, UInt32Index, ResultType } from "../../structure-types";
 import { RefereneceContext, findIndex, createIndex } from "../ref";
 import {
   variableInstructions,
-  getVariableInstructionKinds,
   numericInstructions,
-  getNumericInstructionKinds,
+  controlInstructions,
+  memoryInstructions,
 } from "../../instructions-map";
+import { convertMaybeUint32 } from "./uint32";
 
 export interface State {
   readonly funcs: readonly Func[];
   readonly types: readonly FuncType[];
+}
+
+function funcType(params: ResultType, results: ResultType): FuncType {
+  return {
+    kind: "FuncType",
+    paramType: params,
+    resultType: results,
+  };
 }
 
 function compareFuncType(typeA: FuncType, typeB: FuncType): boolean {
@@ -28,49 +36,127 @@ function compareFuncType(typeA: FuncType, typeB: FuncType): boolean {
   return true;
 }
 
-function isVariableInstr(node: InstructionNode): node is VariableInstructionNode {
-  return getVariableInstructionKinds().some(k => node.instructionKind === k);
+interface ConvertInstrContext {
+  readonly types: FuncType[];
+  readonly refCtx: RefereneceContext;
 }
 
-function isNumericInstr(node: InstructionNode): node is NumericInstructionNode {
-  return getNumericInstructionKinds().some(k => node.instructionKind === k);
-}
+type ConvertInstrFn<K extends InstructionNode["kind"]> = TraverserCallbackFn<
+  InstructionNode,
+  ConvertInstrContext,
+  Result<Instruction>,
+  K
+>;
 
-export function convertInstr(node: InstructionNode, refCtx: RefereneceContext): Result<Instruction> {
-  if (isVariableInstr(node)) {
-    const { args } = variableInstructions[node.instructionKind];
-    return all(
-      node.parameters.map((p, i) => {
-        if (!args[i]) return error({ message: `${node.instructionKind} can not have ${i}th param` }) as Result<number>;
-        return findIndex(refCtx[args[i]]!, p);
-      }),
-    ).map(
-      parameters =>
-        ({
-          kind: "VariableInstruction",
-          instructionKind: node.instructionKind,
-          parameters,
-        } as Instruction),
+const controlInstruction: ConvertInstrFn<"ControlInstruction"> = (node, { refCtx }) => {
+  const { args } = controlInstructions[node.instructionKind];
+  return all(
+    node.parameters.map((p, i) => {
+      if (!args[i]) return error({ message: `${node.instructionKind} can not have ${i}th param` }) as Result<number>;
+      return findIndex(refCtx[args[i]]!, p.kind === "FuncTypeRef" ? p.type : p);
+    }),
+  ).map(
+    parameters =>
+      ({
+        kind: "ControlInstruction",
+        instructionKind: node.instructionKind,
+        parameters,
+      } as Instruction),
+  );
+};
+
+const variableInstruction: ConvertInstrFn<"VariableInstruction"> = (node, { refCtx }) => {
+  const { args } = variableInstructions[node.instructionKind];
+  return all(
+    node.parameters.map((p, i) => {
+      if (!args[i]) return error({ message: `${node.instructionKind} can not have ${i}th param` }) as Result<number>;
+      return findIndex(refCtx[args[i]]!, p);
+    }),
+  ).map(
+    parameters =>
+      ({
+        kind: "VariableInstruction",
+        instructionKind: node.instructionKind,
+        parameters,
+      } as Instruction),
+  );
+};
+
+const numericInstruction: ConvertInstrFn<"NumericInstruction"> = node => {
+  const { args } = numericInstructions[node.instructionKind];
+  return all(
+    node.parameters.map((p, i) => {
+      if (!args[i]) return error({ message: `${node.instructionKind} can not have ${i}th param` }) as Result<number>;
+      return ok(p.value);
+    }),
+  ).map(
+    parameters =>
+      ({
+        kind: "NumericInstruction",
+        instructionKind: node.instructionKind,
+        parameters,
+      } as Instruction),
+  );
+};
+
+const memoryInstruction: ConvertInstrFn<"MemoryInstruction"> = node => {
+  const { defaultAlign } = memoryInstructions[node.instructionKind];
+  return mapValue(
+    convertMaybeUint32(node.offset),
+    convertMaybeUint32(node.align),
+  )((offset, align) =>
+    ok({
+      kind: "MemoryInstruction",
+      instructionKind: node.instructionKind,
+      offset: offset ?? 0,
+      align: align ?? defaultAlign,
+    }),
+  );
+};
+
+const ifInstruction: ConvertInstrFn<"IfInstruction"> = (node, ctx, next) => {
+  let blockType: ValType | UInt32Index | null = null;
+  if (!node.blockType.type && node.blockType.results.length === 0) {
+    blockType = null;
+  } else if (!node.blockType.type && node.blockType.results.length === 1) {
+    blockType = { kind: "Int32Type" };
+  } else if (node.blockType.type) {
+    const foundResult = findIndex(ctx.refCtx.types, node.blockType.type);
+    if (!foundResult.ok) return error(foundResult.value);
+    blockType = foundResult.value;
+  } else {
+    const ft = funcType(
+      [],
+      node.blockType.results.map(() => ({ kind: "Int32Type" })),
     );
-  } else if (isNumericInstr(node)) {
-    const { args } = numericInstructions[node.instructionKind];
-    return all(
-      node.parameters.map((p, i) => {
-        if (!args[i]) return error({ message: `${node.instructionKind} can not have ${i}th param` }) as Result<number>;
-        return ok(p.value);
-      }),
-    ).map(
-      parameters =>
-        ({
-          kind: "NumericInstruction",
-          instructionKind: node.instructionKind,
-          parameters,
-        } as Instruction),
-    );
+    const foundIndex = ctx.types.findIndex(t => compareFuncType(t, ft));
+    if (foundIndex === -1) {
+      blockType = ctx.types.length;
+      ctx.types.push(ft);
+    } else {
+      blockType = foundIndex;
+    }
   }
-  // @ts-expect-error
-  return error({ message: `${node.instructionKind}` });
-}
+  return mapValue(
+    all(node.thenExpr.map(instr => next(instr, ctx))),
+    all(node.elseExpr.map(instr => next(instr, ctx))),
+  )((thenExpr, elseExpr) =>
+    ok({
+      kind: "IfInstruction",
+      blockType,
+      thenExpr,
+      elseExpr,
+    }),
+  );
+};
+
+export const convertInstr = createTreeTraverser<InstructionNode, ConvertInstrContext, Result<Instruction>>({
+  ifInstruction,
+  controlInstruction,
+  variableInstruction,
+  numericInstruction,
+  memoryInstruction,
+});
 
 export function convertFunc(node: FuncNode, prev: State, refCtx: RefereneceContext): Result<State> {
   const locals = new Map<string, number>();
@@ -98,7 +184,9 @@ export function convertFunc(node: FuncNode, prev: State, refCtx: RefereneceConte
     createIndex(node.locals, locals);
   }
 
-  return all(node.instructions.map(instr => convertInstr(instr, { ...refCtx, locals })))
+  const mutTypes = next.types.slice();
+
+  return all(node.instructions.map(instr => convertInstr(instr, { refCtx: { ...refCtx, locals }, types: mutTypes })))
     .map(
       body =>
         ({
@@ -111,7 +199,7 @@ export function convertFunc(node: FuncNode, prev: State, refCtx: RefereneceConte
     .map(
       func =>
         ({
-          ...next,
+          types: mutTypes,
           funcs: [...prev.funcs, func],
         } as State),
     );

@@ -1,6 +1,11 @@
 import { Tree } from "../structure";
 import { Position } from "../parser-util";
-import { NumericInstructionKind, VariableInstructionKind } from "./instructions-map";
+import {
+  ControlInstructionKind,
+  NumericInstructionKind,
+  VariableInstructionKind,
+  MemoryInstructionKind,
+} from "./instructions-map";
 
 interface Node<T extends string> extends Tree<T>, Position {}
 
@@ -11,19 +16,36 @@ export type ValueTypes = ["i32"];
 export type ValueTypeKind = ValueTypes[number];
 
 export type ReservedWords = [
+  "global",
   "import",
   "export",
   "module",
   "type",
   "memory",
   "table",
+  "elem",
   "func",
+  "funcref",
   "param",
   "result",
   "local",
   "i32",
+  "if",
+  "else",
+  "end",
+  "block",
+  "loop",
+  "offset",
+  "mut",
+  "offset=",
+  "align=",
 ];
-export type ReservedWordKind = ReservedWords[number] | VariableInstructionKind | NumericInstructionKind;
+export type ReservedWordKind =
+  | ReservedWords[number]
+  | ControlInstructionKind
+  | VariableInstructionKind
+  | NumericInstructionKind
+  | MemoryInstructionKind;
 
 export interface TokenBase<T extends string> extends Position {
   readonly tokenKind: T;
@@ -65,6 +87,10 @@ export interface ValueTypeNode extends Node<"ValueType"> {
   readonly valueKind: ValueTypeKind;
 }
 
+export interface MutValueTypeNode extends Node<"MutValueType"> {
+  readonly valueType: ValueTypeNode;
+}
+
 export interface ParamTypeNode extends Node<"ParamType"> {
   readonly id: IdentifierNode | null;
   readonly valueType: ValueTypeNode;
@@ -82,10 +108,33 @@ export interface TypeNode extends Node<"Type"> {
 
 export type IndexNode = Uint32LiteralNode | IdentifierNode;
 
+export interface FuncTypeRefNode extends Node<"FuncTypeRef"> {
+  readonly type: IndexNode;
+}
+
 export interface FuncSigNode extends Node<"FuncSig"> {
   readonly type: IndexNode | null;
   readonly params: readonly ParamTypeNode[];
   readonly results: readonly ValueTypeNode[];
+}
+
+export interface BlockTypeNode extends Node<"BlockType"> {
+  readonly type: IndexNode | null;
+  readonly results: readonly ValueTypeNode[];
+}
+
+export interface IfInstructionNode extends Node<"IfInstruction"> {
+  readonly blockType: BlockTypeNode;
+  readonly id: IdentifierNode | null;
+  readonly elseId: IdentifierNode | null;
+  readonly endId: IdentifierNode | null;
+  readonly thenExpr: readonly InstructionNode[];
+  readonly elseExpr: readonly InstructionNode[];
+}
+
+export interface ControlInstructionNode extends Node<"ControlInstruction"> {
+  readonly instructionKind: ControlInstructionKind;
+  readonly parameters: readonly (IndexNode | FuncTypeRefNode)[];
 }
 
 export interface VariableInstructionNode extends Node<"VariableInstruction"> {
@@ -98,7 +147,22 @@ export interface NumericInstructionNode extends Node<"NumericInstruction"> {
   readonly parameters: readonly Int32LiteralNode[];
 }
 
-export type InstructionNode = VariableInstructionNode | NumericInstructionNode;
+export interface MemoryInstructionNode extends Node<"MemoryInstruction"> {
+  readonly instructionKind: MemoryInstructionKind;
+  readonly offset: Uint32LiteralNode | null;
+  readonly align: Uint32LiteralNode | null;
+}
+
+export type StructuredControleInstructionNode = IfInstructionNode;
+export type PlainInstructionNode =
+  | ControlInstructionNode
+  | VariableInstructionNode
+  | NumericInstructionNode
+  | MemoryInstructionNode;
+
+export type InstructionNode = StructuredControleInstructionNode | PlainInstructionNode;
+
+export type ExprNode = readonly InstructionNode[];
 
 export interface LocalVarNode extends Node<"LocalVar"> {
   readonly id: IdentifierNode | null;
@@ -112,9 +176,27 @@ export interface FuncNode extends Node<"Func"> {
   readonly instructions: readonly InstructionNode[];
 }
 
+export type RefKind = "Funcref" | "Externref";
+
+export interface RefTypeNode extends Node<"RefType"> {
+  readonly refKind: RefKind;
+}
+
+export interface HeapTypeNode extends Node<"HeapType"> {
+  readonly refKind: "Func" | "Extern";
+}
+
 export interface LimitsNode extends Node<"Limits"> {
   readonly min: Uint32LiteralNode;
   readonly max: Uint32LiteralNode | null;
+}
+
+export type GlobalTypeNode = ValueTypeNode | MutValueTypeNode;
+
+export interface GlobalNode extends Node<"Global"> {
+  readonly id: IdentifierNode | null;
+  readonly type: GlobalTypeNode;
+  readonly expr: ExprNode;
 }
 
 export interface MemoryNode extends Node<"Memory"> {
@@ -122,7 +204,34 @@ export interface MemoryNode extends Node<"Memory"> {
   readonly limits: LimitsNode;
 }
 
+export interface TableTypeNode extends Node<"TableType"> {
+  readonly limits: LimitsNode;
+  readonly refType: RefTypeNode;
+}
+
+export interface FunctionIndexListNode extends Node<"FunctionIndexList"> {
+  readonly indices: readonly IndexNode[];
+}
+
+export type ElementListNode = FunctionIndexListNode;
+
+export interface ElemNode extends Node<"Elem"> {
+  readonly id: IdentifierNode | null;
+  readonly offsetExpr: ExprNode;
+  readonly elemList: ElementListNode;
+}
+
+export interface TableNode extends Node<"Table"> {
+  readonly id: IdentifierNode | null;
+  readonly tableType: TableTypeNode | null;
+  readonly elemList: ElementListNode | null;
+}
+
 export interface ExportedFuncNode extends Node<"ExportedFunc"> {
+  readonly index: IndexNode;
+}
+
+export interface ExportedGlobalNode extends Node<"ExportedGlobal"> {
   readonly index: IndexNode;
 }
 
@@ -130,14 +239,18 @@ export interface ExportedMemoryNode extends Node<"ExportedMemory"> {
   readonly index: IndexNode;
 }
 
-export type ExportedSecNode = ExportedFuncNode | ExportedMemoryNode;
+export interface ExportedTableNode extends Node<"ExportedTable"> {
+  readonly index: IndexNode;
+}
+
+export type ExportedSecNode = ExportedFuncNode | ExportedGlobalNode | ExportedMemoryNode | ExportedTableNode;
 
 export interface ExportNode extends Node<"Export"> {
   readonly name: string;
   readonly sec: ExportedSecNode;
 }
 
-export type ModuleBodyNode = TypeNode | FuncNode | MemoryNode | ExportNode;
+export type ModuleBodyNode = TypeNode | FuncNode | TableNode | MemoryNode | GlobalNode | ExportNode | ElemNode;
 
 export interface ModuleNode extends Node<"Module"> {
   readonly id: IdentifierNode | null;

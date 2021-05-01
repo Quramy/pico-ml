@@ -18,6 +18,20 @@ export function convertExport(node: ExportNode, refCtx: RefereneceContext): Resu
       exportKind: "Memory",
       index,
     }));
+  } else if (node.sec.kind === "ExportedTable") {
+    return findIndex(refCtx.tables, node.sec.index).map(index => ({
+      kind: "Export",
+      name: node.name,
+      exportKind: "Table",
+      index,
+    }));
+  } else if (node.sec.kind === "ExportedGlobal") {
+    return findIndex(refCtx.globals, node.sec.index).map(index => ({
+      kind: "Export",
+      name: node.name,
+      exportKind: "Global",
+      index,
+    }));
   }
   return undefined as never;
 }
