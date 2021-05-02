@@ -428,10 +428,10 @@ const tableWithType: Parser<TableNode> = tryWith(
     keywordToken("table"),
     option(identifierToken),
     limits,
-    keywordToken("funcref"),
+    oneOf(keywordToken("funcref"), keywordToken("externref")),
     symbolToken(")"),
   )(
-    (tLp, tTable, maybeId, limits, tFuncref, tRp): TableNode => ({
+    (tLp, tTable, maybeId, limits, tRefKind, tRp): TableNode => ({
       kind: "Table",
       elemList: null,
       id: toIdNode(maybeId),
@@ -440,12 +440,12 @@ const tableWithType: Parser<TableNode> = tryWith(
         limits,
         refType: {
           kind: "RefType",
-          refKind: "Funcref",
-          ...loc(tFuncref),
+          refKind: tRefKind.keyword === "funcref" ? "Funcref" : "Externref",
+          ...loc(tRefKind),
         },
         ...loc(limits),
       },
-      ...loc(tLp, tTable, maybeId, limits, tFuncref, tRp),
+      ...loc(tLp, tTable, maybeId, limits, tRefKind, tRp),
     }),
   ),
 );
