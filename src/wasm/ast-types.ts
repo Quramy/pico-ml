@@ -26,6 +26,7 @@ export type ReservedWords = [
   "elem",
   "func",
   "funcref",
+  "externref",
   "param",
   "result",
   "local",
