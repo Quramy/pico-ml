@@ -183,6 +183,12 @@ describe(parseExport, () => {
     expect(use(parseExport)('(export "main" (memory $main))')).toMatchObject(
       f.exportNode("main", f.exportedMemory(f.identifier("main"))),
     );
+    expect(use(parseExport)('(export "main" (table $main))')).toMatchObject(
+      f.exportNode("main", f.exportedTable(f.identifier("main"))),
+    );
+    expect(use(parseExport)('(export "main" (global $main))')).toMatchObject(
+      f.exportNode("main", f.exportedGlobal(f.identifier("main"))),
+    );
   });
 });
 
