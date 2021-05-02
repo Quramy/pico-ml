@@ -40,6 +40,7 @@ import {
   MutValueTypeNode,
   GlobalTypeNode,
   GlobalNode,
+  ExportedGlobalNode,
 } from "./ast-types";
 import {
   NumericInstructionKind,
@@ -371,6 +372,14 @@ export function exportedMemory(index: IndexNode, pos?: Position): ExportedMemory
 export function exportedTable(index: IndexNode, pos?: Position): ExportedTableNode {
   return {
     kind: "ExportedTable",
+    index,
+    loc: pos?.loc,
+  };
+}
+
+export function exportedGlobal(index: IndexNode, pos?: Position): ExportedGlobalNode {
+  return {
+    kind: "ExportedGlobal",
     index,
     loc: pos?.loc,
   };
