@@ -4,7 +4,7 @@ import { convertModule } from "./converter";
 import { unparse } from "./binary";
 import * as f from "./ast-factory";
 
-export { parse } from "./wat";
+export { parse, unparse as printAST } from "./wat";
 export * from "./ast-types";
 
 export const factory = f;
