@@ -22,6 +22,6 @@ const definition: ModuleDefinition = {
   `,
 };
 
-export function getAllocator() {
+export function getAllocatorModuleDefinition() {
   return definition;
 }

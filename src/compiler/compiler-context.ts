@@ -1,7 +1,7 @@
 import { InstructionNode, LocalVarNode, factory } from "../wasm";
 import { CompilationContext, Environment } from "./types";
 import { ModuleDefinition } from "./moduel-builder";
-import { getEnv } from "./assets/modules/env";
+import { getEnvModuleDefinition } from "./assets/modules/env";
 import { createRootEnvironment } from "./environment";
 
 export class Context implements CompilationContext {
@@ -40,7 +40,7 @@ export class Context implements CompilationContext {
   useEnvironment() {
     if (this._enabledEnv) return;
     this._enabledEnv = true;
-    this._dependencies.push(getEnv());
+    this._dependencies.push(getEnvModuleDefinition());
     this._localsMainFn.push(factory.localVar(factory.valueType("i32"), factory.identifier("current_env_addr")));
     this._instructions = [
       factory.numericInstr("i32.const", [factory.int32(0)]),

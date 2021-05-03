@@ -1,9 +1,9 @@
 import { ModuleDefinition } from "../../moduel-builder";
-import { getAllocator } from "./alloc";
+import { getAllocatorModuleDefinition } from "./alloc";
 
 const definition: ModuleDefinition = {
   name: "lib/environment",
-  dependencies: [getAllocator()],
+  dependencies: [getAllocatorModuleDefinition()],
   code: `
     (module
       (func $__env_new__ (param $parent_addr i32) (param $value i32) (result i32) (local $addr i32)
@@ -47,6 +47,6 @@ const definition: ModuleDefinition = {
   `,
 };
 
-export function getEnv() {
+export function getEnvModuleDefinition() {
   return definition;
 }

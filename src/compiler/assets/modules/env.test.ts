@@ -1,9 +1,9 @@
 import { generateBinary } from "../../../wasm";
 import { ModuleBuilder } from "../../moduel-builder";
 
-import { getEnv } from "./env";
+import { getEnvModuleDefinition } from "./env";
 
-describe(getEnv, () => {
+describe(getEnvModuleDefinition, () => {
   describe("$__env_new__", () => {
     it("should store value to a new environment and return it's address", async () => {
       const buf = new ModuleBuilder({
@@ -21,7 +21,7 @@ describe(getEnv, () => {
             (export "mem" (memory $__alloc_mem__))
           )
         `,
-        dependencies: [getEnv()],
+        dependencies: [getEnvModuleDefinition()],
       })
         .build()
         .mapValue(generateBinary)
@@ -60,7 +60,7 @@ describe(getEnv, () => {
             (export "get" (func $get))
           )
         `,
-        dependencies: [getEnv()],
+        dependencies: [getEnvModuleDefinition()],
       })
         .build()
         .mapValue(generateBinary)
@@ -93,7 +93,7 @@ describe(getEnv, () => {
             (export "test" (func $test))
           )
         `,
-        dependencies: [getEnv()],
+        dependencies: [getEnvModuleDefinition()],
       })
         .build()
         .mapValue(generateBinary)

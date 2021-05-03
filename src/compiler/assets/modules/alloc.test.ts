@@ -1,9 +1,9 @@
 import { generateBinary } from "../../../wasm";
 import { ModuleBuilder } from "../../moduel-builder";
 
-import { getAllocator } from "./alloc";
+import { getAllocatorModuleDefinition } from "./alloc";
 
-describe(getAllocator, () => {
+describe(getAllocatorModuleDefinition, () => {
   it("should allocate liner memory and return the allocated address", async () => {
     const buf = new ModuleBuilder({
       name: "test",
@@ -16,7 +16,7 @@ describe(getAllocator, () => {
           (export "test" (func $test))
         )
       `,
-      dependencies: [getAllocator()],
+      dependencies: [getAllocatorModuleDefinition()],
     })
       .build()
       .mapValue(generateBinary)
