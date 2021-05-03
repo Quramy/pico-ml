@@ -38,6 +38,11 @@ const definition: ModuleDefinition = {
           call $__env_get__
         end
       )
+
+      (func $__env_parent__ (param $addr i32) (result i32)
+        local.get $addr
+        i32.load
+      )
     )
   `,
 };

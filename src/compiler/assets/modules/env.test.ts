@@ -72,4 +72,34 @@ describe(getEnv, () => {
       expect((instance.exports["get"] as Function)(2)).toBe(10);
     });
   });
+
+  describe("$__env_parent__", () => {
+    it("should return parent env address", async () => {
+      const buf = new ModuleBuilder({
+        name: "test",
+        code: `
+          (module
+            (func $test (result i32)
+              i32.const 0
+              i32.const 10
+              call $__env_new__
+              i32.const 20
+              call $__env_new__
+              i32.const 30
+              call $__env_new__
+              call $__env_parent__
+              call $__env_parent__
+            )
+            (export "test" (func $test))
+          )
+        `,
+        dependencies: [getEnv()],
+      })
+        .build()
+        .mapValue(generateBinary)
+        .unwrap();
+      const { instance } = await WebAssembly.instantiate(buf, {});
+      expect((instance.exports["test"] as Function)()).toBe(0);
+    });
+  });
 });
