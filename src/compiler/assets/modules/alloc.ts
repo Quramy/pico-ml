@@ -1,9 +1,10 @@
 import { ModuleDefinition } from "../../moduel-builder";
 
-const allocator: ModuleDefinition = {
+const definition: ModuleDefinition = {
   name: "lib/allocator",
   code: `
     (module
+      (memory $__alloc_mem__ 10)
       (global $__alloc_st__ (mut i32) i32.const 0)
       (func $__malloc__ (param $size i32) (result i32) (local $next i32)
 
@@ -22,5 +23,5 @@ const allocator: ModuleDefinition = {
 };
 
 export function getAllocator() {
-  return allocator;
+  return definition;
 }
