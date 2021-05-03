@@ -59,8 +59,12 @@ describe(compile, () => {
   });
 
   describe("variable bindings", () => {
-    it("should compile minus operation", async () => {
+    it("should compile let expression and identifier", async () => {
       expect(await evaluateMain("let a = 1 in a")).toBe(1);
+    });
+
+    it("should compile variable index correctly", async () => {
+      expect(await evaluateMain("let a = 2 in (let b = 10 in a + b) * a")).toBe(24);
     });
   });
 });
