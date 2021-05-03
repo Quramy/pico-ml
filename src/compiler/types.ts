@@ -1,6 +1,6 @@
 import { Result, ResultErrorBase, TraverserCallbackFn } from "../structure";
 import { Position } from "../parser-util";
-import { ExpressionNode } from "../syntax";
+import { ExpressionNode, IdentifierNode } from "../syntax";
 import { InstructionNode } from "../wasm";
 
 export interface CompilationError extends ResultErrorBase {
@@ -11,8 +11,15 @@ export type CompilationValue = true;
 
 export type CompilationResult = Result<CompilationValue, CompilationError>;
 
+export interface Environment {
+  getIndex(identifier: IdentifierNode): number;
+}
+
 export interface CompilationContext {
   readonly pushInstruction: (instruction: InstructionNode) => void;
+  readonly useEnvironment: () => void;
+  readonly setEnv: (env: Environment) => void;
+  readonly getEnv: () => Environment;
 }
 
 export type CompileNodeFn<K extends ExpressionNode["kind"]> = TraverserCallbackFn<

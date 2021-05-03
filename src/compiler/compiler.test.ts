@@ -57,6 +57,12 @@ describe(compile, () => {
       expect(await evaluateMain("(1+2)*3")).toBe(9);
     });
   });
+
+  describe("variable bindings", () => {
+    it("should compile minus operation", async () => {
+      expect(await evaluateMain("let a = 1 in a")).toBe(1);
+    });
+  });
 });
 
 const compile2wasm = (code: string) => parse(code).mapValue(compile).mapValue(generateBinary).unwrap();

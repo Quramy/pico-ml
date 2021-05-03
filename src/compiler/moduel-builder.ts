@@ -49,6 +49,11 @@ export class ModuleBuilder implements ModuleDefinition {
     return this;
   }
 
+  addDependencies(deps: readonly ModuleDefinition[]) {
+    deps.forEach(def => this.addDependency(def));
+    return this;
+  }
+
   get link() {
     return this._link;
   }
