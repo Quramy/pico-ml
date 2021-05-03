@@ -1,7 +1,7 @@
-import { InstructionNode, LocalVarNode, factory } from "../wasm";
+import { InstructionNode, LocalVarNode } from "../wasm";
 import { CompilationContext, Environment } from "./types";
 import { ModuleDefinition } from "./moduel-builder";
-import { getEnvModuleDefinition } from "./assets/modules/env";
+import { getEnvModuleDefinition, localVarTypeForEnv, initEnvInstr } from "./assets/modules/env";
 import { createRootEnvironment } from "./environment";
 
 export class Context implements CompilationContext {
@@ -13,8 +13,12 @@ export class Context implements CompilationContext {
 
   constructor() {}
 
-  pushInstruction(instruction: InstructionNode) {
-    this._instructions.push(instruction);
+  pushInstruction(instruction: InstructionNode | readonly InstructionNode[]) {
+    if (Array.isArray(instruction)) {
+      instruction.forEach(instr => this._instructions.push(instr));
+    } else {
+      this._instructions.push(instruction as InstructionNode);
+    }
   }
 
   getInstructions(): readonly InstructionNode[] {
@@ -41,11 +45,7 @@ export class Context implements CompilationContext {
     if (this._enabledEnv) return;
     this._enabledEnv = true;
     this._dependencies.push(getEnvModuleDefinition());
-    this._localsMainFn.push(factory.localVar(factory.valueType("i32"), factory.identifier("current_env_addr")));
-    this._instructions = [
-      factory.numericInstr("i32.const", [factory.int32(0)]),
-      factory.variableInstr("local.set", [factory.identifier("current_env_addr")]),
-      ...this._instructions,
-    ];
+    this._localsMainFn.push(localVarTypeForEnv());
+    this._instructions = [...initEnvInstr(), ...this._instructions];
   }
 }

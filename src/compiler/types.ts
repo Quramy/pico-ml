@@ -16,7 +16,7 @@ export interface Environment {
 }
 
 export interface CompilationContext {
-  readonly pushInstruction: (instruction: InstructionNode) => void;
+  readonly pushInstruction: (instruction: InstructionNode | readonly InstructionNode[]) => void;
   readonly useEnvironment: () => void;
   readonly setEnv: (env: Environment) => void;
   readonly getEnv: () => Environment;

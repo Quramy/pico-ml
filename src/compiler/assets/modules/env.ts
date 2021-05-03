@@ -1,3 +1,4 @@
+import { factory } from "../../../wasm";
 import { ModuleDefinition } from "../../moduel-builder";
 import { getAllocatorModuleDefinition } from "./alloc";
 
@@ -49,4 +50,38 @@ const definition: ModuleDefinition = {
 
 export function getEnvModuleDefinition() {
   return definition;
+}
+
+export function localVarTypeForEnv() {
+  return factory.localVar(factory.valueType("i32"), factory.identifier("current_env_addr"));
+}
+
+export function initEnvInstr() {
+  return [
+    factory.numericInstr("i32.const", [factory.int32(0)]),
+    factory.variableInstr("local.set", [factory.identifier("current_env_addr")]),
+  ];
+}
+
+export function newEnvInstr() {
+  return [
+    factory.controlInstr("call", [factory.identifier("__env_new__")]),
+    factory.variableInstr("local.set", [factory.identifier("current_env_addr")]),
+  ];
+}
+
+export function popEnvInstr() {
+  return [
+    factory.variableInstr("local.get", [factory.identifier("current_env_addr")]),
+    factory.controlInstr("call", [factory.identifier("__env_parent__")]),
+    factory.variableInstr("local.set", [factory.identifier("current_env_addr")]),
+  ];
+}
+
+export function getEnvValueInstr(index: number) {
+  return [
+    factory.variableInstr("local.get", [factory.identifier("current_env_addr")]),
+    factory.numericInstr("i32.const", [factory.int32(index)]),
+    factory.controlInstr("call", [factory.identifier("__env_get__")]),
+  ];
 }
