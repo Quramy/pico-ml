@@ -193,7 +193,7 @@ function codeSec(funcs: readonly Func[]): Uint8Array {
     10,
     vec(
       funcs.map(func => {
-        const f = [...vec(func.locals.map(numType)), ...expr(func.body)];
+        const f = [...vec(func.locals.map(l => new Uint8Array([1, ...numType(l)]))), ...expr(func.body)];
         const size = uint32(f.length);
         return new Uint8Array([...size, ...f]);
       }),

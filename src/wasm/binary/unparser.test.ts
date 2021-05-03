@@ -20,6 +20,24 @@ describe(unparse, () => {
       expect((instance.exports["main"] as Function)(1, 2)).toBe(3);
     });
 
+    test("Local variable  example", async () => {
+      const source = `
+        (module
+          (func $add (param $a i32) (result i32) (local $x i32)
+            local.get $a
+            i32.const 2
+            i32.mul
+            local.set $x
+            local.get $x
+          )
+          (export "main" (func $add))
+        )
+      `;
+      const buf = parse(source).mapValue(convertModule).map(unparse).unwrap();
+      const { instance } = await WebAssembly.instantiate(buf, {});
+      expect((instance.exports["main"] as Function)(1)).toBe(2);
+    });
+
     test("If instruction example", async () => {
       const source = `
         (module
