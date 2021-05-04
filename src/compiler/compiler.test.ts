@@ -79,8 +79,9 @@ describe(compile, () => {
   });
 
   describe("function", () => {
-    it("should compile function definition as table index", async () => {
+    it("should compile function definition as the function index of table elements", async () => {
       expect(await evaluateMain("fun x -> 10")).toBe(0);
+      expect(await evaluateMain("fun x -> fun y -> 10")).toBe(1);
       expect(await evaluateMain("let f1 = fun x -> 10 in let f2 = fun x -> 20 in f2")).toBe(1);
     });
   });
