@@ -32,11 +32,11 @@ const traverse = createTreeTraverser<ExpressionNode, CompilationContext, Compila
 
 export function compile(node: ExpressionNode) {
   const ctx = new Context();
-  return traverse(node, ctx).mapValue(() => {
+  return traverse(node, ctx).mapValue(instructions => {
     const mainFunc = factory.func(
       factory.funcSig([], [factory.valueType("i32")]),
       ctx.getLocalsMainFn(),
-      ctx.getInstructions(),
+      [...ctx.getInstructions(), ...instructions],
       factory.identifier("main"),
     );
     const mainExport = factory.exportNode("main", factory.exportedFunc(factory.identifier("main")));

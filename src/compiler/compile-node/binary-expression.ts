@@ -1,45 +1,37 @@
-import { ok, mapValue } from "../../structure";
+import { ok, error, all, Result } from "../../structure";
+import { BinaryExpressionNode } from "../../syntax";
 import { CompileNodeFn } from "../types";
-import { factory } from "../../wasm";
+import { factory, InstructionNode } from "../../wasm";
 
-export const binaryExpression: CompileNodeFn<"BinaryExpression"> = (node, ctx, next) => {
-  return mapValue(
+function getOperationInstr(node: BinaryExpressionNode): Result<readonly InstructionNode[]> {
+  switch (node.op.kind) {
+    case "Add":
+      return ok([factory.numericInstr("i32.add", [])]);
+    case "Sub":
+      return ok([factory.numericInstr("i32.sub", [])]);
+    case "Multiply":
+      return ok([factory.numericInstr("i32.mul", [])]);
+    case "LessThan":
+      return ok([factory.numericInstr("i32.lt_s", [])]);
+    case "LessEqualThan":
+      return ok([factory.numericInstr("i32.le_s", [])]);
+    case "GreaterThan":
+      return ok([factory.numericInstr("i32.gt_s", [])]);
+    case "GreaterEqualThan":
+      return ok([factory.numericInstr("i32.ge_s", [])]);
+    case "Equal": // FIXME
+      return ok([factory.numericInstr("i32.eq", [])]);
+    case "NotEqual":
+      return ok([factory.numericInstr("i32.ne", [])]);
+    default:
+      // @ts-expect-error
+      return error({ message: `invalid kind: ${node.op.kind}` });
+  }
+}
+
+export const binaryExpression: CompileNodeFn<"BinaryExpression"> = (node, ctx, next) =>
+  all([
     next(node.left, ctx),
     next(node.right, ctx),
-  )(() => {
-    switch (node.op.kind) {
-      case "Add":
-        ctx.pushInstruction(factory.numericInstr("i32.add", []));
-        break;
-      case "Sub":
-        ctx.pushInstruction(factory.numericInstr("i32.sub", []));
-        break;
-      case "Multiply":
-        ctx.pushInstruction(factory.numericInstr("i32.mul", []));
-        break;
-      case "LessThan":
-        ctx.pushInstruction(factory.numericInstr("i32.lt_s", []));
-        break;
-      case "LessEqualThan":
-        ctx.pushInstruction(factory.numericInstr("i32.le_s", []));
-        break;
-      case "GreaterThan":
-        ctx.pushInstruction(factory.numericInstr("i32.gt_s", []));
-        break;
-      case "GreaterEqualThan":
-        ctx.pushInstruction(factory.numericInstr("i32.ge_s", []));
-        break;
-
-      case "Equal": // FIXME
-        ctx.pushInstruction(factory.numericInstr("i32.eq", []));
-        break;
-      case "NotEqual":
-        ctx.pushInstruction(factory.numericInstr("i32.ne", []));
-        break;
-      default:
-        // @ts-expect-error
-        throw new Error(`invalid kind ${node.op.kind}`);
-    }
-    return ok(true);
-  });
-};
+    getOperationInstr(node).error(err => ({ ...err, occurence: node })),
+  ]).map(lr => lr.flat());

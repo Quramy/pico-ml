@@ -7,7 +7,7 @@ export interface CompilationError extends ResultErrorBase {
   readonly occurence: Position;
 }
 
-export type CompilationValue = true;
+export type CompilationValue = readonly InstructionNode[];
 
 export type CompilationResult = Result<CompilationValue, CompilationError>;
 

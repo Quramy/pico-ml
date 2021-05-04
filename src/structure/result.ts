@@ -15,6 +15,7 @@ export interface ResultErrorForm<E extends ResultErrorBase> {
 export interface ResultCombinator<T, E extends ResultErrorBase> {
   unwrap(): T;
   map<S>(cb: (value: T) => S): Result<S, E>;
+  tap(cb: (value: T) => any): Result<T, E>;
   error<F extends ResultErrorBase>(cb: (error: E) => F): Result<T, F>;
   mapValue<S, F extends ResultErrorBase>(cb: (value: T) => Result<S, F>): Result<S, E | F>;
 }
@@ -77,6 +78,10 @@ export function ok<T, E extends ResultErrorBase = ResultErrorBase>(value: T): Re
     map(cb) {
       return ok(cb(value));
     },
+    tap(cb) {
+      cb(value);
+      return ok(value);
+    },
     error() {
       return r;
     },
@@ -95,6 +100,9 @@ export function error<E extends ResultErrorBase>(value: E): Result<any, E> {
       return unwrap(r);
     },
     map() {
+      return r;
+    },
+    tap() {
       return r;
     },
     error(cb) {
