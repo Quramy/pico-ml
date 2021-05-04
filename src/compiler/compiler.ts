@@ -11,6 +11,7 @@ import { unaryExpression } from "./compile-node/unary-expression";
 import { binaryExpression } from "./compile-node/binary-expression";
 import { identifier } from "./compile-node/identifier";
 import { letExpression } from "./compile-node/let-expression";
+import { ifExpression } from "./compile-node/if-expression";
 
 const notImplemented = (node: ExpressionNode) => error({ message: "not implemented", occurence: node });
 
@@ -20,11 +21,11 @@ const traverse = createTreeTraverser<ExpressionNode, CompilationContext, Compila
   numberLiteral,
   unaryExpression,
   binaryExpression,
+  ifExpression,
   letExpression,
   emptyList: notImplemented,
   functionApplication: notImplemented,
   functionDefinition: notImplemented,
-  ifExpression: notImplemented,
   letRecExpression: notImplemented,
   listConstructor: notImplemented,
   matchExpression: notImplemented,

@@ -58,6 +58,13 @@ describe(compile, () => {
     });
   });
 
+  describe("if expression", () => {
+    it("should compile if expressoin", async () => {
+      expect(await evaluateMain("if true then 0 else 1")).toBe(0);
+      expect(await evaluateMain("if false then 0 else 1")).toBe(1);
+    });
+  });
+
   describe("variable bindings", () => {
     it("should compile let expression and identifier", async () => {
       expect(await evaluateMain("let a = 1 in a")).toBe(1);
