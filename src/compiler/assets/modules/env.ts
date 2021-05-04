@@ -70,6 +70,10 @@ export function newEnvInstr() {
   ];
 }
 
+export function getEnvAddrInstr() {
+  return [factory.variableInstr("local.get", [factory.identifier("current_env_addr")])];
+}
+
 export function popEnvInstr() {
   return [
     factory.variableInstr("local.get", [factory.identifier("current_env_addr")]),
