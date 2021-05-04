@@ -53,6 +53,10 @@ describe(compile, () => {
       expect(await evaluateMain("true==false")).toBe(0);
       expect(await evaluateMain("false!=false")).toBe(0);
       expect(await evaluateMain("false!=true")).toBe(1);
+      expect(await evaluateMain("(fun x -> 10) == (fun x -> 10)")).toBe(0);
+      expect(await evaluateMain("let fn = fun x -> 10 in fn == fn")).toBe(1);
+      expect(await evaluateMain("(fun x -> 10) != (fun x -> 10)")).toBe(1);
+      expect(await evaluateMain("let fn = fun x -> 10 in fn != fn")).toBe(0);
     });
 
     it("should treat association correctly", async () => {
@@ -78,11 +82,10 @@ describe(compile, () => {
     });
   });
 
-  describe("function", () => {
-    it("should compile function definition as the function index of table elements", async () => {
-      expect(await evaluateMain("fun x -> 10")).toBe(0);
-      expect(await evaluateMain("fun x -> fun y -> 10")).toBe(1);
-      expect(await evaluateMain("let f1 = fun x -> 10 in let f2 = fun x -> 20 in f2")).toBe(1);
+  describe("function definition and application", () => {
+    it("should compile function application and evaluate correctly", async () => {
+      expect(await evaluateMain("(fun x -> 10)(1)")).toBe(10);
+      expect(await evaluateMain("let add = fun a -> fun b -> a + b in add 10 20")).toBe(30);
     });
   });
 });

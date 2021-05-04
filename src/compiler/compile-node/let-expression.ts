@@ -1,7 +1,7 @@
 import { all } from "../../structure";
 import { CompileNodeFn } from "../types";
 import { createChildEnvironment } from "../environment";
-import { newEnvInstr, popEnvInstr, getEnvAddrInstr } from "../assets/modules/env";
+import { newEnvInstrForLet, popEnvInstr, getEnvAddrInstr } from "../assets/modules/env";
 
 export const letExpression: CompileNodeFn<"LetExpression"> = (node, ctx, next) => {
   ctx.useEnvironment();
@@ -11,7 +11,7 @@ export const letExpression: CompileNodeFn<"LetExpression"> = (node, ctx, next) =
     ctx.setEnv(childEnv);
     return next(node.exp, ctx)
       .tap(() => ctx.setEnv(parentEnv))
-      .map(instr => [...newEnvInstr(), ...instr]);
+      .map(instr => [...newEnvInstrForLet(), ...instr]);
   };
   return all([next(node.binding, ctx), getInExpressionInstr()]).map(list => [
     ...getEnvAddrInstr(),

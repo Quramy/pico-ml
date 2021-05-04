@@ -42,6 +42,6 @@ export function newTupleInstr() {
   return [factory.controlInstr("call", [factory.identifier("__tuple_new__")])];
 }
 
-export function getTupleValue(index: 0 | 1) {
-  return [factory.controlInstr("call", [factory.identifier(`$__tuple_get_v${index}__`)])];
+export function getTupleValueInstr(index: 0 | 1) {
+  return [factory.controlInstr("call", [factory.identifier(`__tuple_get_v${index}__`)])];
 }

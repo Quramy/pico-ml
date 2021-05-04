@@ -68,10 +68,11 @@ export function initEnvInstr() {
 }
 
 export function newEnvInstr() {
-  return [
-    factory.controlInstr("call", [factory.identifier("__env_new__")]),
-    factory.variableInstr("local.set", [factory.identifier("current_env_addr")]),
-  ];
+  return [factory.controlInstr("call", [factory.identifier("__env_new__")])];
+}
+
+export function newEnvInstrForLet() {
+  return [...newEnvInstr(), factory.variableInstr("local.set", [factory.identifier("current_env_addr")])];
 }
 
 export function getEnvAddrInstr() {

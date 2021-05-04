@@ -1,3 +1,4 @@
+import { factory } from "../../../wasm";
 import { ModuleDefinition } from "../../module-builder";
 
 const definition: ModuleDefinition = {
@@ -24,4 +25,11 @@ const definition: ModuleDefinition = {
 
 export function getAllocatorModuleDefinition() {
   return definition;
+}
+
+export function mallocInstr(byteLength: number) {
+  return [
+    factory.numericInstr("i32.const", [factory.int32(byteLength)]),
+    factory.controlInstr("call", [factory.identifier("__malloc__")]),
+  ];
 }

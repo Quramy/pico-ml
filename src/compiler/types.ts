@@ -1,7 +1,7 @@
 import { Result, ResultErrorBase, TraverserCallbackFn } from "../structure";
 import { Position } from "../parser-util";
 import { ExpressionNode, IdentifierNode } from "../syntax";
-import { InstructionNode, ExprNode } from "../wasm";
+import { InstructionNode, ExprNode, LocalVarNode } from "../wasm";
 
 export interface CompilationError extends ResultErrorBase {
   readonly occurence: Position;
@@ -22,10 +22,15 @@ export interface DefinitionStack<T> {
 
 export interface CompilationContext {
   readonly pushInstruction: (instruction: InstructionNode | readonly InstructionNode[]) => void;
+  readonly useAllocator: () => void;
+  readonly useTuple: () => void;
   readonly useEnvironment: () => void;
+  readonly useLocalVar: (node: LocalVarNode) => void;
   readonly setEnv: (env: Environment) => void;
   readonly getEnv: () => Environment;
-  readonly funcDefStack: DefinitionStack<ExprNode>;
+  readonly funcDefStack: DefinitionStack<ExprNode> & {
+    readonly callInstr: () => ExprNode;
+  };
 }
 
 export type CompileNodeFn<K extends ExpressionNode["kind"]> = TraverserCallbackFn<
