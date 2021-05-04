@@ -3,8 +3,8 @@ import { ModuleBuilder } from "../../module-builder";
 import { getTupleModuleDefinition } from "./tuple";
 
 describe(getTupleModuleDefinition, () => {
-  describe("$__env_new__", () => {
-    it("should store value to a new environment and return it's address", async () => {
+  describe("$__tuple_new__", () => {
+    it("should store pair of values and return it's address", async () => {
       const buf = new ModuleBuilder({
         name: "test",
         code: `
