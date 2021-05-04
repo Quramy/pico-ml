@@ -1,5 +1,5 @@
 import { generateBinary } from "../../../wasm";
-import { ModuleBuilder } from "../../moduel-builder";
+import { ModuleBuilder } from "../../module-builder";
 
 import { getEnvModuleDefinition } from "./env";
 

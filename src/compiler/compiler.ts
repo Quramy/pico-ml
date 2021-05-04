@@ -3,7 +3,7 @@ import { factory } from "../wasm";
 import { ExpressionNode } from "../syntax";
 import { CompilationContext, CompilationResult } from "./types";
 import { Context } from "./compiler-context";
-import { ModuleBuilder } from "./moduel-builder";
+import { ModuleBuilder } from "./module-builder";
 
 import { numberLiteral } from "./compile-node/number-literal";
 import { boolLiteral } from "./compile-node/bool-literal";

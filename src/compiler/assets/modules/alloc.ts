@@ -1,4 +1,4 @@
-import { ModuleDefinition } from "../../moduel-builder";
+import { ModuleDefinition } from "../../module-builder";
 
 const definition: ModuleDefinition = {
   name: "lib/allocator",

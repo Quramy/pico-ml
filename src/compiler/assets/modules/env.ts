@@ -1,5 +1,5 @@
 import { factory } from "../../../wasm";
-import { ModuleDefinition } from "../../moduel-builder";
+import { ModuleDefinition } from "../../module-builder";
 import { getAllocatorModuleDefinition } from "./alloc";
 
 const definition: ModuleDefinition = {

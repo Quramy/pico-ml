@@ -1,5 +1,5 @@
 import { printAST, factory } from "../wasm";
-import { ModuleBuilder, ModuleDefinition } from "./moduel-builder";
+import { ModuleBuilder, ModuleDefinition } from "./module-builder";
 
 describe(ModuleBuilder, () => {
   it("should build from simple module definition", () => {

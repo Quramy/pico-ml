@@ -1,6 +1,6 @@
 import { InstructionNode, LocalVarNode } from "../wasm";
 import { CompilationContext, Environment } from "./types";
-import { ModuleDefinition } from "./moduel-builder";
+import { ModuleDefinition } from "./module-builder";
 import { getEnvModuleDefinition, localVarTypeForEnv, initEnvInstr } from "./assets/modules/env";
 import { createRootEnvironment } from "./environment";
 
