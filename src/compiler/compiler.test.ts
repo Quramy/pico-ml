@@ -4,9 +4,12 @@ import { compile } from "./compiler";
 
 describe(compile, () => {
   describe("literal", () => {
-    it("should comiple number literal", async () => {
+    it("should comiple int literal", async () => {
       expect(await evaluateMain("0")).toBe(0);
       expect(await evaluateMain("1")).toBe(1);
+    });
+
+    it("should comiple bool literal", async () => {
       expect(await evaluateMain("true")).toBe(1);
       expect(await evaluateMain("false")).toBe(0);
     });
@@ -72,6 +75,13 @@ describe(compile, () => {
 
     it("should compile variable index correctly", async () => {
       expect(await evaluateMain("let a = 2 in (let b = 10 in a + b) * a")).toBe(24);
+    });
+  });
+
+  describe("function", () => {
+    it("should compile function definition as table index", async () => {
+      expect(await evaluateMain("fun x -> 10")).toBe(0);
+      expect(await evaluateMain("let f1 = fun x -> 10 in let f2 = fun x -> 20 in f2")).toBe(1);
     });
   });
 });

@@ -56,6 +56,10 @@ export function localVarTypeForEnv() {
   return factory.localVar(factory.valueType("i32"), factory.identifier("current_env_addr"));
 }
 
+export function paramTypeForEnv() {
+  return factory.paramType(factory.valueType("i32"), factory.identifier("current_env_addr"));
+}
+
 export function initEnvInstr() {
   return [
     factory.numericInstr("i32.const", [factory.int32(0)]),

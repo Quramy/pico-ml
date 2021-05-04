@@ -63,6 +63,11 @@ export class ModuleBuilder implements ModuleDefinition {
     return this;
   }
 
+  addFields(fields: readonly ModuleBodyNode[]) {
+    fields.forEach(field => this.addField(field));
+    return this;
+  }
+
   build(): Result<ModuleNode> {
     const importedModules = new Set<string>();
     const createLinkFn = (def: ModuleDefinition): LinkFn => {

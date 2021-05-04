@@ -12,6 +12,7 @@ import { binaryExpression } from "./compile-node/binary-expression";
 import { identifier } from "./compile-node/identifier";
 import { letExpression } from "./compile-node/let-expression";
 import { ifExpression } from "./compile-node/if-expression";
+import { functionDefinition } from "./compile-node/function-definition";
 
 const notImplemented = (node: ExpressionNode) => error({ message: "not implemented", occurence: node });
 
@@ -25,7 +26,7 @@ const traverse = createTreeTraverser<ExpressionNode, CompilationContext, Compila
   letExpression,
   emptyList: notImplemented,
   functionApplication: notImplemented,
-  functionDefinition: notImplemented,
+  functionDefinition,
   letRecExpression: notImplemented,
   listConstructor: notImplemented,
   matchExpression: notImplemented,
@@ -46,7 +47,9 @@ export function compile(node: ExpressionNode) {
       code: "(module)",
     })
       .addDependencies(ctx.getDependencies())
+      .addFields(ctx.funcDefStack.buildFuncs())
       .addField(mainFunc)
+      .addFields(ctx.funcDefStack.buildTables())
       .addField(mainExport);
     return builder.build();
   });

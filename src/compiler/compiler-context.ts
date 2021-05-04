@@ -3,6 +3,7 @@ import { CompilationContext, Environment } from "./types";
 import { ModuleDefinition } from "./module-builder";
 import { getEnvModuleDefinition, localVarTypeForEnv, initEnvInstr } from "./assets/modules/env";
 import { createRootEnvironment } from "./environment";
+import { FunctionDefinitionStack } from "./function-definition-stack";
 
 export class Context implements CompilationContext {
   private _env: Environment = createRootEnvironment();
@@ -10,6 +11,8 @@ export class Context implements CompilationContext {
   private _enabledEnv = false;
   private _localsMainFn: LocalVarNode[] = [];
   private _dependencies: ModuleDefinition[] = [];
+
+  public readonly funcDefStack = new FunctionDefinitionStack();
 
   constructor() {}
 
