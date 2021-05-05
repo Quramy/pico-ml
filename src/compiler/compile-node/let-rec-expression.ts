@@ -8,17 +8,17 @@ export const letRecExpression: CompileNodeFn<"LetRecExpression"> = (node, ctx, n
   ctx.useEnvironment();
   ctx.funcDefStack.enter();
   const parentEnv = ctx.getEnv();
-  const recEnv = createChildEnvironment(node.identifier, parentEnv);
-  ctx.setEnv(recEnv);
+  const funcNameEnv = createChildEnvironment(node.identifier, parentEnv);
+  ctx.setEnv(funcNameEnv);
   const getClosureInstr = () => {
-    const funcEnv = createChildEnvironment(node.binding.param, recEnv);
-    ctx.setEnv(funcEnv);
+    const funcParamEnv = createChildEnvironment(node.binding.param, funcNameEnv);
+    ctx.setEnv(funcParamEnv);
     return next(node.binding.body, ctx)
-      .map(functionBodyExpr => newClosureInstr(ctx)(ctx.funcDefStack.leave(functionBodyExpr), true))
-      .tap(() => ctx.setEnv(recEnv));
+      .map(functionBodyExpr => newClosureInstr(ctx)(ctx.funcDefStack.leave(functionBodyExpr)))
+      .tap(() => ctx.setEnv(funcNameEnv));
   };
   const getInExpressionInstr = () => {
-    ctx.setEnv(recEnv);
+    ctx.setEnv(funcNameEnv);
     return next(node.exp, ctx).map(instr => [...newEnvInstrForLet(), ...instr]);
   };
   return all([getClosureInstr(), getInExpressionInstr()])

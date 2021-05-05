@@ -12,7 +12,7 @@ describe(getTupleModuleDefinition, () => {
             (func $set (result i32)
               i32.const 100
               i32.const 200
-              call $__tuple2_new__
+              call $__tuple_new__
             )
             (func $get_first (param $addr i32) (result i32)
               local.get $addr
