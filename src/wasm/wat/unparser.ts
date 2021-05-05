@@ -44,7 +44,7 @@ class Writer {
       this.pushLine(str);
       return this;
     }
-    if (l.endsWith("(")) {
+    if (l.endsWith("(") || !l.trim().length) {
       this.buffer.push(l + str);
     } else {
       this.buffer.push(l + " " + str);
@@ -58,7 +58,11 @@ class Writer {
       this.pushLine("(");
       return this;
     }
-    this.buffer.push(l + " (");
+    if (l.trim().length) {
+      this.buffer.push(l + " (");
+    } else {
+      this.buffer.push(l + "(");
+    }
     return this;
   }
 

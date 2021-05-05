@@ -108,7 +108,7 @@ describe(unparse, () => {
   fixtures.forEach(code => {
     test("WAT: " + oneline(code), () => {
       const actual = parseAndUnparse(code);
-      // console.log(actual);
+      console.log(actual);
       expect(deindent(actual)).toBe(deindent(code));
     });
   });
