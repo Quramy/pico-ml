@@ -2,6 +2,7 @@ import { InstructionNode, LocalVarNode } from "../wasm";
 import { CompilationContext, Environment } from "./types";
 import { ModuleDefinition } from "./module-builder";
 import { getAllocatorModuleDefinition } from "./assets/modules/alloc";
+import { getListModuleDefinition } from "./assets/modules/list";
 import { getTupleModuleDefinition } from "./assets/modules/tuple";
 import { getEnvModuleDefinition, localVarTypeForEnv, initEnvInstr } from "./assets/modules/env";
 import { createRootEnvironment } from "./environment";
@@ -11,6 +12,7 @@ export class Context implements CompilationContext {
   private _env: Environment = createRootEnvironment();
   private _instructions: InstructionNode[] = [];
   private _enabledAllocator = false;
+  private _enabledList = false;
   private _enabledTuple = false;
   private _enabledEnv = false;
   private _localsMainFn: LocalVarNode[] = [];
@@ -62,6 +64,12 @@ export class Context implements CompilationContext {
     if (this._enabledAllocator) return;
     this._enabledAllocator = true;
     this._dependencies.push(getAllocatorModuleDefinition());
+  }
+
+  useList() {
+    if (this._enabledList) return;
+    this._enabledList = true;
+    this._dependencies.push(getListModuleDefinition());
   }
 
   useTuple() {

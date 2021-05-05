@@ -23,6 +23,7 @@ export interface DefinitionStack<T> {
 export interface CompilationContext {
   readonly pushInstruction: (instruction: InstructionNode | readonly InstructionNode[]) => void;
   readonly useAllocator: () => void;
+  readonly useList: () => void;
   readonly useTuple: () => void;
   readonly useEnvironment: () => void;
   readonly useLocalVar: (node: LocalVarNode) => void;

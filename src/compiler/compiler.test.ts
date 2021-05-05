@@ -9,9 +9,13 @@ describe(compile, () => {
       expect(await evaluateMain("1")).toBe(1);
     });
 
-    it("should comiple bool literal", async () => {
+    it("should comiple bool literal as 1 or 0", async () => {
       expect(await evaluateMain("true")).toBe(1);
       expect(await evaluateMain("false")).toBe(0);
+    });
+
+    it("should comiple empty list as 0", async () => {
+      expect(await evaluateMain("[]")).toBe(0);
     });
   });
 
@@ -53,6 +57,8 @@ describe(compile, () => {
       expect(await evaluateMain("true==false")).toBe(0);
       expect(await evaluateMain("false!=false")).toBe(0);
       expect(await evaluateMain("false!=true")).toBe(1);
+      expect(await evaluateMain("[]==[]")).toBe(1);
+      expect(await evaluateMain("[]!=[]")).toBe(0);
       expect(await evaluateMain("(fun x -> 10) == (fun x -> 10)")).toBe(0);
       expect(await evaluateMain("let fn = fun x -> 10 in fn == fn")).toBe(1);
       expect(await evaluateMain("(fun x -> 10) != (fun x -> 10)")).toBe(1);

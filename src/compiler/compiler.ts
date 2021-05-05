@@ -7,6 +7,7 @@ import { ModuleBuilder } from "./module-builder";
 
 import { numberLiteral } from "./compile-node/number-literal";
 import { boolLiteral } from "./compile-node/bool-literal";
+import { emptyList } from "./compile-node/empty-list";
 import { unaryExpression } from "./compile-node/unary-expression";
 import { binaryExpression } from "./compile-node/binary-expression";
 import { identifier } from "./compile-node/identifier";
@@ -21,6 +22,7 @@ const notImplemented = (node: ExpressionNode) => error({ message: "not implement
 const traverse = createTreeTraverser<ExpressionNode, CompilationContext, CompilationResult>({
   identifier,
   boolLiteral,
+  emptyList,
   numberLiteral,
   unaryExpression,
   binaryExpression,
@@ -29,7 +31,6 @@ const traverse = createTreeTraverser<ExpressionNode, CompilationContext, Compila
   functionApplication,
   letExpression,
   letRecExpression,
-  emptyList: notImplemented,
   listConstructor: notImplemented,
   matchExpression: notImplemented,
 });
