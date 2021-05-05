@@ -7,8 +7,8 @@ const definition: ModuleDefinition = {
   dependencies: [getAllocatorModuleDefinition()],
   code: `
     (module
-      (func $__tuple_new__ (param $v0 i32) (param $v1 i32) (result i32) (local $addr i32)
-        i32.const 8
+      (func $__tuple_new__ (param $v0 i32) (param $v1 i32) (param $v2 i32) (result i32) (local $addr i32)
+        i32.const 12
         call $__malloc__
         local.set $addr
 
@@ -21,6 +21,16 @@ const definition: ModuleDefinition = {
         i32.store offset=4
 
         local.get $addr
+        local.get $v2
+        i32.store offset=8
+
+        local.get $addr
+      )
+      (func $__tuple2_new__ (param $v0 i32) (param $v1 i32) (result i32) (local $addr i32)
+        local.get $v0
+        local.get $v1
+        i32.const -1
+        call $__tuple_new__
       )
       (func $__tuple_get_v0__ (param $addr i32) (result i32)
         local.get $addr
@@ -29,6 +39,10 @@ const definition: ModuleDefinition = {
       (func $__tuple_get_v1__ (param $addr i32) (result i32)
         local.get $addr
         i32.load offset=4
+      )
+      (func $__tuple_get_v2__ (param $addr i32) (result i32)
+        local.get $addr
+        i32.load offset=8
       )
     )
   `,
@@ -39,9 +53,13 @@ export function getTupleModuleDefinition() {
 }
 
 export function newTupleInstr() {
+  return [factory.controlInstr("call", [factory.identifier("__tuple2_new__")])];
+}
+
+export function newTripleInstr() {
   return [factory.controlInstr("call", [factory.identifier("__tuple_new__")])];
 }
 
-export function getTupleValueInstr(index: 0 | 1) {
+export function getTupleValueInstr(index: 0 | 1 | 2) {
   return [factory.controlInstr("call", [factory.identifier(`__tuple_get_v${index}__`)])];
 }

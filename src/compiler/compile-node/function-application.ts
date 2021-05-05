@@ -15,11 +15,28 @@ export const functionApplication: CompileNodeFn<"FunctionApplication"> = (node, 
     ok([
       ...closureInstr,
       factory.variableInstr("local.tee", [factory.identifier("closure_addr")]),
-      ...getTupleValueInstr(0), // env for the closure is stored as the 1st value
+      ...getTupleValueInstr(0),
+
+      // Note:
+      // If closure is recursive function, bind the closure address to the environment from the closure,
+      factory.ifInstr(
+        factory.blockType([factory.valueType("i32")]),
+        [
+          factory.variableInstr("local.get", [factory.identifier("closure_addr")]),
+          ...getTupleValueInstr(1), // env for the closure is stored as the 1st value
+          factory.variableInstr("local.get", [factory.identifier("closure_addr")]),
+          ...newEnvInstr(),
+        ],
+        [
+          factory.variableInstr("local.get", [factory.identifier("closure_addr")]),
+          ...getTupleValueInstr(1), // env for the closure is stored as the 1st value
+        ],
+      ),
       ...argumentInstr,
       ...newEnvInstr(),
+
       factory.variableInstr("local.get", [factory.identifier("closure_addr")]),
-      ...getTupleValueInstr(1), // function body index for the closure is stored as the 2nd value
+      ...getTupleValueInstr(2), // function body index for the closure is stored as the 2nd value
       ...ctx.funcDefStack.callInstr(),
     ]),
   );

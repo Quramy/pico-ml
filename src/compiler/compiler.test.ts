@@ -87,6 +87,10 @@ describe(compile, () => {
       expect(await evaluateMain("(fun x -> 10)(1)")).toBe(10);
       expect(await evaluateMain("let add = fun a -> fun b -> a + b in add 10 20")).toBe(30);
     });
+    it("should compile recursive function application and evaluate correctly", async () => {
+      expect(await evaluateMain("let rec add = fun a -> fun b -> a + b in add 10 20")).toBe(30);
+      expect(await evaluateMain("let rec fact = fun n -> if n < 1 then 1 else n * fact (n - 1) in fact 3")).toBe(6);
+    });
   });
 });
 
