@@ -48,7 +48,7 @@ const fixtures = [
   `
   (module
     (func $main (result i32)
-      i32.load offset= 4
+      i32.load offset=4
     )
   )
   `,

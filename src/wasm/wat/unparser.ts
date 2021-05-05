@@ -66,6 +66,10 @@ class Writer {
     return this.append(str);
   }
 
+  memArg(str: "offset=" | "align=", value: number) {
+    return this.append(`${str}${value}`);
+  }
+
   rp() {
     const l = this.buffer.pop();
     if (!l) {
@@ -195,12 +199,10 @@ function unparseControlInstr(node: ControlInstructionNode, writer: Writer) {
 function unparseMemoryInstr(node: MemoryInstructionNode, writer: Writer) {
   writer.keywordToken(node.instructionKind);
   if (node.offset) {
-    writer.keywordToken("offset=");
-    unparseInt(node.offset, writer);
+    writer.memArg("offset=", node.offset.value);
   }
   if (node.align) {
-    writer.keywordToken("align=");
-    unparseInt(node.align, writer);
+    writer.memArg("align=", node.align.value);
   }
 }
 
