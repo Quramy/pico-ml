@@ -5,8 +5,10 @@ import { getAllocatorModuleDefinition } from "./assets/modules/alloc";
 import { getListModuleDefinition } from "./assets/modules/list";
 import { getTupleModuleDefinition } from "./assets/modules/tuple";
 import { getEnvModuleDefinition, localVarTypeForEnv, initEnvInstr } from "./assets/modules/env";
+import { getMatcherModuleDefinition } from "./assets/modules/matcher";
 import { createRootEnvironment } from "./environment";
 import { FunctionDefinitionStack } from "./function-definition-stack";
+import { MatcherDefinitionStack } from "./matcher-definition-stack";
 
 export class Context implements CompilationContext {
   private _env: Environment = createRootEnvironment();
@@ -15,10 +17,12 @@ export class Context implements CompilationContext {
   private _enabledList = false;
   private _enabledTuple = false;
   private _enabledEnv = false;
+  private _enabledMatcher = false;
   private _localsMainFn: LocalVarNode[] = [];
   private _dependencies: ModuleDefinition[] = [];
 
   public readonly funcDefStack = new FunctionDefinitionStack();
+  public readonly matcherDefStack = new MatcherDefinitionStack();
 
   constructor() {}
 
@@ -84,5 +88,11 @@ export class Context implements CompilationContext {
     this._dependencies.push(getEnvModuleDefinition());
     this._localsMainFn.push(localVarTypeForEnv());
     this._instructions = [...initEnvInstr(), ...this._instructions];
+  }
+
+  useMatcher() {
+    if (this._enabledMatcher) return;
+    this._enabledMatcher = true;
+    this._dependencies.push(getMatcherModuleDefinition());
   }
 }

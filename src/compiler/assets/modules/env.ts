@@ -50,7 +50,7 @@ export function paramTypeForEnv() {
 
 export function initEnvInstr() {
   return [
-    factory.numericInstr("i32.const", [factory.int32(0)]),
+    factory.numericInstr("i32.const", [factory.int32(-1)]),
     factory.variableInstr("local.set", [factory.identifier("current_env_addr")]),
   ];
 }
@@ -65,6 +65,10 @@ export function newEnvInstrForLet() {
 
 export function getEnvAddrInstr() {
   return [factory.variableInstr("local.get", [factory.identifier("current_env_addr")])];
+}
+
+export function setEnvAddrInstr() {
+  return [factory.variableInstr("local.set", [factory.identifier("current_env_addr")])];
 }
 
 export function popEnvInstr() {

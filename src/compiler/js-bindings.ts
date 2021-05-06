@@ -10,7 +10,7 @@ export function toList(instance: WebAssembly.Instance, value: number) {
   const getTail = instance.exports["__list_tail__"] as (addr: number) => number;
   const getHeadValue = instance.exports["__list_head__"] as (addr: number) => number;
   const inner = (addr: number): readonly number[] => {
-    if (addr) {
+    if (addr > 0) {
       return [getHeadValue(addr), ...inner(getTail(addr))];
     } else {
       return [];

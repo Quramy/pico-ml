@@ -51,6 +51,7 @@ export function compile(node: ExpressionNode) {
       code: "(module)",
     })
       .addDependencies(ctx.getDependencies())
+      .addFields(ctx.matcherDefStack.buildFuncs())
       .addFields(ctx.funcDefStack.buildFuncs())
       .addField(mainFunc)
       .addFields(ctx.funcDefStack.buildTables())

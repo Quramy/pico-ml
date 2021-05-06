@@ -25,6 +25,52 @@ describe(getListModuleDefinition, () => {
     });
   });
 
+  describe("$__list_is_empty__", () => {
+    it("should return true when a list is empty", async () => {
+      const buf = new ModuleBuilder({
+        name: "test",
+        code: `
+          (module
+            (func $test (result i32)
+              call $__list_new__
+              call $__list_is_empty__
+             )
+            (export "test" (func $test))
+          )
+        `,
+        dependencies: [getListModuleDefinition()],
+      })
+        .build()
+        .mapValue(generateBinary)
+        .unwrap();
+      const { instance } = await WebAssembly.instantiate(buf, {});
+      expect((instance.exports["test"] as Function)()).toBe(1);
+    });
+
+    it("should return false when a list is not empty", async () => {
+      const buf = new ModuleBuilder({
+        name: "test",
+        code: `
+          (module
+            (func $test (result i32)
+              call $__list_new__
+              i32.const 1
+              call $__list_push__
+              call $__list_is_empty__
+             )
+            (export "test" (func $test))
+          )
+        `,
+        dependencies: [getListModuleDefinition()],
+      })
+        .build()
+        .mapValue(generateBinary)
+        .unwrap();
+      const { instance } = await WebAssembly.instantiate(buf, {});
+      expect((instance.exports["test"] as Function)()).toBe(0);
+    });
+  });
+
   describe("$__list_head__", () => {
     it("should return the head value of the list", async () => {
       const buf = new ModuleBuilder({
