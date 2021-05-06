@@ -87,6 +87,15 @@ describe(compile, () => {
     });
   });
 
+  describe("match expression", () => {
+    it("should compile pattern match expression", async () => {
+      expect(await evaluateMain("match 1::[] with [] -> false | x::y -> y", toList)).toEqual([]);
+      expect(await evaluateMain("match 1::2::[] with x::y::z -> y")).toBe(2);
+      expect(await evaluateMain("match 1::2::[] with x::y::z -> z", toList)).toEqual([]);
+      expect(await evaluateMain("match 0 with _ -> true", toBoolean)).toBe(true);
+    });
+  });
+
   describe("variable bindings", () => {
     it("should compile let expression and identifier", async () => {
       expect(await evaluateMain("let a = 1 in a")).toBe(1);
@@ -105,6 +114,38 @@ describe(compile, () => {
     it("should compile recursive function application and evaluate correctly", async () => {
       expect(await evaluateMain("let rec add = fun a -> fun b -> a + b in add 10 20")).toBe(30);
       expect(await evaluateMain("let rec fact = fun n -> if n < 1 then 1 else n * fact (n - 1) in fact 3")).toBe(6);
+    });
+  });
+
+  describe("complex example", () => {
+    test("list length", async () => {
+      const code = `
+        let rec ln = fun list  ->
+          match list with [] -> 0 | x::y -> 1 + ln y in
+        let l = 1::2::3::4::[] in
+        ln l
+      `;
+      expect(await evaluateMain(code)).toBe(4);
+    });
+
+    test("mapping list", async () => {
+      const code = `
+        let twice = fun x -> x * 2 in
+        let rec map = fun f -> fun list -> match list with [] -> [] | x::y -> (f x)::(map f y) in
+        map twice (1::2::3::[])
+      `;
+      expect(await evaluateMain(code, toList)).toEqual([2, 4, 6]);
+    });
+
+    test("factorial for list", async () => {
+      const code = `
+        let rec fact = fun n -> if n < 2 then 1 else n * fact(n - 1) in
+        let rec range = fun s -> fun e -> if s >= e then [] else s::(range (s + 1) e) in
+        let rec map = fun f -> fun list -> match list with [] -> [] | x::y -> (f x)::(map f y) in
+        let list = range 1 7 in 
+        map fact list 
+      `;
+      expect(await evaluateMain(code, toList)).toEqual([1, 2, 6, 24, 120, 720]);
     });
   });
 });

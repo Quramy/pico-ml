@@ -1,4 +1,4 @@
-import { createTreeTraverser, error } from "../structure";
+import { createTreeTraverser } from "../structure";
 import { factory } from "../wasm";
 import { ExpressionNode } from "../syntax";
 import { CompilationContext, CompilationResult } from "./types";
@@ -12,13 +12,12 @@ import { unaryExpression } from "./compile-node/unary-expression";
 import { binaryExpression } from "./compile-node/binary-expression";
 import { listConstructor } from "./compile-node/list-constructor";
 import { ifExpression } from "./compile-node/if-expression";
+import { matchExpression } from "./compile-node/match-expression";
 import { identifier } from "./compile-node/identifier";
 import { functionDefinition } from "./compile-node/function-definition";
 import { functionApplication } from "./compile-node/function-application";
 import { letExpression } from "./compile-node/let-expression";
 import { letRecExpression } from "./compile-node/let-rec-expression";
-
-const notImplemented = (node: ExpressionNode) => error({ message: "not implemented", occurence: node });
 
 const traverse = createTreeTraverser<ExpressionNode, CompilationContext, CompilationResult>({
   boolLiteral,
@@ -28,12 +27,12 @@ const traverse = createTreeTraverser<ExpressionNode, CompilationContext, Compila
   binaryExpression,
   listConstructor,
   ifExpression,
+  matchExpression,
   identifier,
   functionDefinition,
   functionApplication,
   letExpression,
   letRecExpression,
-  matchExpression: notImplemented,
 });
 
 export function compile(node: ExpressionNode) {

@@ -26,6 +26,7 @@ export interface CompilationContext {
   readonly useList: () => void;
   readonly useTuple: () => void;
   readonly useEnvironment: () => void;
+  readonly useMatcher: () => void;
   readonly useLocalVar: (node: LocalVarNode) => void;
   readonly setEnv: (env: Environment) => void;
   readonly getEnv: () => Environment;
