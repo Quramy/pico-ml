@@ -8,11 +8,14 @@ export const functionApplication: CompileNodeFn<"FunctionApplication"> = (node, 
   ctx.useEnvironment();
   ctx.useTuple();
   ctx.useLocalVar(factory.localVar(factory.valueType("i32"), factory.identifier("closure_addr")));
+  ctx.useLocalVar(factory.localVar(factory.valueType("i32"), factory.identifier("prev_closure_addr")));
   return mapValue(
     next(node.argument, ctx),
     next(node.callee, ctx),
   )((argumentInstr, closureInstr) =>
     ok([
+      factory.variableInstr("local.get", [factory.identifier("closure_addr")]),
+      factory.variableInstr("local.set", [factory.identifier("prev_closure_addr")]),
       ...closureInstr,
       factory.variableInstr("local.tee", [factory.identifier("closure_addr")]),
       ...getTupleValueInstr(0), // env for the closure is stored as the 1st value
@@ -28,6 +31,8 @@ export const functionApplication: CompileNodeFn<"FunctionApplication"> = (node, 
       factory.variableInstr("local.get", [factory.identifier("closure_addr")]),
       ...getTupleValueInstr(1), // function body index for the closure is stored as the 2nd value
       ...ctx.funcDefStack.callInstr(),
+      factory.variableInstr("local.get", [factory.identifier("prev_closure_addr")]),
+      factory.variableInstr("local.set", [factory.identifier("closure_addr")]),
     ]),
   );
 };
