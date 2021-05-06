@@ -1,6 +1,7 @@
 import { parse } from "../syntax";
 import { generateBinary } from "../wasm";
 import { compile } from "./compiler";
+import { toNumber, toBoolean, toList } from "./js-bindings";
 
 describe(compile, () => {
   describe("literal", () => {
@@ -15,7 +16,7 @@ describe(compile, () => {
     });
 
     it("should comiple empty list as 0", async () => {
-      expect(await evaluateMain("[]")).toBe(0);
+      expect(await evaluateMain("[]", toList)).toEqual([]);
     });
   });
 
@@ -34,40 +35,48 @@ describe(compile, () => {
     });
 
     it("should compile numeric compare operation", async () => {
-      expect(await evaluateMain("1>0")).toBe(1);
-      expect(await evaluateMain("1>1")).toBe(0);
-      expect(await evaluateMain("1>2")).toBe(0);
-      expect(await evaluateMain("0<1")).toBe(1);
-      expect(await evaluateMain("1<1")).toBe(0);
-      expect(await evaluateMain("2<1")).toBe(0);
-      expect(await evaluateMain("1>=0")).toBe(1);
-      expect(await evaluateMain("1>=1")).toBe(1);
-      expect(await evaluateMain("1>=2")).toBe(0);
-      expect(await evaluateMain("0<=1")).toBe(1);
-      expect(await evaluateMain("1<=1")).toBe(1);
-      expect(await evaluateMain("2<=1")).toBe(0);
+      expect(await evaluateMain("1>0", toBoolean)).toBe(true);
+      expect(await evaluateMain("1>1", toBoolean)).toBe(false);
+      expect(await evaluateMain("1>2", toBoolean)).toBe(false);
+      expect(await evaluateMain("0<1", toBoolean)).toBe(true);
+      expect(await evaluateMain("1<1", toBoolean)).toBe(false);
+      expect(await evaluateMain("2<1", toBoolean)).toBe(false);
+      expect(await evaluateMain("1>=0", toBoolean)).toBe(true);
+      expect(await evaluateMain("1>=1", toBoolean)).toBe(true);
+      expect(await evaluateMain("1>=2", toBoolean)).toBe(false);
+      expect(await evaluateMain("0<=1", toBoolean)).toBe(true);
+      expect(await evaluateMain("1<=1", toBoolean)).toBe(true);
+      expect(await evaluateMain("2<=1", toBoolean)).toBe(false);
     });
 
     it("should compile equality", async () => {
-      expect(await evaluateMain("0==0")).toBe(1);
-      expect(await evaluateMain("0==1")).toBe(0);
-      expect(await evaluateMain("0!=0")).toBe(0);
-      expect(await evaluateMain("0!=1")).toBe(1);
-      expect(await evaluateMain("true==true")).toBe(1);
-      expect(await evaluateMain("true==false")).toBe(0);
-      expect(await evaluateMain("false!=false")).toBe(0);
-      expect(await evaluateMain("false!=true")).toBe(1);
-      expect(await evaluateMain("[]==[]")).toBe(1);
-      expect(await evaluateMain("[]!=[]")).toBe(0);
-      expect(await evaluateMain("(fun x -> 10) == (fun x -> 10)")).toBe(0);
-      expect(await evaluateMain("let fn = fun x -> 10 in fn == fn")).toBe(1);
-      expect(await evaluateMain("(fun x -> 10) != (fun x -> 10)")).toBe(1);
-      expect(await evaluateMain("let fn = fun x -> 10 in fn != fn")).toBe(0);
+      expect(await evaluateMain("0==0", toBoolean)).toBe(true);
+      expect(await evaluateMain("0==1", toBoolean)).toBe(false);
+      expect(await evaluateMain("0!=0", toBoolean)).toBe(false);
+      expect(await evaluateMain("0!=1", toBoolean)).toBe(true);
+      expect(await evaluateMain("true==true", toBoolean)).toBe(true);
+      expect(await evaluateMain("true==false", toBoolean)).toBe(false);
+      expect(await evaluateMain("false!=false", toBoolean)).toBe(false);
+      expect(await evaluateMain("false!=true", toBoolean)).toBe(true);
+      expect(await evaluateMain("[]==[]", toBoolean)).toBe(true);
+      expect(await evaluateMain("[]!=[]", toBoolean)).toBe(false);
+      expect(await evaluateMain("(fun x -> 10) == (fun x -> 10)", toBoolean)).toBe(false);
+      expect(await evaluateMain("let fn = fun x -> 10 in fn == fn", toBoolean)).toBe(true);
+      expect(await evaluateMain("(fun x -> 10) != (fun x -> 10)", toBoolean)).toBe(true);
+      expect(await evaluateMain("let fn = fun x -> 10 in fn != fn", toBoolean)).toBe(false);
     });
 
     it("should treat association correctly", async () => {
       expect(await evaluateMain("1+2*3")).toBe(7);
       expect(await evaluateMain("(1+2)*3")).toBe(9);
+    });
+  });
+
+  describe("list constructor", () => {
+    it("shuld compile list construction", async () => {
+      expect(await evaluateMain("1::[]", toList)).toEqual([1]);
+      expect(await evaluateMain("1::2::[]", toList)).toEqual([1, 2]);
+      expect(await evaluateMain("true::false::[]", toList)).toEqual([1, 0]);
     });
   });
 
@@ -102,8 +111,12 @@ describe(compile, () => {
 
 const compile2wasm = (code: string) => parse(code).mapValue(compile).mapValue(generateBinary).unwrap();
 
-const evaluateMain = async (code: string) => {
+const evaluateMain = async (
+  code: string,
+  converter: (instance: WebAssembly.Instance, value: number) => any = toNumber,
+) => {
   const source = compile2wasm(code);
   const { instance } = await WebAssembly.instantiate(source, {});
-  return (instance.exports["main"] as Function)();
+  const v = (instance.exports["main"] as Function)() as number;
+  return converter(instance, v);
 };

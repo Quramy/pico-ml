@@ -22,8 +22,8 @@ describe(getAllocatorModuleDefinition, () => {
       .mapValue(generateBinary)
       .unwrap();
     const { instance } = await WebAssembly.instantiate(buf, {});
-    expect((instance.exports["test"] as Function)(10)).toBe(0);
-    expect((instance.exports["test"] as Function)(5)).toBe(10);
-    expect((instance.exports["test"] as Function)(10)).toBe(15);
+    expect((instance.exports["test"] as Function)(10)).toBe(4);
+    expect((instance.exports["test"] as Function)(5)).toBe(14);
+    expect((instance.exports["test"] as Function)(10)).toBe(19);
   });
 });

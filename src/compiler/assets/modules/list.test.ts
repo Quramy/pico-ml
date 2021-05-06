@@ -3,14 +3,14 @@ import { ModuleBuilder } from "../../module-builder";
 import { getListModuleDefinition } from "./list";
 
 describe(getListModuleDefinition, () => {
-  describe("$__list__new__", () => {
+  describe("$__list_new__", () => {
     it("should always return 0", async () => {
       const buf = new ModuleBuilder({
         name: "test",
         code: `
           (module
             (func $test (result i32)
-              call $__list__new__
+              call $__list_new__
              )
             (export "test" (func $test))
           )
@@ -32,7 +32,7 @@ describe(getListModuleDefinition, () => {
         code: `
           (module
             (func $test (result i32)
-              call $__list__new__
+              call $__list_new__
               i32.const 100
               call $__list_push__
 
@@ -58,7 +58,7 @@ describe(getListModuleDefinition, () => {
         code: `
           (module
             (func $test (result i32)
-              call $__list__new__
+              call $__list_new__
               i32.const 100
               call $__list_push__
 

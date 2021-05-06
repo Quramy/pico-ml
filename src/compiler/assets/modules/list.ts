@@ -7,7 +7,7 @@ const definition: ModuleDefinition = {
   dependencies: [getAllocatorModuleDefinition()],
   code: `
     (module
-      (func $__list__new__ (result i32)
+      (func $__list_new__ (result i32)
         i32.const 0
       )
 
@@ -38,6 +38,9 @@ const definition: ModuleDefinition = {
         local.get $list_addr
         i32.load offset=0
       )
+
+      (export "__list_head__" (func $__list_head__))
+      (export "__list_tail__" (func $__list_tail__))
     )
   `,
 };
@@ -47,5 +50,9 @@ export function getListModuleDefinition() {
 }
 
 export function newListInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__list__new__")])];
+  return [factory.controlInstr("call", [factory.identifier("__list_new__")])];
+}
+
+export function pushLishInstr() {
+  return [factory.controlInstr("call", [factory.identifier("__list_push__")])];
 }

@@ -6,7 +6,7 @@ const definition: ModuleDefinition = {
   code: `
     (module
       (memory $__alloc_mem__ 10)
-      (global $__alloc_st__ (mut i32) i32.const 0)
+      (global $__alloc_st__ (mut i32) i32.const 4)
       (func $__malloc__ (param $size i32) (result i32) (local $next i32)
 
         global.get $__alloc_st__

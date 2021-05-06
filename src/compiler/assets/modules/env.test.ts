@@ -29,8 +29,8 @@ describe(getEnvModuleDefinition, () => {
       const { instance } = await WebAssembly.instantiate(buf, {});
       (instance.exports["test"] as Function)();
       const mem = instance.exports["mem"] as WebAssembly.Memory;
-      const arr = [...new Int32Array(mem.buffer)].slice(0, 4);
-      expect(arr).toEqual([0, 15, 0, 100]);
+      const arr = [...new Int32Array(mem.buffer)].slice(1, 5);
+      expect(arr).toEqual([0, 15, 4, 100]);
     });
   });
 
@@ -99,7 +99,7 @@ describe(getEnvModuleDefinition, () => {
         .mapValue(generateBinary)
         .unwrap();
       const { instance } = await WebAssembly.instantiate(buf, {});
-      expect((instance.exports["test"] as Function)()).toBe(0);
+      expect((instance.exports["test"] as Function)()).toBe(4);
     });
   });
 });
