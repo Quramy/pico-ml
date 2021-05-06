@@ -88,6 +88,50 @@ describe(ModuleBuilder, () => {
     `;
     expect(oneline(printAST(mod))).toBe(oneline(expectedSource));
   });
+
+  it("should work with complex dependencies", () => {
+    const depA: ModuleDefinition = {
+      name: "moduleA",
+      code: ` (module (global $a i32 i32.const 0))`,
+    };
+    const depB: ModuleDefinition = {
+      name: "moduleB",
+      code: ` (module (global $b i32 i32.const 1))`,
+      dependencies: [depA],
+    };
+    const depC: ModuleDefinition = {
+      name: "moduleC",
+      code: ` (module (global $c i32 i32.const 2))`,
+      dependencies: [depB],
+    };
+    const depD: ModuleDefinition = {
+      name: "moduleD",
+      code: ` (module (global $d i32 i32.const 3))`,
+      dependencies: [depB],
+    };
+    const depE: ModuleDefinition = {
+      name: "moduleE",
+      code: ` (module (global $e i32 i32.const 4))`,
+      dependencies: [depC, depD],
+    };
+    const depF: ModuleDefinition = {
+      name: "moduleF",
+      code: ` (module (global $f i32 i32.const 5))`,
+      dependencies: [depC, depE],
+    };
+    const mod = new ModuleBuilder(depF).build().unwrap();
+    const expectedSource = `
+      (module
+        (global $a i32 i32.const 0)
+        (global $b i32 i32.const 1)
+        (global $d i32 i32.const 3)
+        (global $c i32 i32.const 2)
+        (global $e i32 i32.const 4)
+        (global $f i32 i32.const 5)
+      )
+    `;
+    expect(oneline(printAST(mod))).toBe(oneline(expectedSource));
+  });
 });
 
 function oneline(text: string) {

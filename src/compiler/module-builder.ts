@@ -1,5 +1,5 @@
 import { Result, ok, mapValue } from "../structure";
-import { ModuleNode, parse, ModuleBodyNode } from "../wasm";
+import { factory, ModuleNode, parse, ModuleBodyNode } from "../wasm";
 
 type LinkFn = (dependent: ModuleNode, self: ModuleNode) => ModuleNode;
 
@@ -69,27 +69,28 @@ export class ModuleBuilder implements ModuleDefinition {
   }
 
   build(): Result<ModuleNode> {
-    const importedModules = new Set<string>();
-    const createLinkFn = (def: ModuleDefinition): LinkFn => {
-      return (dependent, self) => {
-        if (importedModules.has(def.name)) return dependent;
-        importedModules.add(def.name);
-        if (!def.link) return defaultLinkFn(dependent, self);
-        return def.link(dependent, self);
-      };
+    const definitions: ModuleDefinition[] = [];
+    const collectDependencies = (def: ModuleDefinition) => {
+      definitions.push(def);
+      if (!def.dependencies) return;
+      def.dependencies.forEach(collectDependencies);
     };
-    const buildInner = (definition: ModuleDefinition): Result<ModuleNode> =>
-      parse(definition.code).mapValue(dependentModule =>
-        (definition.dependencies ?? [])
-          .map(dependencyDefinition =>
-            buildInner(dependencyDefinition).map(mod => ({ mod, linkFn: createLinkFn(dependencyDefinition) })),
-          )
-          .reduce(
-            (mod, dependencyModule) =>
-              mapValue(mod, dependencyModule)((mod, dependency) => ok(dependency.linkFn(mod, dependency.mod))),
-            ok(dependentModule),
-          ),
-      );
-    return buildInner(this).map(mod => ({ ...mod, body: [...mod.body, ...this.additionalFields] }));
+    collectDependencies(this);
+    const uniqueDefs: ModuleDefinition[] = [];
+    while (true) {
+      const d = definitions.pop();
+      if (!d) break;
+      if (uniqueDefs.find(dd => dd.name === d.name)) continue;
+      uniqueDefs.push(d);
+    }
+    return uniqueDefs
+      .reverse()
+      .slice()
+      .reduce(
+        (acc, def) =>
+          mapValue(acc, parse(def.code))((dependent, self) => ok((def.link ?? defaultLinkFn)(dependent, self))),
+        ok(factory.mod([])),
+      )
+      .map(mod => ({ ...mod, body: [...mod.body, ...this.additionalFields] }));
   }
 }
