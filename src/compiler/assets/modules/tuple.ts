@@ -8,7 +8,7 @@ const definition: ModuleDefinition = {
   code: `
     (module
       (func $__tuple_new__ (param $v0 i32) (param $v1 i32) (result i32) (local $addr i32)
-        i32.const 12
+        i32.const 8
         call $__malloc__
         local.set $addr
 
