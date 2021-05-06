@@ -142,8 +142,7 @@ describe(compile, () => {
         let rec fact = fun n -> if n < 2 then 1 else n * fact(n - 1) in
         let rec range = fun s -> fun e -> if s >= e then [] else s::(range (s + 1) e) in
         let rec map = fun f -> fun list -> match list with [] -> [] | x::y -> (f x)::(map f y) in
-        let list = range 1 7 in 
-        map fact list 
+        map fact (range 1 7)
       `;
       expect(await evaluateMain(code, toList)).toEqual([1, 2, 6, 24, 120, 720]);
     });
