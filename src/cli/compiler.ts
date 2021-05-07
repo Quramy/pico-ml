@@ -71,7 +71,7 @@ async function main({ inputFilename, target = "binary" }: MainOption) {
 
 const inputFilename = process.argv.slice(1)[1];
 if (!inputFilename) {
-  console.error(`Usage: ${process.argv.slice(1)[0]} <input_filename>`);
+  console.error(`Usage: ${path.basename(process.argv.slice(1)[0])} <input_filename>`);
   process.exit(1);
 }
 const target = process.argv.slice(1)[2] === "-t" ? "wat" : "binary";
