@@ -3,6 +3,10 @@
 .vscode/
 .husky/
 .prettierrc.yml
+coverage/
 src/
 tsconfig.*
 *.test.js
+*.test.d.ts
+jest.config.js
+renovate.json

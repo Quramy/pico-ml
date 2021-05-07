@@ -1,5 +1,8 @@
 # PicoML
 
+[![github actions](https://github.com/Quramy/pico-ml/workflows/build/badge.svg)](https://github.com/Quramy/pico-ml/actions)
+[![npm version](https://badge.fury.io/js/pico-ml.svg)](https://badge.fury.io/js/pico-ml)
+
 A toy programming language which is a subset of OCaml.
 
 ```ocaml
