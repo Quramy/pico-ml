@@ -56,27 +56,28 @@ The generated module exports `main` function to the input expression.
 ```js
 // Execute in browser
 
-WebAssembly.instatiateStreaming(fetch("example.wasm"), {}).then(instance => {
+await instance = WebAssembly.instatiateStreaming(fetch("example.wasm"), {});
+const result = instance.exports["main"]();
+console.log(result);
+```
+
+```js
+// Execute in Node.js
+
+const fs = require("fs/promises");
+
+(async () => {
+  const source = await fs.readFile("example.wasm");
+  const { instance } = await WebAssembly.instantiate(source, {});
   const result = instance.exports["main"]();
-  console.log(main);
-});
+  console.log(result);
+})();
 ```
 
 And `pico-mlc` can also outputs WAT file with `-t` option.
 
 ```sh
 $ pico-mlc example.ml -t
-```
-
-```js
-// Execute in Node.js
-
-const fs = require("fs/priomises");
-
-const source = await fs.readFile("example.wasm");
-const instance = WebAssembly.instantiate(source, {});
-const result = instance.exports["main"]();
-console.log(main);
 ```
 
 ## Language
