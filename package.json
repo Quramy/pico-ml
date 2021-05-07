@@ -1,7 +1,7 @@
 {
   "name": "pico-ml",
   "version": "0.3.0",
-  "description": "A toy programming language",
+  "description": "A toy programming language witch is a subset of OCaml",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
@@ -22,7 +22,9 @@
   },
   "keywords": [
     "ml",
-    "language"
+    "language",
+    "wasm",
+    "compiler"
   ],
   "author": "Quramy",
   "license": "MIT",
