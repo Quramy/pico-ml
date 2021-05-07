@@ -7,7 +7,9 @@
   "types": "lib/index.d.ts",
   "bin": {
     "pico-ml": "./bin/repl.js",
-    "pico-mlc": "./bin/compiler.js"
+    "pico-mlc": "./bin/compiler.js",
+    "ipml": "./bin/repl.js",
+    "pmlc": "./bin/compiler.js"
   },
   "exports": {
     ".": {
