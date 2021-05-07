@@ -1,7 +1,6 @@
 import path from "path";
 import { Position } from "../parser-util";
-import { pos2location } from "./position-converter";
-import { color } from "./color";
+import { color, pos2location } from "../string-util";
 
 const lineMark = (line: number, width: number) => {
   const strLine = line + 1 + "";
@@ -16,14 +15,14 @@ export type ErrorContent = {
   readonly fileName: string;
   readonly content: string;
   readonly message: string;
-  readonly occurence: Position;
+  readonly occurence?: Position | undefined | null;
 };
 
 export class ErrorReporter {
   constructor(private readonly _currentDirectory: string, private readonly _output: (msg: string) => void = () => {}) {}
 
   outputError(error: ErrorContent) {
-    if (!error.occurence.loc) {
+    if (!error.occurence?.loc) {
       this._outputErrorWithoutLocation(error);
     } else {
       this._outputErrorWithLocation(error, error.occurence.loc);

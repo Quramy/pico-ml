@@ -5,7 +5,8 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
-    "pico-ml": "./bin/cli.js"
+    "pico-ml": "./bin/repl.js",
+    "pico-mlc": "./bin/compiler.js"
   },
   "scripts": {
     "clean": "rimraf tsconfig.tsbuildinfo lib",
