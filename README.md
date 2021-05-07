@@ -28,8 +28,10 @@ $ npm i -g pico-ml
 
 ### REPL
 
+You can REPL with `ipml` command.
+
 ```sh
-$ pico-ml
+$ ipml
 
 # Input ML expression to evaluate
 > let add = fun a -> fun b -> a + b in add 1 2;;
@@ -45,13 +47,13 @@ The REPL allows multiple line input. Enter `;;` to evaluate the input expression
 let add = fun a -> fun b -> a + b in add 1 2
 ```
 
-To compile Web Assembly module, use `pico-mlc` command.
+To compile Web Assembly module, use `pmlc` command.
 
 ```sh
-$ pico-mlc example.ml
+$ pmlc example.ml
 ```
 
-The generated module exports `main` function to the input expression.
+The generated module exports `main` function to evaluate the input expression.
 
 ```js
 // Execute in browser
@@ -77,7 +79,7 @@ const fs = require("fs/promises");
 And `pico-mlc` can also outputs WAT file with `-t` option.
 
 ```sh
-$ pico-mlc example.ml -t
+$ pmlc example.ml -t
 ```
 
 ## Language
