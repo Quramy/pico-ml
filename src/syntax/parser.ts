@@ -1,4 +1,5 @@
-import { Parser, use, oneOf, expect, leftAssociate, rightAssociate, loc, Scanner } from "../parser-util";
+import { Parser, use, oneOf, expect, leftAssociate, rightAssociate, loc } from "../parser-util";
+import { Scanner } from "./scanner";
 import {
   ExpressionNode,
   NumberLiteralNode,
