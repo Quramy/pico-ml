@@ -1,7 +1,7 @@
 import { createTreeTraverser } from "../structure";
 import { factory } from "../wasm";
 import { ExpressionNode } from "../syntax";
-import { CompilationContext, CompilationResult } from "./types";
+import { CompilationContext, CompilationResult, CompiledModuleResult } from "./types";
 import { Context } from "./compiler-context";
 import { ModuleBuilder } from "./module-builder";
 
@@ -35,7 +35,7 @@ const traverse = createTreeTraverser<ExpressionNode, CompilationContext, Compila
   letRecExpression,
 });
 
-export function compile(node: ExpressionNode) {
+export function compile(node: ExpressionNode): CompiledModuleResult {
   const ctx = new Context();
   return traverse(node, ctx).mapValue(instructions => {
     const mainFunc = factory.func(
@@ -55,6 +55,6 @@ export function compile(node: ExpressionNode) {
       .addField(mainFunc)
       .addFields(ctx.funcDefStack.buildTables())
       .addField(mainExport);
-    return builder.build();
+    return builder.build().error(err => ({ ...err, occurence: undefined }));
   });
 }

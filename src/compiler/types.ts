@@ -1,14 +1,15 @@
 import { Result, ResultErrorBase, TraverserCallbackFn } from "../structure";
 import { Position } from "../parser-util";
 import { ExpressionNode, IdentifierNode } from "../syntax";
-import { InstructionNode, ExprNode, LocalVarNode, IdentifierNode as WATIdNode } from "../wasm";
+import { ModuleNode, InstructionNode, ExprNode, LocalVarNode, IdentifierNode as WATIdNode } from "../wasm";
 
 export interface CompilationError extends ResultErrorBase {
-  readonly occurence: Position;
+  readonly occurence: Position | undefined;
 }
 
 export type CompilationValue = readonly InstructionNode[];
 
+export type CompiledModuleResult = Result<ModuleNode, CompilationError>;
 export type CompilationResult = Result<CompilationValue, CompilationError>;
 
 export interface Environment {

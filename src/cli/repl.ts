@@ -2,7 +2,7 @@ import readline from "readline";
 import { parse } from "../syntax";
 import { createTypePrinter, getPrimaryType } from "../type-checker";
 import { evaluate, getPrintableEvaluationValue } from "../evaluate";
-import { color } from "./color";
+import { color } from "../string-util";
 import { ErrorReporter } from "./error-reporter";
 
 function getVersion() {
