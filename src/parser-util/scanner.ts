@@ -1,36 +1,45 @@
 export class Scanner {
   private _pos = 0;
-  constructor(readonly input: string) {}
 
-  private head(n = 0) {
-    if (n > 0) {
-      return this.input.slice(this._pos).trimLeft().slice(n);
-    } else {
-      return this.input.slice(this._pos).trimLeft();
-    }
+  constructor(protected readonly input: string) {}
+
+  private _head(n = 0) {
+    const l = this._leadingTrivia();
+    return this.input.substr(this._pos + l + n);
   }
 
-  slice(length: number) {
-    return this.head().slice(0, length);
+  private _leadingTrivia() {
+    let l = 0;
+    while (true) {
+      const p1 = this.leadingWhitespace(this._pos + l);
+      const p2 = this.leadingComment(this._pos + l + p1);
+      if (p1 === 0 && p2 === 0) break;
+      l += p1 + p2;
+    }
+    return l;
   }
 
   hasNext(offset = 0) {
-    const l = this.pos + this.leadingWhitespace() + offset;
+    const l = this.pos + this._leadingTrivia() + offset;
     return l < this.input.length;
   }
 
+  slice(length: number) {
+    return this._head().slice(0, length);
+  }
+
   startsWith(word: string, offset = 0) {
-    return this.head(offset).startsWith(word);
+    return this._head(offset).startsWith(word);
   }
 
   match(regexp: RegExp, offset = 0) {
-    return this.head(offset).match(regexp);
+    return this._head(offset).match(regexp);
   }
 
-  leadingWhitespace() {
+  leadingWhitespace(pos: number) {
     let i = 0;
     for (; ; i++) {
-      const c = this.input.slice(this._pos)[i];
+      const c = this.input[pos + i];
       if (c === " ") continue;
       if (c === "\t") continue;
       if (c === "\r") continue;
@@ -40,13 +49,17 @@ export class Scanner {
     return i;
   }
 
+  leadingComment(_pos: number): number {
+    return 0;
+  }
+
   consume(length: number) {
-    const l = this.leadingWhitespace() + length;
+    const s = this._leadingTrivia();
     const loc = {
-      pos: this._pos,
-      end: this._pos + l,
+      pos: this._pos + s,
+      end: this._pos + s + length,
     };
-    this._pos += l;
+    this._pos += s + length;
     return loc;
   }
 

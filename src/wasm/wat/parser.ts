@@ -1,16 +1,4 @@
-import {
-  Parser,
-  Scanner,
-  NullPosition,
-  use,
-  oneOf,
-  tryWith,
-  expect,
-  option,
-  vec,
-  fromOptional,
-  loc,
-} from "../../parser-util";
+import { Parser, NullPosition, use, oneOf, tryWith, expect, option, vec, fromOptional, loc } from "../../parser-util";
 import {
   ModuleNode,
   IdentifierToken,
@@ -43,6 +31,7 @@ import {
   MutValueTypeNode,
   GlobalNode,
 } from "../ast-types";
+import { Scanner } from "./scanner";
 import {
   symbolToken,
   keywordToken,
