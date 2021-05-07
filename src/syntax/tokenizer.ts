@@ -3,7 +3,7 @@ import { Parser, ParseResult, Scanner } from "../parser-util";
 import {
   SymbolKind,
   SymbolToken,
-  NumberToken,
+  IntegerToken,
   ReservedWords,
   ReservedWordKind,
   KeywordToken,
@@ -56,7 +56,7 @@ export const keywordToken: (keyword: ReservedWordKind) => Parser<KeywordToken> =
   };
 };
 
-export const numberToken: Parser<NumberToken> = scanner => {
+export const numberToken: Parser<IntegerToken> = scanner => {
   const hit = scanner.match(/^(\d+)/);
   if (!hit)
     return error({
@@ -65,7 +65,7 @@ export const numberToken: Parser<NumberToken> = scanner => {
       occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
     });
   return ok({
-    tokenKind: "Number",
+    tokenKind: "Integer",
     value: parseInt(hit[1], 10),
     loc: scanner.consume(hit[1].length),
   });

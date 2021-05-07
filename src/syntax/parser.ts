@@ -2,7 +2,7 @@ import { Parser, use, oneOf, expect, leftAssociate, rightAssociate, loc } from "
 import { Scanner } from "./scanner";
 import {
   ExpressionNode,
-  NumberLiteralNode,
+  IntLiteralNode,
   BoolLiteralNode,
   UnaryExpressionNode,
   IfExpressionNode,
@@ -355,8 +355,8 @@ const bool: Parser<BoolLiteralNode> = oneOf(
   ),
 );
 
-const num: Parser<NumberLiteralNode> = expect(numberToken)(({ value, loc }) => ({
-  kind: "NumberLiteral",
+const num: Parser<IntLiteralNode> = expect(numberToken)(({ value, loc }) => ({
+  kind: "IntLiteral",
   value,
   loc,
 }));

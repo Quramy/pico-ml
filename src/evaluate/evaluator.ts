@@ -19,7 +19,7 @@ import { functionApplication } from "./evaluate-node/function-application";
 export function evaluate(expression: ExpressionNode) {
   return createTreeTraverser<ExpressionNode, Environment, EvaluationResult>({
     boolLiteral: literal,
-    numberLiteral: literal,
+    intLiteral: literal,
     emptyList,
     identifier,
     functionDefinition,

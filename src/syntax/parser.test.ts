@@ -2,7 +2,7 @@ import { unwrap } from "../structure";
 import { parse } from "./parser";
 import {
   ExpressionNode,
-  NumberLiteralNode,
+  IntLiteralNode,
   MinusOperation,
   AddOperation,
   MultiplyOperation,
@@ -20,9 +20,9 @@ import {
 
 const num = (value: number) =>
   ({
-    kind: "NumberLiteral",
+    kind: "IntLiteral",
     value,
-  } as NumberLiteralNode);
+  } as IntLiteralNode);
 
 const minus: MinusOperation = {
   kind: "Minus",

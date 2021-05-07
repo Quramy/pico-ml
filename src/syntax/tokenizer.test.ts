@@ -4,15 +4,15 @@ import { Token } from "./types";
 
 test(numberToken.name, () => {
   expect(numberToken(new Scanner("0")).unwrap()).toMatchObject<Token>({
-    tokenKind: "Number",
+    tokenKind: "Integer",
     value: 0,
   });
   expect(numberToken(new Scanner("01")).unwrap()).toMatchObject<Token>({
-    tokenKind: "Number",
+    tokenKind: "Integer",
     value: 1,
   });
   expect(numberToken(new Scanner("20")).unwrap()).toMatchObject<Token>({
-    tokenKind: "Number",
+    tokenKind: "Integer",
     value: 20,
   });
 });

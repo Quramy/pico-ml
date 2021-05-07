@@ -5,7 +5,7 @@ import { CompilationContext, CompilationResult, CompiledModuleResult } from "./t
 import { Context } from "./compiler-context";
 import { ModuleBuilder } from "./module-builder";
 
-import { numberLiteral } from "./compile-node/number-literal";
+import { intLiteral } from "./compile-node/int-literal";
 import { boolLiteral } from "./compile-node/bool-literal";
 import { emptyList } from "./compile-node/empty-list";
 import { unaryExpression } from "./compile-node/unary-expression";
@@ -22,7 +22,7 @@ import { letRecExpression } from "./compile-node/let-rec-expression";
 const traverse = createTreeTraverser<ExpressionNode, CompilationContext, CompilationResult>({
   boolLiteral,
   emptyList,
-  numberLiteral,
+  intLiteral,
   unaryExpression,
   binaryExpression,
   listConstructor,
