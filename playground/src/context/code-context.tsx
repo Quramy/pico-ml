@@ -1,7 +1,17 @@
 import React, { createContext } from "react";
-import { Observable, Subject, BehaviorSubject } from "rxjs";
+import { Observable, Subject, BehaviorSubject, combineLatest } from "rxjs";
 import { map, throttleTime } from "rxjs/operators";
-import { parse, Result, ParseResult, ExpressionNode, compile, generateBinary, printAST } from "pico-ml";
+import {
+  parse,
+  Result,
+  ParseResult,
+  ExpressionNode,
+  getPrimaryType,
+  compile,
+  generateBinary,
+  printAST,
+  mapValue,
+} from "pico-ml";
 
 export type CodeContextValue = {
   readonly initialContent: string;
@@ -22,9 +32,11 @@ const Provider = context.Provider;
 export function CodeProvider({ initialContent, children }: Props) {
   const code$ = new BehaviorSubject(initialContent);
   const parseResult$ = code$.asObservable().pipe(map(parse));
-  const compileResult$ = parseResult$.pipe(
-    throttleTime(100),
-    map(pr => pr.mapValue(compile)),
+  const primaryType$ = parseResult$.pipe(map(pr => pr.mapValue(getPrimaryType)));
+  const compileResult$ = combineLatest(parseResult$.pipe(throttleTime(100)), primaryType$.pipe(throttleTime(100))).pipe(
+    map(([pr, ptr]) => {
+      return mapValue(pr, ptr)(expression => compile(expression));
+    }),
   );
   const wat$ = compileResult$.pipe(map(cr => cr.map(printAST)));
   const wasm$ = compileResult$.pipe(map(cr => cr.mapValue(generateBinary)));

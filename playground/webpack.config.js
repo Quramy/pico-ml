@@ -21,12 +21,29 @@ module.exports = {
       { test: /\.tsx?$/, exclude: /node_modules/, loader: "ts-loader", options: { transpileOnly: true } },
       {
         test: /\.css$/,
+        exclude: /node_modules/,
+        include: /src/,
         use: [
           { loader: MiniCssExtractPlugin.loader },
           {
             loader: "css-loader",
             options: {
               modules: true,
+            },
+          },
+          // { loader: "postcss-loader" },
+        ],
+      },
+      {
+        test: /\.css$/,
+        include: /node_modules/,
+        exclude: /src/,
+        use: [
+          { loader: MiniCssExtractPlugin.loader },
+          {
+            loader: "css-loader",
+            options: {
+              modules: false,
             },
           },
           // { loader: "postcss-loader" },
