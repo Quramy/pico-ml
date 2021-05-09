@@ -4,7 +4,9 @@ import "ace-builds/webpack-resolver"; // tell theme, syntax highlight module url
 
 export function setupEditor(element: HTMLElement | null, ctx: CodeContextValue) {
   if (!element) return;
-  const editor = ace.edit(element);
+  const editor = ace.edit(element, {
+    mode: "ace/mode/ocaml",
+  });
   editor.setOptions({});
 
   editor.setTheme("ace/theme/monokai");

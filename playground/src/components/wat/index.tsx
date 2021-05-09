@@ -4,6 +4,9 @@ import "prismjs/components/prism-wasm";
 import React, { useState, useContext, useEffect } from "react";
 import { codeContext } from "../../context/code-context";
 
+import cx from "classnames";
+import styles from "./index.css";
+
 export function Wat() {
   const [code, setCode] = useState({ __html: "" });
   const [hasError, setHasError] = useState(false);
@@ -24,5 +27,11 @@ export function Wat() {
   if (hasError) {
     return <div>Error</div>;
   }
-  return <pre className="line-numbers" dangerouslySetInnerHTML={code}></pre>;
+  return (
+    <div className={cx(styles.root)}>
+      <pre className="language-wasm">
+        <code className="language-wasm" dangerouslySetInnerHTML={code} />
+      </pre>
+    </div>
+  );
 }
