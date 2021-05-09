@@ -1,0 +1,9 @@
+playground/dist/
+lib/
+lib-esm/
+node_modules/
+.vscode/
+.husky/
+.gitignore
+package-lock.json
+*.tsbuildinfo
