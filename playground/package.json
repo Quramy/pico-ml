@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "name": "picoml-playground",
+  "scripts": {
+    "start": "webpack-cli serve --mode development",
+    "build": "webpack-cli build --mode production"
+  },
+  "devDependencies": {
+    "@types/react": "17.0.5",
+    "@types/react-dom": "17.0.3",
+    "css-loader": "5.2.4",
+    "html-webpack-plugin": "5.3.1",
+    "mini-css-extract-plugin": "1.6.0",
+    "ts-loader": "9.1.2",
+    "webpack": "5.36.2",
+    "webpack-cli": "4.7.0",
+    "webpack-dev-server": "3.11.2"
+  },
+  "dependencies": {
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  }
+}
