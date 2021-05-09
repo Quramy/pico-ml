@@ -1,8 +1,9 @@
 import React from "react";
 import { render } from "react-dom";
 
-const elem = document.getElementById("app");
+// import "./codemirror/init";
+import { App } from "./components/app";
 
-const App = () => <div>Hello</div>;
+const elem = document.getElementById("app")!;
 
-render(App(), elem);
+render(<App />, elem);

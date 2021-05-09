@@ -1,11 +1,16 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "rootDir": "../",
     "target": "es2019",
     "module": "esnext",
     "moduleResolution": "node",
     "noEmit": true,
     "declaration": false,
-    "jsx": "react"
-  }
+    "jsx": "react",
+    "paths": {
+      "pico-ml": ["../src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "lib", "lib-esm"]
 }

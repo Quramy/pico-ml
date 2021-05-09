@@ -12,6 +12,9 @@ module.exports = {
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".json"],
+    alias: {
+      "pico-ml": path.resolve(__dirname, "../src/index.ts"),
+    },
   },
   module: {
     rules: [
@@ -22,13 +25,16 @@ module.exports = {
           { loader: MiniCssExtractPlugin.loader },
           {
             loader: "css-loader",
+            options: {
+              modules: true,
+            },
           },
           // { loader: "postcss-loader" },
         ],
       },
     ],
   },
-  plugins: [new HtmlWebpackPlugin({ template: "index.html" })],
+  plugins: [new MiniCssExtractPlugin(), new HtmlWebpackPlugin({ template: "index.html" })],
   devServer: {
     port: 4001,
   },
