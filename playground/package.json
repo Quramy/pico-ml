@@ -2,6 +2,7 @@
   "private": true,
   "name": "picoml-playground",
   "scripts": {
+    "compile": "tsc -p .",
     "start": "webpack-cli serve --mode development",
     "build": "webpack-cli build --mode production"
   },
