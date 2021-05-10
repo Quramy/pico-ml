@@ -20,7 +20,11 @@ function setupEditor(element: HTMLElement | null, program: Program) {
   const editor = ace.edit(element, {
     mode: "ace/mode/ocaml",
   });
-  editor.setOptions({});
+  editor.commands.addCommand({
+    name: "executeWasm",
+    bindKey: { win: "Ctrl-Enter", mac: "Command-Enter" },
+    exec: () => program.execute$.next(null),
+  });
 
   editor.setTheme("ace/theme/iceberg");
 
