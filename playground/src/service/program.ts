@@ -1,5 +1,5 @@
 import { Observable, Subject, BehaviorSubject, combineLatest } from "rxjs";
-import { map, throttleTime } from "rxjs/operators";
+import { map, debounceTime } from "rxjs/operators";
 import {
   parse,
   Result,
@@ -40,7 +40,7 @@ export type CreateProgramOptions = {
 
 export function createProgram({ initialContent }: CreateProgramOptions) {
   const code$ = new BehaviorSubject(initialContent);
-  const parseResult$ = code$.asObservable().pipe(map(parse));
+  const parseResult$ = code$.asObservable().pipe(debounceTime(100), map(parse));
   const primaryType$ = parseResult$.pipe(
     map(pr =>
       pr
@@ -49,7 +49,7 @@ export function createProgram({ initialContent }: CreateProgramOptions) {
         .map(({ expressionType }) => expressionType),
     ),
   );
-  const compileResult$ = combineLatest(parseResult$.pipe(throttleTime(100)), primaryType$.pipe(throttleTime(100))).pipe(
+  const compileResult$ = combineLatest(parseResult$, primaryType$).pipe(
     map(([pr, ptr]) => mapValue(pr, ptr)(expression => compile(expression))),
   );
   const wat$ = compileResult$.pipe(map(cr => cr.map(printAST)));

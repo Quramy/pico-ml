@@ -1,0 +1,25 @@
+.root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  overflow: auto;
+}
+
+.table {
+  font-size: 0.75rem;
+  font-family: var(--system-fontfamily);
+  margin-top: 32px;
+  margin-left: 24px;
+}
+
+.addressCell {
+  color: #a59f85;
+  padding-right: 8px;
+}
+
+.cell {
+  color: #f9f8f5;
+  padding: 0 2px;
+}

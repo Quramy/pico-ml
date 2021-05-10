@@ -10,3 +10,7 @@ html {
   color: #fff;
   background: #272822;
 }
+
+:root {
+  --system-fontfamily: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+}
