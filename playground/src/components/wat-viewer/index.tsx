@@ -2,15 +2,15 @@ import Prism from "prismjs";
 import "prismjs/themes/prism-tomorrow.css";
 import "prismjs/components/prism-wasm";
 import React, { useState, useContext, useEffect } from "react";
-import { codeContext } from "../../context/code-context";
+import { programContext } from "../../context/program-context";
 
 import cx from "classnames";
 import styles from "./index.css";
 
-export function Wat() {
+export function WatViewer() {
   const [code, setCode] = useState({ __html: "" });
   const [hasError, setHasError] = useState(false);
-  const ctx = useContext(codeContext);
+  const ctx = useContext(programContext);
   useEffect(() => {
     const subscription = ctx.wat$.subscribe(r => {
       if (r.ok) {

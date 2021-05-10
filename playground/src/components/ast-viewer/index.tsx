@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useContext } from "react";
 import ReactJson from "react-json-view";
 import cx from "classnames";
-import { codeContext } from "../../context/code-context";
+import { programContext } from "../../context/program-context";
 import styles from "./index.css";
 
 export function AstViewer() {
-  const ctx = useContext(codeContext);
+  const ctx = useContext(programContext);
   const [hasError, setHasError] = useState(false);
   const [tree, setTree] = useState<any>({});
   useEffect(() => {
