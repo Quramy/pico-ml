@@ -51,16 +51,18 @@ export function BinaryViewer() {
   return (
     <div className={cx(styles.root)}>
       <table className={cx(styles.table)}>
-        {rows.map(row => (
-          <tr key={row.address}>
-            <th className={styles.addressCell}>{row.address}</th>
-            {row.values.map((v, i) => (
-              <td className={styles.cell} key={i}>
-                {v}
-              </td>
-            ))}
-          </tr>
-        ))}
+        <tbody>
+          {rows.map(row => (
+            <tr key={row.address}>
+              <th className={styles.addressCell}>{row.address}</th>
+              {row.values.map((v, i) => (
+                <td className={styles.cell} key={i}>
+                  {v}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
   );

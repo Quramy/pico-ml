@@ -6,4 +6,5 @@
   bottom: 0;
   overflow: auto;
   padding: 16px;
+  font-family: var(--system-fontfamily);
 }

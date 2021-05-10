@@ -1,0 +1,122 @@
+.ace-iceberg {
+  background-color: #161821;
+  color: #c6c8d1;
+}
+
+.ace-iceberg .ace_gutter {
+  background: #1e2132;
+  color: #c6c8d1;
+}
+
+.ace-iceberg .ace_print-margin {
+  width: 1px;
+  background: #1e2132;
+}
+
+.ace-iceberg .ace_constant.ace_other,
+.ace-iceberg .ace_cursor {
+  color: #c6c8d1;
+}
+
+.ace-iceberg .ace_marker-layer .ace_selection {
+  background: #45493e;
+}
+
+.ace-iceberg.ace_multiselect .ace_selection.ace_start {
+  box-shadow: 0 0 3px 0px #2d2d2d;
+}
+
+.ace-iceberg .ace_marker-layer .ace_step {
+  background: rgb(102, 82, 0);
+}
+
+.ace-iceberg .ace_marker-layer .ace_bracket {
+  margin: -1px 0 0 -1px;
+  border: 1px solid #6a6a6a;
+}
+
+.ace-iceberg .ace_marker-layer .ace_active-line {
+  background: #1e2132;
+}
+
+.ace-iceberg .ace_gutter-active-line {
+  background-color: #1e2132;
+}
+
+.ace-iceberg .ace_marker-layer .ace_selected-word {
+  border: 1px solid #45493e;
+}
+
+.ace-iceberg .ace_invisible {
+  color: #6a6a6a;
+}
+
+.ace-iceberg .ace_keyword,
+.ace-iceberg .ace_meta,
+.ace-iceberg .ace_storage,
+.ace-iceberg .ace_storage.ace_type,
+.ace-iceberg .ace_support.ace_type {
+  color: #84a0c6;
+}
+
+.ace-iceberg .ace_keyword.ace_operator {
+  color: #84a0c6;
+}
+
+.ace-iceberg .ace_constant.ace_character,
+.ace-iceberg .ace_constant.ace_language,
+.ace-iceberg .ace_constant.ace_numeric,
+.ace-iceberg .ace_keyword.ace_other.ace_unit,
+.ace-iceberg .ace_support.ace_constant,
+.ace-iceberg .ace_variable.ace_parameter {
+  color: #a093c7;
+}
+
+.ace-iceberg .ace_invalid {
+  color: #cdcdcd;
+  background-color: #f2777a;
+}
+
+.ace-iceberg .ace_invalid.ace_deprecated {
+  color: #cdcdcd;
+  background-color: #cc99cc;
+}
+
+.ace-iceberg .ace_fold {
+  background-color: #6699cc;
+  border-color: #cccccc;
+}
+
+.ace-iceberg .ace_entity.ace_name.ace_function,
+.ace-iceberg .ace_support.ace_function,
+.ace-iceberg .ace_variable {
+  color: #84a0c6;
+}
+
+.ace-iceberg .ace_support.ace_class,
+.ace-iceberg .ace_support.ace_type {
+  color: #ffcc66;
+}
+
+.ace-iceberg .ace_heading,
+.ace-iceberg .ace_markup.ace_heading,
+.ace-iceberg .ace_identifier,
+.ace-iceberg .ace_string {
+  color: #89b8c2;
+}
+
+.ace-iceberg .ace_comment {
+  color: #6b7089;
+}
+
+.ace-iceberg .ace_entity.ace_name.ace_tag,
+.ace-iceberg .ace_entity.ace_other.ace_attribute-name,
+.ace-iceberg .ace_meta.ace_tag,
+.ace-iceberg .ace_variable {
+  color: #f2777a;
+}
+
+.ace-iceberg .ace_indent-guide {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAEklEQVQImWPQ09NrYAgMjP4PAAtGAwchHMyAAAAAAElFTkSuQmCC)
+    right repeat-y;
+}

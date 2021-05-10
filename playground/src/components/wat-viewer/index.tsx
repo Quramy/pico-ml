@@ -1,5 +1,5 @@
 import Prism from "prismjs";
-import "prismjs/themes/prism-tomorrow.css";
+import "../../styles/prism-theme.css";
 import "prismjs/components/prism-wasm";
 import React, { useState, useContext, useEffect } from "react";
 import { programContext } from "../../context/program-context";

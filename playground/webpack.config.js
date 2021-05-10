@@ -21,8 +21,8 @@ module.exports = {
       { test: /\.tsx?$/, exclude: /node_modules/, loader: "ts-loader", options: { transpileOnly: true } },
       {
         test: /\.css$/,
-        exclude: /node_modules/,
-        include: /src/,
+        exclude: [/node_modules/, /src\/styles/],
+        include: /src\/components/,
         use: [
           { loader: MiniCssExtractPlugin.loader },
           {
@@ -36,8 +36,8 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        include: /node_modules/,
-        exclude: /src/,
+        include: [/node_modules/, /src\/styles/],
+        exclude: /src\/components/,
         use: [
           { loader: MiniCssExtractPlugin.loader },
           {

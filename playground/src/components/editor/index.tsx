@@ -1,11 +1,19 @@
 import ace from "ace-builds";
 import "ace-builds/webpack-resolver"; // tell theme, syntax highlight module url to webpack
+
 import React, { useContext } from "react";
 import cx from "classnames";
 
 import { Program } from "../../service/program";
 import { programContext } from "../../context/program-context";
 import styles from "./index.css";
+
+const aceDefine = (ace as any).define as Function;
+
+aceDefine("ace/theme/iceberg", (_: any, exports: any) => {
+  exports.isDark = true;
+  exports.cssClass = "ace-iceberg";
+});
 
 function setupEditor(element: HTMLElement | null, program: Program) {
   if (!element) return;
@@ -14,7 +22,7 @@ function setupEditor(element: HTMLElement | null, program: Program) {
   });
   editor.setOptions({});
 
-  editor.setTheme("ace/theme/monokai");
+  editor.setTheme("ace/theme/iceberg");
 
   const editSession = editor.getSession();
   editSession.setTabSize(2);
