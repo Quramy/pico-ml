@@ -1,7 +1,7 @@
 import ace from "ace-builds";
 import "ace-builds/webpack-resolver"; // tell theme, syntax highlight module url to webpack
 
-import React, { useContext } from "react";
+import React, { useRef, useEffect, useContext } from "react";
 import cx from "classnames";
 
 import { Program } from "../../service/program";
@@ -30,12 +30,22 @@ function setupEditor(element: HTMLElement | null, program: Program) {
   editSession.setValue(program.initialContent);
 
   editor.on("change", () => program.code$.next(editSession.getValue()));
-  program.diagnostics$.subscribe(diagnostics => editSession.setAnnotations([...diagnostics]));
+  const subscription = program.diagnostics$.subscribe(diagnostics => editSession.setAnnotations([...diagnostics]));
 
-  return editor;
+  const dispose = () => {
+    editor.destroy();
+    subscription.unsubscribe();
+  };
+
+  return dispose;
 }
 
 export function Editor() {
-  const ctx = useContext(programContext);
-  return <div className={cx(styles.root)} ref={ref => setupEditor(ref, ctx)} />;
+  const ref = useRef<HTMLDivElement>(null);
+  const program = useContext(programContext);
+  useEffect(() => {
+    if (!ref.current) return;
+    return setupEditor(ref.current, program);
+  }, [ref.current]);
+  return <div className={cx(styles.root)} ref={ref} />;
 }
