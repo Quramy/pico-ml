@@ -1,6 +1,6 @@
 {
   "name": "pico-ml",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "A toy programming language witch is a subset of OCaml",
   "type": "commonks",
   "main": "lib/index.js",
