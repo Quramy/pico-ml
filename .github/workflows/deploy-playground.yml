@@ -18,13 +18,14 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Deploy Playground
+      - name: Build Playground
         run: |
           git config --global user.email "yosuke.kurami@gmai.com"
           git config --global user.name "Quramy"
           npm ci
           npm run build
-      - name: Deploy
+        working-directory: playground
+      - name: Publish gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
