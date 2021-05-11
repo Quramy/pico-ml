@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "@types/classnames": "2.3.1",
-    "@types/prismjs": "^1.16.5",
+    "@types/prismjs": "1.16.5",
     "@types/react": "17.0.5",
     "@types/react-dom": "17.0.3",
     "css-loader": "5.2.4",
@@ -25,11 +25,11 @@
   "dependencies": {
     "ace-builds": "1.4.12",
     "classnames": "2.3.1",
-    "prismjs": "^1.23.0",
+    "prismjs": "1.23.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-json-view": "^1.21.3",
-    "react-split-pane": "^0.1.92",
+    "react-json-view": "1.21.3",
+    "react-split-pane": "0.1.92",
     "rxjs": "7.0.0"
   }
 }
