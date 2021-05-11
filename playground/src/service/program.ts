@@ -17,13 +17,63 @@ import {
   printAST,
   mapValue,
   pos2location,
+  toBoolean,
+  toNumber,
+  toList,
+  IntType,
+  ListType,
+  BoolType,
+  FunctionType,
+  TypeParameterType,
 } from "pico-ml";
+import { toHex } from "../functions/hex";
 
 export interface Diagnostic {
   readonly row: number;
   readonly column: number;
   readonly type: "error";
   readonly text: string;
+}
+
+type IntValueType = IntType & {
+  value: number;
+};
+
+type BoolValueType = BoolType & {
+  value: boolean;
+};
+
+type FunctionValueType = FunctionType & {
+  value: string;
+};
+
+type ListValueType = ListType & {
+  value: readonly ValueTypeTree[];
+};
+
+type TypeValueType = TypeParameterType & {
+  value: string;
+};
+
+export type ValueTypeTree = IntValueType | BoolValueType | ListValueType | FunctionValueType | TypeValueType;
+
+function createFormatter(instance: WebAssembly.Instance, pt: TypeValue): (value: number) => ValueTypeTree {
+  if (pt.kind === "Int") {
+    return (value: number) => ({ ...pt, value: toNumber(instance, value) });
+  } else if (pt.kind === "Bool") {
+    return (value: number) => ({ ...pt, value: toBoolean(instance, value) });
+  } else if (pt.kind === "List") {
+    const elementConverter = createFormatter(instance, pt.elementType);
+    return (value: number) => {
+      return { ...pt, value: toList(instance, value).map(elementConverter) };
+    };
+  } else if (pt.kind === "TypeParameter") {
+    return () => ({ ...pt, value: "unknown" });
+  } else if (pt.kind === "Function") {
+    return (value: number) => ({ ...pt, value: `Closure@${toHex(value, 4)}` });
+  }
+  // @ts-expect-error
+  throw new Error(`${pt.kind}`);
 }
 
 export interface Program {
@@ -35,7 +85,7 @@ export interface Program {
   readonly diagnostics$: Observable<readonly Diagnostic[]>;
   readonly wat$: Observable<Result<string>>;
   readonly wasm$: Observable<Result<Uint8Array>>;
-  readonly evaluatedResult$: Observable<Result<number>>;
+  readonly evaluatedResult$: Observable<Result<ValueTypeTree>>;
 }
 
 export type CreateProgramOptions = {
@@ -77,15 +127,17 @@ export function createProgram({ initialContent }: CreateProgramOptions) {
     }),
   );
   const evaluatedResult$ = execute$.pipe(
-    withLatestFrom(wasm$),
-    switchMap(async ([_, bin]) => {
+    withLatestFrom(combineLatest(primaryType$, wasm$)),
+    switchMap(async ([_, [ptr, bin]]) => {
+      if (!ptr.ok) return error({ message: ptr.value.message });
       if (!bin.ok) return error({ message: bin.value.message });
       try {
         const { instance } = await WebAssembly.instantiate(bin.value);
+        const formatter = createFormatter(instance, ptr.value);
         const value = (instance.exports["main"] as Function)() as number;
-        return ok(value);
+        return ok(formatter(value)) as Result<ValueTypeTree>;
       } catch (e) {
-        return error(e) as Result<number>;
+        return error(e) as Result<ValueTypeTree>;
       }
     }),
   );

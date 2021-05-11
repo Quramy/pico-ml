@@ -1,0 +1,52 @@
+.root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  overflow: auto;
+  padding-top: 24px;
+}
+
+.logItem {
+  margin-top: 8px;
+  padding: 0 25px;
+  border-style: solid;
+  border-color: #1e2132;
+  border-width: 0 0 1px 0;
+}
+
+.logHeader {
+  color: #6b7089;
+  font-size: 0.75rem;
+  margin-right: 12px;
+}
+
+.logBody {
+  font-style: oblique;
+  font-family: var(--system-fontfamily);
+  line-height: 1.5;
+}
+
+.error {
+  color: #e27878;
+}
+
+.intNode {
+  color: #a093c7;
+}
+.boolNode {
+  color: #a093c7;
+}
+
+.lpToken,
+.rpToken {
+}
+
+.commaToken {
+  color: #c6c8d1;
+}
+
+.functionNode {
+  color: #84a0c6;
+}

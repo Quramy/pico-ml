@@ -9,10 +9,20 @@ import { BinaryViewer } from "../binary-viewer";
 import styles from "./index.css";
 import { EvaluatedLog } from "../evaluated-log";
 
+const code = `
+(*                                                                  *)
+(*                 Welcome to PicoML Playground!                    *)
+(*                                                                  *)
+(* Type the folloting to compile and execute the ML expression:     *)
+(* - win: Ctrl + Enter                                              *)
+(* - mac: Command + Enter                                           *)
+
+if true then 1 + 2 * 3 else 0
+`;
+
 export function App() {
-  const code = "(* Write ML Code here ! *)\n\nif true then 1 * 2 else 4 - 3";
   return (
-    <ProgramProvider initialContent={code}>
+    <ProgramProvider initialContent={code.trim()}>
       <SplitPane resizerClassName={styles.resizer} split="vertical" defaultSize="45%">
         <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="70%">
           <Editor />

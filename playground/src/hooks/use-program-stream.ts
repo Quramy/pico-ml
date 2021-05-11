@@ -20,8 +20,9 @@ function isResult(x: any): x is Result<any, any> {
 }
 
 type UseProgramStreamResult<V, E> =
-  | { readonly data: null; readonly error: E }
-  | { readonly data: V; readonly error: null };
+  | { readonly ready: false; readonly data: null; readonly error: null }
+  | { readonly ready: true; readonly data: null; readonly error: E }
+  | { readonly ready: true; readonly data: V; readonly error: null };
 
 export function useProgramStream<
   K extends ProgramKey,
@@ -29,9 +30,9 @@ export function useProgramStream<
   R extends StreamValue<S>,
   V extends ResultValue<R>,
   E extends ResultError<R>
->(key: K, initialValue: V): UseProgramStreamResult<V, E> {
+>(key: K, initialValue?: V): UseProgramStreamResult<V, E> {
   const program = useContext(programContext);
-  const [result, setResult] = useState<Result<V, E>>(ok(initialValue));
+  const [state, setState] = useState<Result<V, E> | null>(initialValue ? ok(initialValue) : null);
   useEffect(() => {
     const stream = program[key];
     if (!isObservable(stream)) {
@@ -39,19 +40,27 @@ export function useProgramStream<
     }
     const subscription = stream.subscribe(v => {
       if (isResult(v)) {
-        setResult(v);
+        setState(v);
       }
     });
     return () => subscription.unsubscribe();
   }, []);
-  const ret: UseProgramStreamResult<V, E> = result.ok
+  const ret: UseProgramStreamResult<V, E> = !state
     ? {
-        data: result.value,
+        ready: false,
+        data: null,
+        error: null,
+      }
+    : state.ok
+    ? {
+        ready: true,
+        data: state.value,
         error: null,
       }
     : {
+        ready: true,
         data: null,
-        error: result.value,
+        error: state.value,
       };
   return ret;
 }

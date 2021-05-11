@@ -1,5 +1,5 @@
 .resizer {
-  background: #000;
+  background: #89b8c2;
   opacity: 0.2;
   z-index: 1;
   -moz-box-sizing: border-box;
@@ -11,8 +11,9 @@
 }
 
 .resizer:hover {
-  -webkit-transition: all 2s ease;
-  transition: all 2s ease;
+  opacity: 1;
+  color: #fff;
+  transition: all 0.3s ease;
 }
 
 .resizer:global(.horizontal) {
