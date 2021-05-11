@@ -18,7 +18,11 @@ map fact (range 1 7) (* ==> int list: [ 1, 2, 6, 24, 120, 720 ] *)
 - Type inference
 - Compile to WASM
 
-[Play this here!](https://quramy.github.io/pico-ml/)
+## Web Playground
+
+[![Playground](playground_capture.png)](https://quramy.github.io/pico-ml/)
+
+[You can try PicoML here.](https://quramy.github.io/pico-ml/)
 
 ## How to use
 

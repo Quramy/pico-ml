@@ -11,3 +11,4 @@ tsconfig.*
 jest.config.js
 renovate.json
 playground/
+playground_capture.png
