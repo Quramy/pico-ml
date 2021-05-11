@@ -20,7 +20,7 @@ map fact (range 1 7) (* ==> int list: [ 1, 2, 6, 24, 120, 720 ] *)
 
 ## Web Playground
 
-[![Playground](playground_capture.png)](https://quramy.github.io/pico-ml/)
+[![Playground](https://raw.githubusercontent.com/Quramy/pico-ml/main/playground_capture.png)](https://quramy.github.io/pico-ml/)
 
 [You can try PicoML here.](https://quramy.github.io/pico-ml/)
 
