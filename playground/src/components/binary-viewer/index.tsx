@@ -33,6 +33,7 @@ function createTableFrom(bin: Uint8Array) {
 
 export function BinaryViewer() {
   const result = useProgramStream("wasm$", new Uint8Array());
+  if (!result.ready) return null;
   if (result.error) {
     return <div>Error</div>;
   }
