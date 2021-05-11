@@ -31,7 +31,7 @@ module.exports = {
               modules: true,
             },
           },
-          // { loader: "postcss-loader" },
+          { loader: "postcss-loader" },
         ],
       },
       {
@@ -46,7 +46,7 @@ module.exports = {
               modules: false,
             },
           },
-          // { loader: "postcss-loader" },
+          { loader: "postcss-loader" },
         ],
       },
     ],
