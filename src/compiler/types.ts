@@ -13,7 +13,7 @@ export type CompiledModuleResult = Result<ModuleNode, CompilationError>;
 export type CompilationResult = Result<CompilationValue, CompilationError>;
 
 export interface Environment {
-  getIndex(identifier: IdentifierNode): number;
+  getIndex(identifier: IdentifierNode): Result<number>;
 }
 
 export interface DefinitionStack<T, S = number> {
