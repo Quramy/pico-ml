@@ -1,0 +1,30 @@
+.root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  overflow: auto;
+}
+
+.table {
+  font-size: 0.75rem;
+  border-collapse: collapse;
+  font-family: var(--system-fontfamily);
+  margin-top: 32px;
+}
+
+.addressCell {
+  line-height: 1.5;
+  padding-left: 25px;
+  padding-right: 13px;
+}
+
+.addressCell + .cell {
+  padding-left: 1.5ch;
+}
+
+.cell {
+  color: #a093c7;
+  padding: 0 0.5ch;
+}

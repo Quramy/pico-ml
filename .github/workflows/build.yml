@@ -24,3 +24,8 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm test
+      - name: Compile Playground
+        run: |
+          npm ci
+          npm run compile
+        working-directory: playground

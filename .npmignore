@@ -10,3 +10,4 @@ tsconfig.*
 *.test.d.ts
 jest.config.js
 renovate.json
+playground/

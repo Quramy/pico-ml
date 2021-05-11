@@ -25,7 +25,7 @@
     "build:esm": "tsc -p tsconfig.esm.json",
     "test": "jest",
     "start": "ts-node src/cli/index.ts",
-    "prettier": "prettier \"src/**/*.ts\" \"*.{js,json,md}\"",
+    "prettier": "prettier \"src/**/*.ts\" \"playground/**/*\" \"*.{js,json,md}\"",
     "format": "npm run prettier -- --write",
     "lint": "npm run prettier -- --check",
     "postinstall": "husky install",

@@ -1,0 +1,20 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  color: #c6c8d1;
+  background: #161821;
+}
+
+:root {
+  --system-fontfamily: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+}
+
+ul {
+  list-style: none;
+}
