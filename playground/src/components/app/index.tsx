@@ -13,7 +13,7 @@ const code = `
 (*                                                                  *)
 (*                 Welcome to PicoML Playground!                    *)
 (*                                                                  *)
-(* Type the folloting to compile and execute the ML expression:     *)
+(* Type the folloing to compile and execute the ML expression:      *)
 (* - win: Ctrl + Enter                                              *)
 (* - mac: Command + Enter                                           *)
 
