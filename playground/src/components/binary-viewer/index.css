@@ -1,17 +1,11 @@
 .root {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  overflow: auto;
 }
 
 .table {
   font-size: 0.75rem;
   border-collapse: collapse;
   font-family: var(--system-fontfamily);
-  margin-top: 32px;
+  margin-top: 18px;
 }
 
 .addressCell {

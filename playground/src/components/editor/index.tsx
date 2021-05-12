@@ -1,7 +1,7 @@
 import ace from "ace-builds";
 // import "ace-builds/webpack-resolver"; // tell theme, syntax highlight module url to webpack
 
-import React, { useRef, useEffect, useContext } from "react";
+import { useRef, useEffect, useContext } from "react";
 import cx from "classnames";
 
 import { Program } from "../../service/program";

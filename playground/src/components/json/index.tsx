@@ -1,4 +1,3 @@
-import React from "react";
 import ReactJson, { ReactJsonViewProps } from "react-json-view";
 
 export type Props = Omit<ReactJsonViewProps, "theme">;

@@ -1,3 +1,8 @@
+.main {
+  position: relative;
+  height: calc(100vh-70px);
+}
+
 .resizer {
   background: #89b8c2;
   opacity: 0.2;
@@ -47,4 +52,25 @@
 }
 .resizer:global(.disabled):hover {
   border-color: transparent;
+}
+
+.footer {
+  z-index: 10;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  background: #111319;
+  padding: 24px 32px;
+  height: 70px;
+  font-size: 0.8rem;
+}
+
+.footer a:link,
+.footer a:visited {
+  color: #89b8c2;
+}
+
+.footer a:hover {
+  opacity: 0.8;
 }

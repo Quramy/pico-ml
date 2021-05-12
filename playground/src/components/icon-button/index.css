@@ -1,0 +1,12 @@
+.root {
+  color: #6b7089;
+  cursor: pointer;
+  background: transparent;
+  font-size: 0;
+  transform: scale(0.75);
+  transform-origin: top left;
+}
+
+.root:hover {
+  color: #c6c8d1;
+}

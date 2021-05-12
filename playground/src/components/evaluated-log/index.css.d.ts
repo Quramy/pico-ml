@@ -1,5 +1,7 @@
 declare const styles: {
   readonly root: string;
+  readonly buttonsArea: string;
+  readonly logList: string;
   readonly logItem: string;
   readonly logHeader: string;
   readonly logBody: string;
