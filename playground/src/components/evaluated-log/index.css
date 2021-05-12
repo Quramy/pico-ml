@@ -1,5 +1,26 @@
 .root {
-  padding-top: 24px;
+  isolation: isolate;
+}
+
+.buttonsArea {
+  z-index: 1;
+  background: #161821;
+  position: sticky;
+  top: 0;
+  padding: 8px 19px;
+  height: 33px;
+  border-style: solid;
+  border-style: solid;
+  border-color: #1e2132;
+  border-width: 0 0 1px 0;
+}
+
+.buttonsArea > *:not(:first-child) {
+  margin-left: 12px;
+}
+
+.logList {
+  margin-top: 12px;
 }
 
 .logItem {

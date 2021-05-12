@@ -4,5 +4,32 @@
   top: 0;
   right: 0;
   bottom: 0;
+}
+
+.inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
   overflow: auto;
+}
+
+.sectionName {
+  z-index: 1;
+  color: #0f1116;
+  background: #89a0c3;
+  display: inline-block;
+  position: absolute;
+  opacity: 0.8;
+  top: 0;
+  right: 0;
+  font-size: 0.75rem;
+  font-family: var(--system-fontfamily);
+  font-weight: bold;
+  line-height: 1.5;
+  padding: 0 12px;
+  min-width: 80px;
+  text-align: center;
+  border-bottom-left-radius: 4px;
 }

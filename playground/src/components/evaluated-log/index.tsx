@@ -1,8 +1,10 @@
-import React, { useRef } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import cx from "classnames";
 import { ValueTypeTree } from "../../service/program";
-import { useProgramStream } from "../../hooks/use-program-stream";
 import styles from "./index.css";
+import { IconButton } from "../icon-button";
+import { Play, Stop } from "../icons";
+import { programContext } from "../../context/program-context";
 
 type LogMessage =
   | {
@@ -10,7 +12,7 @@ type LogMessage =
       readonly message: string;
     }
   | {
-      readonly type: "value";
+      readonly type: "success";
       readonly value: ValueTypeTree;
     };
 
@@ -40,21 +42,27 @@ function EvaluatedValueNode({ node }: { node: ValueTypeTree }): React.ReactEleme
 
 export function EvaluatedLog() {
   const bottomElem = useRef<HTMLSpanElement>(null);
-  const arr = useRef<LogMessage[]>([]);
-  const result = useProgramStream("evaluatedResult$");
-  const logs = arr.current;
-  if (!result) return null;
-  if (result.error) {
-    logs.push({ type: "error", message: result.error.message });
-  } else if (result.data) {
-    logs.push({ type: "value", value: result.data });
-  }
-  if (bottomElem.current) {
-    bottomElem.current.scrollIntoView();
-  }
+  const [logs, setArr] = useState<LogMessage[]>([]);
+  const context = useContext(programContext);
+  useEffect(
+    () =>
+      context.evaluatedResult$.subscribe(logs => {
+        setArr(logs);
+        bottomElem.current?.scrollIntoView();
+      }).unsubscribe,
+    [],
+  );
   return (
     <div className={styles.root}>
-      <ul>
+      <div className={styles.buttonsArea}>
+        <IconButton label="Evaluate expression" title="Evaluate expression" onClick={() => context.execute$.next(null)}>
+          <Play />
+        </IconButton>
+        <IconButton label="Clear logs" title="Clear logs" onClick={() => context.execute$.next(true)}>
+          <Stop />
+        </IconButton>
+      </div>
+      <ul className={styles.logList}>
         {logs.map((logItem, i) => (
           <li className={styles.logItem} key={i}>
             <span className={styles.logHeader}>result#{i + 1}</span>

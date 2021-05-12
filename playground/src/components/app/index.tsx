@@ -28,19 +28,19 @@ export function App() {
           <Pane>
             <Editor />
           </Pane>
-          <Pane>
+          <Pane sectionName="Evaluation Log">
             <EvaluatedLog />
           </Pane>
         </SplitPane>
         <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="45%">
-          <Pane>
+          <Pane sectionName="Expression AST">
             <AstViewer />
           </Pane>
           <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="65%">
-            <Pane>
+            <Pane sectionName="Compiled WAT">
               <WatViewer />
             </Pane>
-            <Pane>
+            <Pane sectionName="Compiled WASM">
               <BinaryViewer />
             </Pane>
           </SplitPane>
