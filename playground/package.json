@@ -1,9 +1,15 @@
 {
   "private": true,
   "name": "picoml-playground",
+  "sideEffects": [
+    "./src/index.tsx",
+    "src/ace-config.js",
+    "*.css"
+  ],
   "scripts": {
     "clean": "rimraf dist",
     "compile": "tsc -p .",
+    "tcm": "tcm --watch src/components",
     "start": "webpack-cli serve --mode development",
     "build": "webpack-cli build --mode production"
   },

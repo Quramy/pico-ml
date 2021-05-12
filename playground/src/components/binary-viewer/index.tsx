@@ -1,4 +1,3 @@
-import React from "react";
 import cx from "classnames";
 
 import { useProgramStream } from "../../hooks/use-program-stream";

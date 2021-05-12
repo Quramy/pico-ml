@@ -1,4 +1,3 @@
-import React from "react";
 import SplitPane from "react-split-pane";
 import { Editor } from "../editor";
 import { ProgramProvider } from "../../context/program-context";
@@ -8,6 +7,7 @@ import { BinaryViewer } from "../binary-viewer";
 
 import styles from "./index.css";
 import { EvaluatedLog } from "../evaluated-log";
+import { Pane } from "../pane";
 
 const code = `
 (*                                                                  *)
@@ -25,14 +25,24 @@ export function App() {
     <ProgramProvider initialContent={code.trim()}>
       <SplitPane resizerClassName={styles.resizer} split="vertical" defaultSize="45%">
         <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="70%">
-          <Editor />
-          <EvaluatedLog />
+          <Pane>
+            <Editor />
+          </Pane>
+          <Pane>
+            <EvaluatedLog />
+          </Pane>
         </SplitPane>
         <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="45%">
-          <AstViewer />
+          <Pane>
+            <AstViewer />
+          </Pane>
           <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="65%">
-            <WatViewer />
-            <BinaryViewer />
+            <Pane>
+              <WatViewer />
+            </Pane>
+            <Pane>
+              <BinaryViewer />
+            </Pane>
           </SplitPane>
         </SplitPane>
       </SplitPane>
