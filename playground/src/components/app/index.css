@@ -1,3 +1,8 @@
+.main {
+  position: relative;
+  height: calc(100vh-70px);
+}
+
 .resizer {
   background: #89b8c2;
   opacity: 0.2;
@@ -57,6 +62,7 @@
   text-align: center;
   background: #111319;
   padding: 24px 32px;
+  height: 70px;
   font-size: 0.8rem;
 }
 
