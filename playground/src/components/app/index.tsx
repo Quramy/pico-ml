@@ -23,8 +23,8 @@ if true then 1 + 2 * 3 else 0
 export function App() {
   return (
     <ProgramProvider initialContent={code.trim()}>
-      <SplitPane resizerClassName={styles.resizer} split="vertical" defaultSize="45%">
-        <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="70%">
+      <SplitPane resizerClassName={styles.resizer} split="vertical" defaultSize="43%">
+        <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="62%">
           <Pane>
             <Editor />
           </Pane>
@@ -32,11 +32,11 @@ export function App() {
             <EvaluatedLog />
           </Pane>
         </SplitPane>
-        <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="45%">
+        <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="38%">
           <Pane sectionName="Expression AST">
             <AstViewer />
           </Pane>
-          <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="65%">
+          <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="60%">
             <Pane sectionName="Compiled WAT">
               <WatViewer />
             </Pane>
@@ -46,6 +46,9 @@ export function App() {
           </SplitPane>
         </SplitPane>
       </SplitPane>
+      <footer className={styles.footer}>
+        Powered by <a href="https://github.com/Quramy/pico-ml">https://github.com/Quramy/pico-ml</a>
+      </footer>
     </ProgramProvider>
   );
 }
