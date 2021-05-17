@@ -8,6 +8,7 @@ export interface RefereneceContext {
   readonly mems: Map<string, number>;
   readonly globals: Map<string, number>;
   readonly elem: Map<string, number>;
+  readonly funcLocals: Map<number, Map<string, number>>;
   readonly locals?: Map<string, number>;
   readonly labels?: Map<string, number>;
 }

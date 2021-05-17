@@ -14,7 +14,11 @@ import {
   FunctionIndexList,
   Global,
   GlobalType,
+  Names,
+  NameAssociation,
+  IndirectNameMap,
 } from "../structure-types";
+import { BinaryOutputOptions } from "../types";
 
 import {
   variableInstructions,
@@ -70,6 +74,14 @@ function section(id: number, elements: readonly Uint8Array[]) {
   if (!elements.length) return new Uint8Array();
   const content = vec(elements);
   return new Uint8Array([id, ...encodeUnsigned(content.byteLength), ...content]);
+}
+
+function nameMap(nmap: readonly NameAssociation[]): readonly Uint8Array[] {
+  return nmap.map(({ idx, name: n }) => new Uint8Array([...uint32(idx), ...name(n)]));
+}
+
+function indirectMap(nmap: readonly IndirectNameMap[]): readonly Uint8Array[] {
+  return nmap.map(({ idx, nameMap: subMap }) => new Uint8Array([...uint32(idx), ...vec(nameMap(subMap))]));
 }
 
 function numType(_valueType: ValType): Uint8Array {
@@ -151,6 +163,21 @@ function funcIdx(elemList: FunctionIndexList): Uint8Array {
   return new Uint8Array([0x00, ...expr(elemList.offsetExpr), ...vec(elemList.indices.map(i => uint32(i)))]);
 }
 
+function nameData(names: Names): Uint8Array {
+  return new Uint8Array([
+    ...encodeString("name"),
+    ...section(1, nameMap(names.funcs)),
+    ...section(2, indirectMap(names.locals)),
+  ]);
+}
+
+function customSec(mod: Module, { enabledNameSection }: BinaryOutputOptions): Uint8Array {
+  if (!enabledNameSection) {
+    return new Uint8Array([]);
+  }
+  return section(0, [nameData(mod.names)]);
+}
+
 function typeSec(funcTypes: readonly FuncType[]): Uint8Array {
   return section(1, funcTypes.map(funcType));
 }
@@ -211,10 +238,11 @@ function codeSec(funcs: readonly Func[]): Uint8Array {
   );
 }
 
-export function unparse(mod: Module): Uint8Array {
+export function unparse(mod: Module, options: BinaryOutputOptions): Uint8Array {
   const head = new Uint8Array([...magic, ...version]);
   const ret = new Uint8Array([
     ...head,
+    ...customSec(mod, options),
     ...typeSec(mod.types),
     ...funcSec(mod.funcs),
     ...tableSec(mod.tables),

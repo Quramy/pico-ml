@@ -9,7 +9,7 @@ import {
   ExportNode,
   ElemNode,
 } from "../../ast-types";
-import { Module, Func, TableType } from "../../structure-types";
+import { Module, Func, TableType, Names } from "../../structure-types";
 import { RefereneceContext, createIndex } from "../ref";
 import { convertType } from "./typedef";
 import { convertFunc } from "./func";
@@ -27,6 +27,7 @@ function group(node: ModuleNode) {
     elem: new Map(),
     mems: new Map(),
     tables: new Map(),
+    funcLocals: new Map(),
   };
 
   const typedefNodes: TypeNode[] = [];
@@ -82,13 +83,33 @@ function group(node: ModuleNode) {
   };
 }
 
+function names(refCtx: RefereneceContext): Names {
+  return {
+    kind: "Names",
+    funcs: [...refCtx.funcs.entries()].map(([name, idx]) => ({
+      kind: "NameAssociation",
+      idx,
+      name,
+    })),
+    locals: [...refCtx.funcLocals.entries()].map(([idx, localMap]) => ({
+      kind: "IndirectNameMap",
+      idx,
+      nameMap: [...localMap.entries()].map(([name, idx]) => ({
+        kind: "NameAssociation",
+        idx,
+        name,
+      })),
+    })),
+  };
+}
+
 export function convertModule(node: ModuleNode): Result<Module> {
   const { typedefNodes, funcNodes, tableNodes, memNodes, globalNodes, exportNodes, elemNodes, refCtx } = group(node);
   return all(typedefNodes.map(node => convertType(node))).mapValue(types =>
     mapValue(
       all(memNodes.map(node => convertMemory(node))),
       funcNodes.reduce(
-        (acc, node) => acc.mapValue(state => convertFunc(node, state, refCtx)),
+        (acc, node, i) => acc.mapValue(state => convertFunc(node, i, state, refCtx)),
         ok({ funcs: [] as readonly Func[], types }),
       ),
       all(elemNodes.map(node => convertElem(node, refCtx))),
@@ -102,6 +123,7 @@ export function convertModule(node: ModuleNode): Result<Module> {
         )
         .map(({ tables, elems }) => ({
           kind: "Module",
+          names: names(refCtx),
           types,
           funcs,
           tables,

@@ -1,6 +1,6 @@
 import { parseMatchPattern } from "../../syntax";
 import { Context } from "../compiler-context";
-import { generateBinary } from "../../wasm";
+import { generateBinaryWithDefaultOptions as generateBinary } from "../../wasm";
 import { ModuleBuilder } from "../module-builder";
 import { matchPattern } from "./match-pattern";
 import { toList } from "../js-bindings";

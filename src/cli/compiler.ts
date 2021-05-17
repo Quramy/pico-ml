@@ -57,7 +57,10 @@ async function main({ inputFilename, target = "binary" }: MainOption) {
 
   if (target === "binary") {
     const outputFilename = path.basename(inputFilename, path.extname(inputFilename)) + ".wasm";
-    const binResult = generateBinary(compileResult.value);
+    const enabledNameSection = false; // FIXME
+    const binResult = generateBinary(compileResult.value, {
+      enabledNameSection,
+    });
     if (!binResult.ok) {
       console.error(binResult.value);
       process.exit(1);

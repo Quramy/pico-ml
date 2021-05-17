@@ -108,7 +108,8 @@ export function createProgram({ initialContent }: CreateProgramOptions) {
     map(([pr, ptr]) => mapValue(pr, ptr)(expression => compile(expression))),
   );
   const wat$ = compileResult$.pipe(map(cr => cr.map(printAST)));
-  const wasm$ = compileResult$.pipe(map(cr => cr.mapValue(generateBinary)));
+  const enabledNameSection = true; // TODO get this value from options
+  const wasm$ = compileResult$.pipe(map(cr => cr.mapValue(mod => generateBinary(mod, { enabledNameSection }))));
   const diagnostics$ = combineLatest(code$, primaryType$).pipe(
     map(([code, ptr]) => {
       if (!ptr.ok) {

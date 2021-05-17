@@ -1,4 +1,4 @@
-import { generateBinary } from "../../../wasm";
+import { generateBinaryWithDefaultOptions as generateBinary } from "../../../wasm";
 import { ModuleBuilder } from "../../module-builder";
 
 import { getAllocatorModuleDefinition } from "./alloc";
