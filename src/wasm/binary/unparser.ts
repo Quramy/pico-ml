@@ -70,10 +70,11 @@ function vec(elements: readonly Uint8Array[]) {
   return new Uint8Array(buf);
 }
 
-function section(id: number, elements: Uint8Array | readonly Uint8Array[]) {
-  if (elements instanceof Uint8Array) {
-    return new Uint8Array([id, ...encodeUnsigned(elements.byteLength), ...elements]);
-  }
+function section(id: number, elements: Uint8Array) {
+  return new Uint8Array([id, ...encodeUnsigned(elements.byteLength), ...elements]);
+}
+
+function vecSection(id: number, elements: readonly Uint8Array[]) {
   if (!elements.length) return new Uint8Array();
   const content = vec(elements);
   return new Uint8Array([id, ...encodeUnsigned(content.byteLength), ...content]);
@@ -169,12 +170,12 @@ function funcIdx(elemList: FunctionIndexList): Uint8Array {
 function nameData(names: Names): Uint8Array {
   return new Uint8Array([
     ...name("name"),
-    ...section(1, nameMap(names.funcs)),
-    ...section(2, indirectMap(names.locals)),
-    ...section(4, nameMap(names.types)),
-    ...section(5, nameMap(names.tables)),
-    ...section(6, nameMap(names.mems)),
-    ...section(7, nameMap(names.globals)),
+    ...vecSection(1, nameMap(names.funcs)),
+    ...vecSection(2, indirectMap(names.locals)),
+    ...vecSection(4, nameMap(names.types)),
+    ...vecSection(5, nameMap(names.tables)),
+    ...vecSection(6, nameMap(names.mems)),
+    ...vecSection(7, nameMap(names.globals)),
   ]);
 }
 
@@ -186,18 +187,18 @@ function customSec(mod: Module, { enabledNameSection }: BinaryOutputOptions): Ui
 }
 
 function typeSec(funcTypes: readonly FuncType[]): Uint8Array {
-  return section(1, funcTypes.map(funcType));
+  return vecSection(1, funcTypes.map(funcType));
 }
 
 function funcSec(funcs: readonly Func[]): Uint8Array {
-  return section(
+  return vecSection(
     3,
     funcs.map(func => uint32(func.type)),
   );
 }
 
 function tableSec(tableTypes: readonly TableType[]): Uint8Array {
-  return section(
+  return vecSection(
     4,
     tableTypes.map(tableType => {
       const marker = tableType.refType === "Funcref" ? 0x70 : 0x6f;
@@ -207,35 +208,35 @@ function tableSec(tableTypes: readonly TableType[]): Uint8Array {
 }
 
 function memSec(memTypes: readonly MemType[]): Uint8Array {
-  return section(
+  return vecSection(
     5,
     memTypes.map(m => limits(m.limits)),
   );
 }
 
 function globalSec(globals: readonly Global[]): Uint8Array {
-  return section(
+  return vecSection(
     6,
     globals.map(g => new Uint8Array([...globalType(g.type), ...expr(g.expr)])),
   );
 }
 
 function exportSec(exports: readonly Export[]): Uint8Array {
-  return section(
+  return vecSection(
     7,
     exports.map(e => new Uint8Array([...name(e.name), exportTypes[e.exportKind], ...uint32(e.index)])),
   );
 }
 
 function elemSec(elems: readonly Elem[]): Uint8Array {
-  return section(
+  return vecSection(
     9,
     elems.map(elem => funcIdx(elem.elemList)),
   );
 }
 
 function codeSec(funcs: readonly Func[]): Uint8Array {
-  return section(
+  return vecSection(
     10,
     funcs.map(func => {
       const f = [...vec(func.locals.map(l => new Uint8Array([1, ...numType(l)]))), ...expr(func.body)];
