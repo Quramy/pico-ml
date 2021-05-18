@@ -1,14 +1,12 @@
 export function encodeString(str: string): Uint8Array {
-  var n = str.length,
-    idx = -1,
-    byteLength = 512,
-    bytes = new Uint8Array(byteLength),
-    i,
-    c,
-    _bytes;
+  const n = str.length;
+  let idx = -1;
+  let byteLength = 0x200;
+  let bytes = new Uint8Array(byteLength);
+  let _bytes = bytes;
 
-  for (i = 0; i < n; ++i) {
-    c = str.charCodeAt(i);
+  for (let i = 0; i < n; ++i) {
+    const c = str.charCodeAt(i);
     if (c <= 0x7f) {
       bytes[++idx] = c;
     } else if (c <= 0x7ff) {
@@ -26,7 +24,7 @@ export function encodeString(str: string): Uint8Array {
     }
     if (byteLength - idx <= 4) {
       _bytes = bytes;
-      byteLength *= 2;
+      byteLength <<= 1;
       bytes = new Uint8Array(byteLength);
       bytes.set(_bytes);
     }
