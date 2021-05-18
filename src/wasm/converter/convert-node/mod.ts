@@ -84,22 +84,27 @@ function group(node: ModuleNode) {
 }
 
 function names(refCtx: RefereneceContext): Names {
+  const mapToAssociations = (map: Map<string, number>) =>
+    [...map.entries()].map(
+      ([name, idx]) =>
+        ({
+          kind: "NameAssociation",
+          idx,
+          name,
+        } as const),
+    );
   return {
     kind: "Names",
-    funcs: [...refCtx.funcs.entries()].map(([name, idx]) => ({
-      kind: "NameAssociation",
-      idx,
-      name,
-    })),
+    funcs: mapToAssociations(refCtx.funcs),
     locals: [...refCtx.funcLocals.entries()].map(([idx, localMap]) => ({
       kind: "IndirectNameMap",
       idx,
-      nameMap: [...localMap.entries()].map(([name, idx]) => ({
-        kind: "NameAssociation",
-        idx,
-        name,
-      })),
+      nameMap: mapToAssociations(localMap),
     })),
+    types: mapToAssociations(refCtx.types),
+    tables: mapToAssociations(refCtx.tables),
+    mems: mapToAssociations(refCtx.mems),
+    globals: mapToAssociations(refCtx.globals),
   };
 }
 

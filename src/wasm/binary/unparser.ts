@@ -70,7 +70,10 @@ function vec(elements: readonly Uint8Array[]) {
   return new Uint8Array(buf);
 }
 
-function section(id: number, elements: readonly Uint8Array[]) {
+function section(id: number, elements: Uint8Array | readonly Uint8Array[]) {
+  if (elements instanceof Uint8Array) {
+    return new Uint8Array([id, ...encodeUnsigned(elements.byteLength), ...elements]);
+  }
   if (!elements.length) return new Uint8Array();
   const content = vec(elements);
   return new Uint8Array([id, ...encodeUnsigned(content.byteLength), ...content]);
@@ -165,9 +168,13 @@ function funcIdx(elemList: FunctionIndexList): Uint8Array {
 
 function nameData(names: Names): Uint8Array {
   return new Uint8Array([
-    ...encodeString("name"),
+    ...name("name"),
     ...section(1, nameMap(names.funcs)),
     ...section(2, indirectMap(names.locals)),
+    ...section(4, nameMap(names.types)),
+    ...section(5, nameMap(names.tables)),
+    ...section(6, nameMap(names.mems)),
+    ...section(7, nameMap(names.globals)),
   ]);
 }
 
@@ -175,7 +182,7 @@ function customSec(mod: Module, { enabledNameSection }: BinaryOutputOptions): Ui
   if (!enabledNameSection) {
     return new Uint8Array([]);
   }
-  return section(0, [nameData(mod.names)]);
+  return section(0, nameData(mod.names));
 }
 
 function typeSec(funcTypes: readonly FuncType[]): Uint8Array {
@@ -242,7 +249,6 @@ export function unparse(mod: Module, options: BinaryOutputOptions): Uint8Array {
   const head = new Uint8Array([...magic, ...version]);
   const ret = new Uint8Array([
     ...head,
-    ...customSec(mod, options),
     ...typeSec(mod.types),
     ...funcSec(mod.funcs),
     ...tableSec(mod.tables),
@@ -251,6 +257,7 @@ export function unparse(mod: Module, options: BinaryOutputOptions): Uint8Array {
     ...exportSec(mod.exports),
     ...elemSec(mod.elems),
     ...codeSec(mod.funcs),
+    ...customSec(mod, options),
   ]);
   return ret;
 }

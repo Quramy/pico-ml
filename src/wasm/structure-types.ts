@@ -138,6 +138,10 @@ export interface Names {
   readonly kind: "Names";
   readonly funcs: readonly NameAssociation[];
   readonly locals: readonly IndirectNameMap[];
+  readonly types: readonly NameAssociation[];
+  readonly tables: readonly NameAssociation[];
+  readonly mems: readonly NameAssociation[];
+  readonly globals: readonly NameAssociation[];
 }
 
 export interface Module {
