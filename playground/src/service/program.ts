@@ -111,7 +111,7 @@ export function createProgram({ initialContent, settingsService }: CreateProgram
   );
   const wat$ = compileResult$.pipe(map(cr => cr.map(printAST)));
   const wasm$ = combineLatest([compileResult$, settingsService.settings$]).pipe(
-    map(([cr, { enabledNameSection }]) => cr.mapValue(mod => generateBinary(mod, { enabledNameSection }))),
+    map(([cr, { enableNameSection }]) => cr.mapValue(mod => generateBinary(mod, { enableNameSection }))),
   );
   const diagnostics$ = combineLatest(code$, primaryType$).pipe(
     map(([code, ptr]) => {

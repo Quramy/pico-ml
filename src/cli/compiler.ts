@@ -13,10 +13,10 @@ import { ConsoleLogger } from "./logger";
 type MainOption = {
   readonly inputFilename: string;
   readonly target?: "binary" | "wat";
-  readonly enabledNameSection?: boolean;
+  readonly enableNameSection?: boolean;
 };
 
-async function main({ inputFilename, target = "binary", enabledNameSection = false }: MainOption) {
+async function main({ inputFilename, target = "binary", enableNameSection = false }: MainOption) {
   const errorReporter = new ErrorReporter(process.cwd(), msg => console.error(msg));
   const code = await fs.readFile(inputFilename, "utf-8").catch(err => {
     console.error(err.message);
@@ -61,7 +61,7 @@ async function main({ inputFilename, target = "binary", enabledNameSection = fal
   if (target === "binary") {
     const outputFilename = path.basename(inputFilename, path.extname(inputFilename)) + ".wasm";
     const binResult = generateBinary(compileResult.value, {
-      enabledNameSection,
+      enableNameSection,
     });
     if (!binResult.ok) {
       console.error(binResult.value);
@@ -86,7 +86,7 @@ const cliParser = createParser({
       type: "boolean",
       description: "Output compiled .wat file.",
     },
-    enabledNameSection: {
+    enableNameSection: {
       type: "boolean",
       description: "Emit WASM name section.",
     },
@@ -107,6 +107,6 @@ if (!inputFilename) {
   process.exit(1);
 }
 const target = options.text ? "wat" : "binary";
-const enabledNameSection = options.enabledNameSection;
+const enableNameSection = options.enableNameSection;
 
-main({ inputFilename, target, enabledNameSection });
+main({ inputFilename, target, enableNameSection });

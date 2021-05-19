@@ -11,7 +11,7 @@ export interface SettingsService {
 }
 
 export const defaultSettingOptions: SettingsOptions = {
-  enabledNameSection: true,
+  enableNameSection: true,
 };
 
 export function createSettingsService(): SettingsService {

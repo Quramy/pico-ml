@@ -152,7 +152,7 @@ describe(compile, () => {
 const compile2wasm = (code: string) =>
   parse(code)
     .mapValue(compile)
-    .mapValue(mod => generateBinary(mod, { enabledNameSection: false }))
+    .mapValue(mod => generateBinary(mod, { enableNameSection: false }))
     .unwrap();
 
 const evaluateMain = async (

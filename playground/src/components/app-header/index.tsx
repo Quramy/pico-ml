@@ -8,7 +8,7 @@ type Props = {
 };
 
 export function AppHeader({ className }: Props) {
-  const [enabledNameSection, setEnabledNameSection] = useSettingsValue("enabledNameSection");
+  const [enableNameSection, setenableNameSection] = useSettingsValue("enableNameSection");
   const [settingsIsOpening, setSettingsIsOpening] = useState(false);
   const closeCb = useCallback(() => setSettingsIsOpening(false), []);
   const registerClickOutside = (elem: HTMLDivElement | null) => {
@@ -32,8 +32,8 @@ export function AppHeader({ className }: Props) {
                 <label>
                   <input
                     type="checkbox"
-                    checked={enabledNameSection}
-                    onChange={() => setEnabledNameSection(!enabledNameSection)}
+                    checked={enableNameSection}
+                    onChange={() => setenableNameSection(!enableNameSection)}
                   />
                   <span>Emit WASM name section</span>
                 </label>

@@ -3,7 +3,7 @@ import { convertModule } from "../converter";
 import { Module } from "../structure-types";
 import { unparse as baseUnparse } from "./unparser";
 
-const unparse = (mod: Module) => baseUnparse(mod, { enabledNameSection: false });
+const unparse = (mod: Module) => baseUnparse(mod, { enableNameSection: false });
 
 describe(unparse, () => {
   describe("unparse result should work as WebAssembly buffered source", () => {

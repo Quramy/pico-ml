@@ -180,8 +180,8 @@ function nameData(names: Names): Uint8Array {
   );
 }
 
-function customSec(mod: Module, { enabledNameSection }: BinaryOutputOptions): Uint8Array {
-  if (!enabledNameSection) {
+function customSec(mod: Module, { enableNameSection }: BinaryOutputOptions): Uint8Array {
+  if (!enableNameSection) {
     return new Uint8Array();
   }
   return section(0, nameData(mod.names));

@@ -1,3 +1,3 @@
 export interface BinaryOutputOptions {
-  readonly enabledNameSection: boolean;
+  readonly enableNameSection: boolean;
 }

@@ -16,5 +16,5 @@ export function generateBinary(moduleNode: ModuleNode, options: BinaryOutputOpti
 }
 
 export function generateBinaryWithDefaultOptions(moduleNode: ModuleNode): Result<Uint8Array> {
-  return generateBinary(moduleNode, { enabledNameSection: false });
+  return generateBinary(moduleNode, { enableNameSection: false });
 }
