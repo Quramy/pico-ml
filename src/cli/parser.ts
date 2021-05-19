@@ -40,10 +40,11 @@ export type CommandCliSetting = OptionsHolder & {
 };
 
 type ParseOptions = {
-  options: {
-    [name: string]: CommandLineOptionEntry;
+  readonly baseUsage?: string;
+  readonly options: {
+    readonly [name: string]: CommandLineOptionEntry;
   };
-  logger: Logger;
+  readonly logger: Logger;
 };
 
 type Dispatch<T extends CommandLineOptionEntry> = T extends BooleanOptionEntry
@@ -131,7 +132,11 @@ export function createParser<T extends ParseOptions>(parseOptions: T) {
   const parse: (rawArguments?: string[]) => ParseResult<T> = (rawArguments = process.argv) => {
     const showHelp = () => {
       const lines: string[] = [];
-      lines.push(`Usage: ${path.basename(rawArguments[1])} [options]`);
+      if (!parseOptions.baseUsage) {
+        lines.push(`Usage: ${path.basename(rawArguments[1])} [options]`);
+      } else {
+        lines.push(`Usage: ${path.basename(rawArguments[1])} ${parseOptions.baseUsage}`);
+      }
       lines.push("");
       lines.push("Options:");
       let line = "";

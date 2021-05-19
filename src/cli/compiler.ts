@@ -75,6 +75,7 @@ async function main({ inputFilename, target = "binary", enableNameSection = fals
 }
 
 const cliParser = createParser({
+  baseUsage: "source_file [options]",
   options: {
     help: {
       alias: "h",
