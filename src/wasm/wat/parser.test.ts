@@ -222,14 +222,14 @@ function use<V extends ParseValue, T extends Parser<V>>(parser: T) {
 function normalize<T>(o: T): T {
   const obj = o as any;
   if (!obj) return obj as T;
-  if (typeof obj === "boolean") return (obj as any) as T;
-  if (typeof obj === "number") return (obj as any) as T;
-  if (typeof obj === "string") return (obj as any) as T;
+  if (typeof obj === "boolean") return obj as any as T;
+  if (typeof obj === "number") return obj as any as T;
+  if (typeof obj === "string") return obj as any as T;
   if (Array.isArray(obj)) {
     return obj.map(item => normalize(item)) as any;
   }
-  return (Object.keys(obj).reduce((acc, k) => {
+  return Object.keys(obj).reduce((acc, k) => {
     if (k === "loc") return { ...acc, loc: undefined };
     return { ...acc, [k]: normalize((obj as any)[k] as T) };
-  }, {}) as any) as T;
+  }, {}) as any as T;
 }

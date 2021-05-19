@@ -29,7 +29,7 @@ export function useProgramStream<
   S extends Program[K],
   R extends StreamValue<S>,
   V extends ResultValue<R>,
-  E extends ResultError<R>
+  E extends ResultError<R>,
 >(key: K, initialValue?: V): UseProgramStreamResult<V, E> {
   const program = useContext(programContext);
   const [state, setState] = useState<Result<V, E> | null>(initialValue ? ok(initialValue) : null);

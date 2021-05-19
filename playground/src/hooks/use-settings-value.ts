@@ -5,7 +5,7 @@ import { defaultSettingOptions, SettingsOptions } from "../service/settings";
 
 export function useSettingsValue<
   K extends keyof SettingsOptions & keyof typeof defaultSettingOptions,
-  V extends SettingsOptions[K]
+  V extends SettingsOptions[K],
 >(key: K) {
   const service = useContext(settingsContext);
   const [value, setValue] = useState(defaultSettingOptions[key]);
