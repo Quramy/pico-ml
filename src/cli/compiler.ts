@@ -7,13 +7,16 @@ import { printAST, generateBinary } from "../wasm";
 
 import { color } from "../string-util";
 import { ErrorReporter } from "./error-reporter";
+import { createParser } from "./parser";
+import { ConsoleLogger } from "./logger";
 
 type MainOption = {
   readonly inputFilename: string;
   readonly target?: "binary" | "wat";
+  readonly enabledNameSection?: boolean;
 };
 
-async function main({ inputFilename, target = "binary" }: MainOption) {
+async function main({ inputFilename, target = "binary", enabledNameSection = false }: MainOption) {
   const errorReporter = new ErrorReporter(process.cwd(), msg => console.error(msg));
   const code = await fs.readFile(inputFilename, "utf-8").catch(err => {
     console.error(err.message);
@@ -57,7 +60,9 @@ async function main({ inputFilename, target = "binary" }: MainOption) {
 
   if (target === "binary") {
     const outputFilename = path.basename(inputFilename, path.extname(inputFilename)) + ".wasm";
-    const binResult = generateBinary(compileResult.value);
+    const binResult = generateBinary(compileResult.value, {
+      enabledNameSection,
+    });
     if (!binResult.ok) {
       console.error(binResult.value);
       process.exit(1);
@@ -69,11 +74,39 @@ async function main({ inputFilename, target = "binary" }: MainOption) {
   }
 }
 
-const inputFilename = process.argv.slice(1)[1];
+const cliParser = createParser({
+  options: {
+    help: {
+      alias: "h",
+      type: "boolean",
+      description: "Print this message.",
+    },
+    text: {
+      alias: "t",
+      type: "boolean",
+      description: "Output compiled .wat file.",
+    },
+    enabledNameSection: {
+      type: "boolean",
+      description: "Emit WASM name section.",
+    },
+  },
+  logger: new ConsoleLogger(),
+});
+
+const { _, options, showHelp } = cliParser.parse(process.argv);
+
+if (options.help) {
+  showHelp();
+  process.exit(0);
+}
+
+const inputFilename = _[0];
 if (!inputFilename) {
-  console.error(`Usage: ${path.basename(process.argv.slice(1)[0])} <input_filename>`);
+  showHelp();
   process.exit(1);
 }
-const target = process.argv.slice(1)[2] === "-t" ? "wat" : "binary";
+const target = options.text ? "wat" : "binary";
+const enabledNameSection = options.enabledNameSection;
 
-main({ inputFilename, target });
+main({ inputFilename, target, enabledNameSection });

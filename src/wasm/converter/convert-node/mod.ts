@@ -9,7 +9,7 @@ import {
   ExportNode,
   ElemNode,
 } from "../../ast-types";
-import { Module, Func, TableType } from "../../structure-types";
+import { Module, Func, TableType, Names } from "../../structure-types";
 import { RefereneceContext, createIndex } from "../ref";
 import { convertType } from "./typedef";
 import { convertFunc } from "./func";
@@ -27,6 +27,7 @@ function group(node: ModuleNode) {
     elem: new Map(),
     mems: new Map(),
     tables: new Map(),
+    funcLocals: new Map(),
   };
 
   const typedefNodes: TypeNode[] = [];
@@ -82,13 +83,38 @@ function group(node: ModuleNode) {
   };
 }
 
+function names(refCtx: RefereneceContext): Names {
+  const mapToAssociations = (map: Map<string, number>) =>
+    [...map.entries()].map(
+      ([name, idx]) =>
+        ({
+          kind: "NameAssociation",
+          idx,
+          name,
+        } as const),
+    );
+  return {
+    kind: "Names",
+    funcs: mapToAssociations(refCtx.funcs),
+    locals: [...refCtx.funcLocals.entries()].map(([idx, localMap]) => ({
+      kind: "IndirectNameMap",
+      idx,
+      nameMap: mapToAssociations(localMap),
+    })),
+    types: mapToAssociations(refCtx.types),
+    tables: mapToAssociations(refCtx.tables),
+    mems: mapToAssociations(refCtx.mems),
+    globals: mapToAssociations(refCtx.globals),
+  };
+}
+
 export function convertModule(node: ModuleNode): Result<Module> {
   const { typedefNodes, funcNodes, tableNodes, memNodes, globalNodes, exportNodes, elemNodes, refCtx } = group(node);
   return all(typedefNodes.map(node => convertType(node))).mapValue(types =>
     mapValue(
       all(memNodes.map(node => convertMemory(node))),
       funcNodes.reduce(
-        (acc, node) => acc.mapValue(state => convertFunc(node, state, refCtx)),
+        (acc, node, i) => acc.mapValue(state => convertFunc(node, i, state, refCtx)),
         ok({ funcs: [] as readonly Func[], types }),
       ),
       all(elemNodes.map(node => convertElem(node, refCtx))),
@@ -102,6 +128,7 @@ export function convertModule(node: ModuleNode): Result<Module> {
         )
         .map(({ tables, elems }) => ({
           kind: "Module",
+          names: names(refCtx),
           types,
           funcs,
           tables,

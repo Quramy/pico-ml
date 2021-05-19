@@ -1,0 +1,64 @@
+.root {
+  border: 1px solid rgba(137, 184, 194, 0.2);
+  border-width: 0 0 1px 0;
+  display: flex;
+}
+
+.heading {
+  font-size: 1rem;
+  line-height: 32px;
+  margin-left: 14px;
+  flex: auto;
+}
+
+.subActions {
+}
+
+.buttonWrap {
+  position: relative;
+}
+
+.buttonWrap:hover,
+.buttonWrap.open {
+  background: #1e2132;
+}
+
+.textButton {
+  background: none;
+  color: currentColor;
+  cursor: pointer;
+  transition-property: opacity;
+  transition: 0.1s ease-in-out;
+  height: 32px;
+  padding: 0 14px;
+}
+
+.textButton:active {
+  opacity: 0.7;
+}
+
+.panel {
+  z-index: 1;
+  right: 0;
+  top: 26px;
+  padding: 14px;
+  position: absolute;
+  background: #1e2132;
+  min-width: 360px;
+}
+
+.settingItem {
+}
+
+.settingItem > p {
+  font-size: 12px;
+}
+
+.settingItem > label > span {
+  font-size: 14px;
+  margin-left: 12px;
+}
+
+.settingItem + .settingItem {
+  margin-top: 12px;
+}
