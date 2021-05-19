@@ -1,0 +1,32 @@
+name: Deploy Playground
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-playground:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Build Playground
+        run: |
+          git config --global user.email "yosuke.kurami@gmai.com"
+          git config --global user.name "Quramy"
+          npm ci
+          npm run build
+        working-directory: playground
+      - name: Publish gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./playground/dist

@@ -158,7 +158,7 @@ export const convertInstr = createTreeTraverser<InstructionNode, ConvertInstrCon
   memoryInstruction,
 });
 
-export function convertFunc(node: FuncNode, prev: State, refCtx: RefereneceContext): Result<State> {
+export function convertFunc(node: FuncNode, idx: number, prev: State, refCtx: RefereneceContext): Result<State> {
   const locals = new Map<string, number>();
   let typeidx: number | undefined = undefined;
   let next = prev;
@@ -183,6 +183,8 @@ export function convertFunc(node: FuncNode, prev: State, refCtx: RefereneceConte
     typeidx = found.value;
     createIndex(node.locals, locals);
   }
+
+  refCtx.funcLocals.set(idx, locals);
 
   const mutTypes = next.types.slice();
 

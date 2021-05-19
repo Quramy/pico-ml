@@ -1,13 +1,18 @@
 import ace from "ace-builds";
-import "ace-builds/webpack-resolver"; // tell theme, syntax highlight module url to webpack
+// import "ace-builds/webpack-resolver"; // tell theme, syntax highlight module url to webpack
 
-import React, { useRef, useEffect, useContext } from "react";
+import { useRef, useEffect, useContext } from "react";
 import cx from "classnames";
 
 import { Program } from "../../service/program";
 import { programContext } from "../../context/program-context";
 import styles from "./index.css";
 
+// Tell theme, syntax highlight module url to webpack. For detail, see "ace-builds/webpack-resolver"
+ace.config.setModuleUrl(
+  "ace/mode/ocaml",
+  require("file-loader?esModule=false!ace-builds/src-noconflict/mode-ocaml.js"),
+);
 const aceDefine = (ace as any).define as Function;
 
 aceDefine("ace/theme/iceberg", (_: any, exports: any) => {

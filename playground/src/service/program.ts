@@ -1,9 +1,7 @@
 import { Observable, Subject, BehaviorSubject, combineLatest } from "rxjs";
-import { map, debounceTime, switchMap, withLatestFrom } from "rxjs/operators";
+import { map, scan, debounceTime, switchMap, withLatestFrom } from "rxjs/operators";
 import {
   parse,
-  ok,
-  error,
   Result,
   ParseResult,
   ExpressionNode,
@@ -26,6 +24,7 @@ import {
   FunctionType,
   TypeParameterType,
 } from "pico-ml";
+import { SettingsService } from "./settings";
 import { toHex } from "../functions/hex";
 
 export interface Diagnostic {
@@ -79,22 +78,25 @@ function createFormatter(instance: WebAssembly.Instance, pt: TypeValue): (value:
 export interface Program {
   readonly initialContent: string;
   readonly code$: Subject<string>;
-  readonly execute$: Subject<null>;
+  readonly execute$: Subject<boolean | null>;
   readonly parseResult$: Observable<ParseResult<ExpressionNode>>;
   readonly primaryType$: Observable<Result<TypeValue, ParseError | TypeError>>;
   readonly diagnostics$: Observable<readonly Diagnostic[]>;
   readonly wat$: Observable<Result<string>>;
   readonly wasm$: Observable<Result<Uint8Array>>;
-  readonly evaluatedResult$: Observable<Result<ValueTypeTree>>;
+  readonly evaluatedResult$: Observable<
+    ({ type: "success"; value: ValueTypeTree } | { type: "error"; message: string })[]
+  >;
 }
 
 export type CreateProgramOptions = {
   readonly initialContent: string;
+  readonly settingsService: SettingsService;
 };
 
-export function createProgram({ initialContent }: CreateProgramOptions) {
+export function createProgram({ initialContent, settingsService }: CreateProgramOptions) {
   const code$ = new BehaviorSubject(initialContent);
-  const execute$ = new Subject<null>();
+  const execute$ = new Subject<null | boolean>();
   const parseResult$ = code$.asObservable().pipe(debounceTime(100), map(parse));
   const primaryType$ = parseResult$.pipe(
     map(pr =>
@@ -108,7 +110,9 @@ export function createProgram({ initialContent }: CreateProgramOptions) {
     map(([pr, ptr]) => mapValue(pr, ptr)(expression => compile(expression))),
   );
   const wat$ = compileResult$.pipe(map(cr => cr.map(printAST)));
-  const wasm$ = compileResult$.pipe(map(cr => cr.mapValue(generateBinary)));
+  const wasm$ = combineLatest([compileResult$, settingsService.settings$]).pipe(
+    map(([cr, { enabledNameSection }]) => cr.mapValue(mod => generateBinary(mod, { enabledNameSection }))),
+  );
   const diagnostics$ = combineLatest(code$, primaryType$).pipe(
     map(([code, ptr]) => {
       if (!ptr.ok) {
@@ -128,18 +132,20 @@ export function createProgram({ initialContent }: CreateProgramOptions) {
   );
   const evaluatedResult$ = execute$.pipe(
     withLatestFrom(combineLatest(primaryType$, wasm$)),
-    switchMap(async ([_, [ptr, bin]]) => {
-      if (!ptr.ok) return error({ message: ptr.value.message });
-      if (!bin.ok) return error({ message: bin.value.message });
+    switchMap(async ([shouldClear, [ptr, bin]]) => {
+      if (shouldClear) return { shouldClear: true };
+      if (!ptr.ok) return { type: "error", message: ptr.value.message } as const;
+      if (!bin.ok) return { type: "error", message: bin.value.message } as const;
       try {
         const { instance } = await WebAssembly.instantiate(bin.value);
         const formatter = createFormatter(instance, ptr.value);
         const value = (instance.exports["main"] as Function)() as number;
-        return ok(formatter(value)) as Result<ValueTypeTree>;
+        return { type: "success", value: formatter(value) } as const;
       } catch (e) {
-        return error(e) as Result<ValueTypeTree>;
+        return { type: "error", message: e.message || "unknown error" } as const;
       }
     }),
+    scan((acc, value) => (value.shouldClear ? [] : [...acc, value]), [] as any[]),
   );
   const program: Program = {
     initialContent,

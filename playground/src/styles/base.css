@@ -1,6 +1,7 @@
 *,
 *::before,
 *::after {
+  border: none;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -9,6 +10,17 @@
 html {
   color: #c6c8d1;
   background: #161821;
+  font-family: sans-serif;
+}
+
+h1,
+h2,
+h2,
+h3,
+h4,
+h5 {
+  font-size: 1rem;
+  font-weight: initial;
 }
 
 :root {

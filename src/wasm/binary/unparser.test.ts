@@ -1,6 +1,9 @@
 import { parse } from "../wat/parser";
 import { convertModule } from "../converter";
-import { unparse } from "./unparser";
+import { Module } from "../structure-types";
+import { unparse as baseUnparse } from "./unparser";
+
+const unparse = (mod: Module) => baseUnparse(mod, { enabledNameSection: false });
 
 describe(unparse, () => {
   describe("unparse result should work as WebAssembly buffered source", () => {

@@ -23,6 +23,18 @@ export interface GlobalType {
 
 export type UInt32Index = number;
 
+export interface NameAssociation {
+  readonly kind: "NameAssociation";
+  readonly idx: UInt32Index;
+  readonly name: string;
+}
+
+export interface IndirectNameMap {
+  readonly kind: "IndirectNameMap";
+  readonly idx: UInt32Index;
+  readonly nameMap: readonly NameAssociation[];
+}
+
 export type BlockType = null | ValType | UInt32Index;
 
 export interface IfInstruction {
@@ -122,8 +134,19 @@ export interface Elem {
   readonly elemList: ElemList;
 }
 
+export interface Names {
+  readonly kind: "Names";
+  readonly funcs: readonly NameAssociation[];
+  readonly locals: readonly IndirectNameMap[];
+  readonly types: readonly NameAssociation[];
+  readonly tables: readonly NameAssociation[];
+  readonly mems: readonly NameAssociation[];
+  readonly globals: readonly NameAssociation[];
+}
+
 export interface Module {
   readonly kind: "Module";
+  readonly names: Names;
   readonly types: readonly FuncType[];
   readonly funcs: readonly Func[];
   readonly tables: readonly TableType[];

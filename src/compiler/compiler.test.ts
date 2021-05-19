@@ -149,7 +149,11 @@ describe(compile, () => {
   });
 });
 
-const compile2wasm = (code: string) => parse(code).mapValue(compile).mapValue(generateBinary).unwrap();
+const compile2wasm = (code: string) =>
+  parse(code)
+    .mapValue(compile)
+    .mapValue(mod => generateBinary(mod, { enabledNameSection: false }))
+    .unwrap();
 
 const evaluateMain = async (
   code: string,

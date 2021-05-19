@@ -1,10 +1,11 @@
 import Prism from "prismjs";
-import "../../styles/prism-theme.css";
-import "prismjs/components/prism-wasm";
-import React, { useState, useContext, useEffect } from "react";
-import { programContext } from "../../context/program-context";
-
+import { useState, useContext, useEffect } from "react";
 import cx from "classnames";
+import "prismjs/components/prism-wasm";
+
+import { programContext } from "../../context/program-context";
+import "../../styles/prism-theme.css";
+
 import styles from "./index.css";
 
 export function WatViewer() {

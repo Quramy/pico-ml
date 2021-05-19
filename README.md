@@ -18,6 +18,12 @@ map fact (range 1 7) (* ==> int list: [ 1, 2, 6, 24, 120, 720 ] *)
 - Type inference
 - Compile to WASM
 
+## Web Playground
+
+[![Playground](https://raw.githubusercontent.com/Quramy/pico-ml/main/playground_capture.png)](https://quramy.github.io/pico-ml/)
+
+[You can try PicoML here.](https://quramy.github.io/pico-ml/)
+
 ## How to use
 
 ### Install
@@ -58,7 +64,7 @@ The generated module exports `main` function to evaluate the input expression.
 ```js
 // Execute in browser
 
-await instance = WebAssembly.instatiateStreaming(fetch("example.wasm"), {});
+const instance = await WebAssembly.instatiateStreaming(fetch("example.wasm"), {});
 const result = instance.exports["main"]();
 console.log(result);
 ```
