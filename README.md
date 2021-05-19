@@ -64,7 +64,7 @@ The generated module exports `main` function to evaluate the input expression.
 ```js
 // Execute in browser
 
-await instance = WebAssembly.instatiateStreaming(fetch("example.wasm"), {});
+const instance = await WebAssembly.instatiateStreaming(fetch("example.wasm"), {});
 const result = instance.exports["main"]();
 console.log(result);
 ```
