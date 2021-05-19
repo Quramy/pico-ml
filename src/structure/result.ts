@@ -62,7 +62,7 @@ export function all<T, E extends ResultErrorBase>(results: readonly Result<T, E>
     if (result.ok) {
       values.push(result.value);
     } else {
-      return (result as any) as Result<readonly T[], E>;
+      return result as any as Result<readonly T[], E>;
     }
   }
   return ok(values) as Result<readonly T[], E>;

@@ -77,20 +77,22 @@ export const identifierToken: Parser<IdentifierToken> = scanner => {
   });
 };
 
-const intTokenGen = (signed: boolean): Parser<IntToken> => scanner => {
-  const hit = signed ? scanner.match(/^([\+-]?\d+)/) : scanner.match(/(^\d+)/);
-  if (!hit)
-    return error({
-      confirmed: false,
-      message: "Integer expected.",
-      occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
+const intTokenGen =
+  (signed: boolean): Parser<IntToken> =>
+  scanner => {
+    const hit = signed ? scanner.match(/^([\+-]?\d+)/) : scanner.match(/(^\d+)/);
+    if (!hit)
+      return error({
+        confirmed: false,
+        message: "Integer expected.",
+        occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
+      });
+    return ok({
+      tokenKind: "Int",
+      value: parseInt(hit[1], 10),
+      loc: scanner.consume(hit[1].length),
     });
-  return ok({
-    tokenKind: "Int",
-    value: parseInt(hit[1], 10),
-    loc: scanner.consume(hit[1].length),
-  });
-};
+  };
 
 export const intToken = intTokenGen(true);
 export const uintToken = intTokenGen(false);

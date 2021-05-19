@@ -12,46 +12,48 @@ export const use = <T extends ParseValue>(cb: () => Parser<T>) => {
   return (scanner: Scanner) => cb()(scanner) as ParseResult<T>;
 };
 
-export const expect = <T extends readonly Parser[]>(...parsers: T) => <R extends ParseValue>(
-  cb: (...args: [...UnwrapToParseResultTuple<T>, Scanner]) => R,
-) => {
-  return (scanner: Scanner): ParseResult<R> => {
-    const results: any[] = [];
-    let i = 0;
-    for (const parser of parsers) {
-      const result = parser(scanner);
-      if (!result.ok)
-        return error({
-          ...result.value,
-          confirmed: i !== 0,
-        }) as ParseResult<R>;
-      results.push(result.value);
-      i++;
-    }
-    return ok(cb(...([...results, scanner] as any)));
+export const expect =
+  <T extends readonly Parser[]>(...parsers: T) =>
+  <R extends ParseValue>(cb: (...args: [...UnwrapToParseResultTuple<T>, Scanner]) => R) => {
+    return (scanner: Scanner): ParseResult<R> => {
+      const results: any[] = [];
+      let i = 0;
+      for (const parser of parsers) {
+        const result = parser(scanner);
+        if (!result.ok)
+          return error({
+            ...result.value,
+            confirmed: i !== 0,
+          }) as ParseResult<R>;
+        results.push(result.value);
+        i++;
+      }
+      return ok(cb(...([...results, scanner] as any)));
+    };
   };
-};
 
-export const tryWith = <T extends Parser>(parser: T) => (scanner: Scanner): UnwrapToParseResult<T> => {
-  const posToBack = scanner.pos;
-  const r = parser(scanner);
-  if (!r.ok) {
-    scanner.back(posToBack);
-    return r.error(v => ({ ...v, confirmed: false })) as any;
-  }
-  return r as any;
-};
+export const tryWith =
+  <T extends Parser>(parser: T) =>
+  (scanner: Scanner): UnwrapToParseResult<T> => {
+    const posToBack = scanner.pos;
+    const r = parser(scanner);
+    if (!r.ok) {
+      scanner.back(posToBack);
+      return r.error(v => ({ ...v, confirmed: false })) as any;
+    }
+    return r as any;
+  };
 
-export const option = <T extends Parser>(parser: T) => (
-  scanner: Scanner,
-): ParseResult<UnwrapToParseValue<T> | NullPosition> => {
-  const r = parser(scanner);
-  if (!r.ok) {
-    return ok(nullPosition(scanner));
-  } else {
-    return ok(r.value) as any;
-  }
-};
+export const option =
+  <T extends Parser>(parser: T) =>
+  (scanner: Scanner): ParseResult<UnwrapToParseValue<T> | NullPosition> => {
+    const r = parser(scanner);
+    if (!r.ok) {
+      return ok(nullPosition(scanner));
+    } else {
+      return ok(r.value) as any;
+    }
+  };
 
 type CompositeParser<U extends readonly Parser[]> = (
   scanner: Scanner,
@@ -96,50 +98,48 @@ export const vec = <T extends Parser, S extends UnwrapToParseValue<T>>(parser: T
   return p;
 };
 
-export const leftAssociate = <S extends Parser, L extends UnwrapToParseValue<S>>(leftParser: S) => <
-  T extends readonly Parser[]
->(
-  ...parsers: T
-) => (cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => L) => {
-  return (scanner: Scanner): ParseResult<L> => {
-    const first = leftParser(scanner) as ParseResult<L>;
-    if (!first.ok) return first;
-    const inner = (node: L): Result<L, ParseError> => {
-      const results: ParseValue[] = [];
-      let i = 0;
-      for (const parser of parsers) {
-        const r = parser(scanner);
-        if (!r.ok) return i === 0 ? ok(node) : error({ ...r.value, message: "Missing operand.", confirmed: false });
-        results.push(r.value);
-        i++;
-      }
-      return inner(cb(node, ...(results as any)));
+export const leftAssociate =
+  <S extends Parser, L extends UnwrapToParseValue<S>>(leftParser: S) =>
+  <T extends readonly Parser[]>(...parsers: T) =>
+  (cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => L) => {
+    return (scanner: Scanner): ParseResult<L> => {
+      const first = leftParser(scanner) as ParseResult<L>;
+      if (!first.ok) return first;
+      const inner = (node: L): Result<L, ParseError> => {
+        const results: ParseValue[] = [];
+        let i = 0;
+        for (const parser of parsers) {
+          const r = parser(scanner);
+          if (!r.ok) return i === 0 ? ok(node) : error({ ...r.value, message: "Missing operand.", confirmed: false });
+          results.push(r.value);
+          i++;
+        }
+        return inner(cb(node, ...(results as any)));
+      };
+      return inner(first.value);
     };
-    return inner(first.value);
   };
-};
 
-export const rightAssociate = <S extends Parser, L extends UnwrapToParseValue<S>>(leftParser: S) => <
-  T extends readonly Parser[]
->(
-  ...parsers: T
-) => <R extends ParseValue>(cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => R) => {
-  return (scanner: Scanner) => {
-    const first = leftParser(scanner) as ParseResult<L>;
-    if (!first.ok) return first;
-    const inner = (node: L): Result<R | L, ParseError> => {
-      const results: ParseValue[] = [];
-      let i = 0;
-      for (const parser of parsers) {
-        const r = parser(scanner);
-        if (!r.ok) return i === 0 ? ok(node) : error({ ...r.value, message: "Missing operand.", confirmed: false });
-        results.push(r.value);
-        i++;
-      }
-      const mid = results.slice(0, results.length - 1);
-      const last = results[results.length - 1];
-      return ok(cb(node, ...([...mid, inner(last as any).value] as any)));
+export const rightAssociate =
+  <S extends Parser, L extends UnwrapToParseValue<S>>(leftParser: S) =>
+  <T extends readonly Parser[]>(...parsers: T) =>
+  <R extends ParseValue>(cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => R) => {
+    return (scanner: Scanner) => {
+      const first = leftParser(scanner) as ParseResult<L>;
+      if (!first.ok) return first;
+      const inner = (node: L): Result<R | L, ParseError> => {
+        const results: ParseValue[] = [];
+        let i = 0;
+        for (const parser of parsers) {
+          const r = parser(scanner);
+          if (!r.ok) return i === 0 ? ok(node) : error({ ...r.value, message: "Missing operand.", confirmed: false });
+          results.push(r.value);
+          i++;
+        }
+        const mid = results.slice(0, results.length - 1);
+        const last = results[results.length - 1];
+        return ok(cb(node, ...([...mid, inner(last as any).value] as any)));
+      };
+      return inner(first.value);
     };
-    return inner(first.value);
   };
-};
