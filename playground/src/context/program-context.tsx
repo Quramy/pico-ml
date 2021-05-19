@@ -1,16 +1,25 @@
 import React, { createContext } from "react";
 import { Program, createProgram } from "../service/program";
+import { SettingsService, createSettingsService } from "../service/settings";
 
 type Props = {
   readonly initialContent: string;
   readonly children: React.ReactNode;
 };
 
-const context = createContext<Program>(null as any);
-const Provider = context.Provider;
+const settingsCtx = createContext<SettingsService>(null as any);
+const SettingsProviderInner = settingsCtx.Provider;
+const programCtx = createContext<Program>(null as any);
+const ProgramProviderInner = programCtx.Provider;
 
 export function ProgramProvider({ initialContent, children }: Props) {
-  return <Provider value={createProgram({ initialContent })}>{children}</Provider>;
+  const settingsService = createSettingsService();
+  return (
+    <SettingsProviderInner value={settingsService}>
+      <ProgramProviderInner value={createProgram({ initialContent, settingsService })}>{children}</ProgramProviderInner>
+    </SettingsProviderInner>
+  );
 }
 
-export const programContext = context;
+export const programContext = programCtx;
+export const settingsContext = settingsCtx;

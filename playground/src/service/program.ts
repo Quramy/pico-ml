@@ -24,6 +24,7 @@ import {
   FunctionType,
   TypeParameterType,
 } from "pico-ml";
+import { SettingsService } from "./settings";
 import { toHex } from "../functions/hex";
 
 export interface Diagnostic {
@@ -90,9 +91,10 @@ export interface Program {
 
 export type CreateProgramOptions = {
   readonly initialContent: string;
+  readonly settingsService: SettingsService;
 };
 
-export function createProgram({ initialContent }: CreateProgramOptions) {
+export function createProgram({ initialContent, settingsService }: CreateProgramOptions) {
   const code$ = new BehaviorSubject(initialContent);
   const execute$ = new Subject<null | boolean>();
   const parseResult$ = code$.asObservable().pipe(debounceTime(100), map(parse));
@@ -108,8 +110,9 @@ export function createProgram({ initialContent }: CreateProgramOptions) {
     map(([pr, ptr]) => mapValue(pr, ptr)(expression => compile(expression))),
   );
   const wat$ = compileResult$.pipe(map(cr => cr.map(printAST)));
-  const enabledNameSection = true; // TODO get this value from options
-  const wasm$ = compileResult$.pipe(map(cr => cr.mapValue(mod => generateBinary(mod, { enabledNameSection }))));
+  const wasm$ = combineLatest([compileResult$, settingsService.settings$]).pipe(
+    map(([cr, { enabledNameSection }]) => cr.mapValue(mod => generateBinary(mod, { enabledNameSection }))),
+  );
   const diagnostics$ = combineLatest(code$, primaryType$).pipe(
     map(([code, ptr]) => {
       if (!ptr.ok) {

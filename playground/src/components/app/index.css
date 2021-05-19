@@ -1,6 +1,16 @@
+:root {
+  --header-height: 33px;
+  --footer-height: 70px;
+}
+
+.header {
+  height: var(--header-height);
+}
+
 .main {
+  isolation: isolate;
   position: relative;
-  height: calc(100vh-70px);
+  height: calc(100vh - var(--header-height) - var(--footer-height));
 }
 
 .resizer {
@@ -62,7 +72,7 @@
   text-align: center;
   background: #111319;
   padding: 24px 32px;
-  height: 70px;
+  height: var(--footer-height);
   font-size: 0.8rem;
 }
 

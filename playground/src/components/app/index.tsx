@@ -1,13 +1,14 @@
 import SplitPane from "react-split-pane";
-import { Editor } from "../editor";
 import { ProgramProvider } from "../../context/program-context";
+import { AppHeader } from "../app-header";
+import { Pane } from "../pane";
+import { Editor } from "../editor";
 import { WatViewer } from "../wat-viewer";
 import { AstViewer } from "../ast-viewer";
 import { BinaryViewer } from "../binary-viewer";
+import { EvaluatedLog } from "../evaluated-log";
 
 import styles from "./index.css";
-import { EvaluatedLog } from "../evaluated-log";
-import { Pane } from "../pane";
 
 const code = `
 (*                                                                  *)
@@ -23,6 +24,7 @@ if true then 1 + 2 * 3 else 0
 export function App() {
   return (
     <ProgramProvider initialContent={code.trim()}>
+      <AppHeader className={styles.header} />
       <main className={styles.main}>
         <SplitPane resizerClassName={styles.resizer} split="vertical" defaultSize="43%">
           <SplitPane resizerClassName={styles.resizer} split="horizontal" defaultSize="65%">
