@@ -1,4 +1,4 @@
-import { Observable, Subject, BehaviorSubject, combineLatest } from "rxjs";
+import { Observable, Subject, combineLatest } from "rxjs";
 import { map, scan, debounceTime, switchMap, withLatestFrom } from "rxjs/operators";
 import {
   parse,
@@ -90,12 +90,11 @@ export interface Program {
 }
 
 export type CreateProgramOptions = {
-  readonly initialContent: string;
+  readonly code$: Subject<string>;
   readonly settingsService: SettingsService;
 };
 
-export function createProgram({ initialContent, settingsService }: CreateProgramOptions) {
-  const code$ = new BehaviorSubject(initialContent);
+export function createProgram({ code$, settingsService }: CreateProgramOptions) {
   const execute$ = new Subject<null | boolean>();
   const parseResult$ = code$.asObservable().pipe(debounceTime(100), map(parse));
   const primaryType$ = parseResult$.pipe(
@@ -148,7 +147,7 @@ export function createProgram({ initialContent, settingsService }: CreateProgram
     scan((acc, value) => (value.shouldClear ? [] : [...acc, value]), [] as any[]),
   );
   const program: Program = {
-    initialContent,
+    initialContent: code$.getValue(),
     code$,
     execute$,
     parseResult$,
