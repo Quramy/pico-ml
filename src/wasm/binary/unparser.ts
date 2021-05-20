@@ -29,7 +29,6 @@ import {
 } from "../instructions-map";
 
 import { encodeUnsigned, encodeSigned } from "./leb";
-import { encodeString } from "./str";
 
 const magic = new Uint8Array([0x00, 0x61, 0x73, 0x6d]);
 const version = new Uint8Array([0x01, 0x00, 0x00, 0x00]);
@@ -53,6 +52,10 @@ function int32(value: number) {
   return encodeSigned(value);
 }
 
+function str(value: string) {
+  return new TextEncoder().encode(value);
+}
+
 function concat(...elements: readonly Uint8Array[]) {
   const size = elements.reduce((s, a) => s + a.byteLength, 0);
   const ret = new Uint8Array(size);
@@ -65,7 +68,7 @@ function concat(...elements: readonly Uint8Array[]) {
 }
 
 function name(value: string) {
-  const c = encodeString(value);
+  const c = str(value);
   return concat(uint32(c.byteLength), c);
 }
 

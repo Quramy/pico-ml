@@ -7,6 +7,7 @@ module.exports = {
   transform: {
     "^.+\\.ts$": "ts-jest",
   },
+  setupFilesAfterEnv: ["./.jest/setup.js"],
   testRegex: "(src/.*\\.test)\\.ts$",
   testPathIgnorePatterns: ["/node_modules/", "\\.d\\.ts$", "lib/.*", "lib-esm/.*"],
   watchPathIgnorePatterns: ["playground/.*", "lib/.*", "lib-esm/.*"],
