@@ -1,10 +1,10 @@
 import React, { createContext } from "react";
-import type { Subject } from "rxjs";
+import type { BehaviorSubject } from "rxjs";
 import { Program, createProgram } from "../service/program";
 import { SettingsService, createSettingsService } from "../service/settings";
 
 type Props = {
-  readonly code$: Subject<string>;
+  readonly code$: BehaviorSubject<string>;
   readonly children: React.ReactNode;
 };
 

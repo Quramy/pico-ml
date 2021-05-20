@@ -1,4 +1,5 @@
-import { Observable, Subject, combineLatest } from "rxjs";
+import type { Observable, BehaviorSubject } from "rxjs";
+import { combineLatest, Subject } from "rxjs";
 import { map, scan, debounceTime, switchMap, withLatestFrom } from "rxjs/operators";
 import {
   parse,
@@ -90,7 +91,7 @@ export interface Program {
 }
 
 export type CreateProgramOptions = {
-  readonly code$: Subject<string>;
+  readonly code$: BehaviorSubject<string>;
   readonly settingsService: SettingsService;
 };
 

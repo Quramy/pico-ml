@@ -1,5 +1,6 @@
 import SplitPane from "react-split-pane";
 
+import { useCodeStream } from "../../hooks/use-code-stream";
 import { ProgramProvider } from "../../context/program-context";
 import { AppHeader } from "../app-header";
 import { Pane } from "../pane";
@@ -10,7 +11,6 @@ import { BinaryViewer } from "../binary-viewer";
 import { EvaluatedLog } from "../evaluated-log";
 
 import styles from "./index.css";
-import { useCodeStream } from "../../hooks/use-code-stream";
 
 const initialCode = `
 (*                                                                  *)
