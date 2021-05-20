@@ -1,4 +1,6 @@
 import SplitPane from "react-split-pane";
+
+import { useCodeStream } from "../../hooks/use-code-stream";
 import { ProgramProvider } from "../../context/program-context";
 import { AppHeader } from "../app-header";
 import { Pane } from "../pane";
@@ -10,7 +12,7 @@ import { EvaluatedLog } from "../evaluated-log";
 
 import styles from "./index.css";
 
-const code = `
+const initialCode = `
 (*                                                                  *)
 (*                 Welcome to PicoML Playground!                    *)
 (*                                                                  *)
@@ -22,8 +24,9 @@ if true then 1 + 2 * 3 else 0
 `;
 
 export function App() {
+  const code$ = useCodeStream(initialCode);
   return (
-    <ProgramProvider initialContent={code.trim()}>
+    <ProgramProvider code$={code$}>
       <AppHeader className={styles.header} />
       <main className={styles.main}>
         <SplitPane resizerClassName={styles.resizer} split="vertical" defaultSize="43%">

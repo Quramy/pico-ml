@@ -1,9 +1,10 @@
 import React, { createContext } from "react";
+import type { BehaviorSubject } from "rxjs";
 import { Program, createProgram } from "../service/program";
 import { SettingsService, createSettingsService } from "../service/settings";
 
 type Props = {
-  readonly initialContent: string;
+  readonly code$: BehaviorSubject<string>;
   readonly children: React.ReactNode;
 };
 
@@ -12,11 +13,12 @@ const SettingsProviderInner = settingsCtx.Provider;
 const programCtx = createContext<Program>(null as any);
 const ProgramProviderInner = programCtx.Provider;
 
-export function ProgramProvider({ initialContent, children }: Props) {
+export function ProgramProvider({ code$, children }: Props) {
   const settingsService = createSettingsService();
+  const programService = createProgram({ code$, settingsService });
   return (
     <SettingsProviderInner value={settingsService}>
-      <ProgramProviderInner value={createProgram({ initialContent, settingsService })}>{children}</ProgramProviderInner>
+      <ProgramProviderInner value={programService}>{children}</ProgramProviderInner>
     </SettingsProviderInner>
   );
 }
