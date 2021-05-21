@@ -36,6 +36,18 @@ describe(evaluate, () => {
     expect(parseAndEval("1 >= 2")).toBe(false);
   });
 
+  test("logical operation", () => {
+    expect(parseAndEval("true || true")).toBe(true);
+    expect(parseAndEval("true || false")).toBe(true);
+    expect(parseAndEval("false || true")).toBe(true);
+    expect(parseAndEval("false || false")).toBe(false);
+
+    expect(parseAndEval("true && true")).toBe(true);
+    expect(parseAndEval("true && false")).toBe(false);
+    expect(parseAndEval("false && true")).toBe(false);
+    expect(parseAndEval("false && false")).toBe(false);
+  });
+
   test("equality", () => {
     expect(parseAndEval("1 == 0")).toBe(false);
     expect(parseAndEval("1 == 1")).toBe(true);

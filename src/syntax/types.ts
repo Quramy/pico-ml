@@ -11,6 +11,8 @@ export type Symbols = readonly [
   ">",
   "<=",
   ">=",
+  "||",
+  "&&",
   "==",
   "!=",
   "=",
@@ -79,7 +81,13 @@ export interface GTOperation extends OperationBase<"GreaterThan"> {}
 export interface LEOperation extends OperationBase<"LessEqualThan"> {}
 
 export interface GEOperation extends OperationBase<"GreaterEqualThan"> {}
+
+export interface OrOperation extends OperationBase<"Or"> {}
+
+export interface AndOperation extends OperationBase<"And"> {}
+
 export interface EQOperation extends OperationBase<"Equal"> {}
+
 export interface NEOperation extends OperationBase<"NotEqual"> {}
 
 export type UnaryOperation = MinusOperation;
@@ -91,6 +99,8 @@ export type BinaryOperation =
   | GTOperation
   | LEOperation
   | GEOperation
+  | OrOperation
+  | AndOperation
   | EQOperation
   | NEOperation;
 

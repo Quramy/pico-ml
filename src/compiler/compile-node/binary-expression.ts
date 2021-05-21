@@ -19,6 +19,10 @@ function getOperationInstr(node: BinaryExpressionNode): Result<readonly Instruct
       return ok([factory.numericInstr("i32.gt_s", [])]);
     case "GreaterEqualThan":
       return ok([factory.numericInstr("i32.ge_s", [])]);
+    case "Or":
+      return ok([factory.numericInstr("i32.or", [])]);
+    case "And":
+      return ok([factory.numericInstr("i32.and", [])]);
     case "Equal": // FIXME
       return ok([factory.numericInstr("i32.eq", [])]);
     case "NotEqual":

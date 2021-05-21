@@ -24,7 +24,7 @@ import { symbolToken, numberToken, keywordToken, variableToken } from "./tokeniz
 
 /**
  *
- * expr         ::= eq | cond | match | func | bind
+ * expr         ::= or | cond | match | func | bind
  * cond         ::= "if" expr "then" expr "else" expr
  * match        ::= "match" expr "wich" pat_clauses
  * pat_clauses  ::= pat_match("|" pat_match)*
@@ -33,6 +33,8 @@ import { symbolToken, numberToken, keywordToken, variableToken } from "./tokeniz
  * p_prim       ::= id | "[" "]" | "_"
  * func         ::= "fun" id "->" expr
  * bind         ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
+ * or           ::= and("||" (and | cond | match | func | bind))*
+ * and          ::= eq("&&" (eq | cond | match | func | bind))*
  * eq           ::= comp(("==" | "!=") (comp | cond | match | func | bind))*
  * comp         ::= cons(("<" | ">" | "<=" | ">=" | "==" | "!=") (cons | cond | match | func | bind))*
  * cons         ::= add("::" (add | cond | match | func | bind))*
@@ -49,7 +51,7 @@ import { symbolToken, numberToken, keywordToken, variableToken } from "./tokeniz
  *
  */
 const expr: Parser<ExpressionNode> = oneOf(
-  use(() => eq),
+  use(() => or),
   use(() => cond),
   use(() => match),
   use(() => func),
@@ -187,6 +189,46 @@ const pPrim: Parser<MatchPatternElementNode> = oneOf(
     }),
   ),
 );
+
+const or: Parser<ExpressionNode> = rightAssociate(use(() => and))(
+  symbolToken("||"),
+  oneOf(
+    use(() => and),
+    use(() => cond),
+    use(() => match),
+    use(() => func),
+    use(() => bind),
+  ),
+)((left, token, right) => ({
+  kind: "BinaryExpression",
+  op: {
+    kind: "Or",
+    token,
+  },
+  left,
+  right,
+  ...loc(left, token, right),
+}));
+
+const and: Parser<ExpressionNode> = rightAssociate(use(() => eq))(
+  symbolToken("&&"),
+  oneOf(
+    use(() => eq),
+    use(() => cond),
+    use(() => match),
+    use(() => func),
+    use(() => bind),
+  ),
+)((left, token, right) => ({
+  kind: "BinaryExpression",
+  op: {
+    kind: "And",
+    token,
+  },
+  left,
+  right,
+  ...loc(left, token, right),
+}));
 
 const eq: Parser<ExpressionNode> = leftAssociate(use(() => comp))(
   oneOf(symbolToken("=="), symbolToken("!=")),

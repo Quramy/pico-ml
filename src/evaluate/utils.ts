@@ -39,6 +39,17 @@ export function map2num(...operands: EvaluationValue[]) {
   };
 }
 
+export function map2bool(...operands: EvaluationValue[]) {
+  return (cb: (...numberOperands: boolean[]) => EvaluationValue) => {
+    for (const operand of operands) {
+      if (typeof operand !== "boolean") {
+        return error({ message: `The operand is not boolean. ${getEvaluationResultTypeName(operand)}` });
+      }
+    }
+    return ok(cb(...(operands as boolean[])));
+  };
+}
+
 export function getEvaluationResultTypeName(value: EvaluationValue): string {
   if (isList(value)) {
     return "list";

@@ -1,6 +1,6 @@
 import { mapValue } from "../../structure";
 import { EvaluateNodeFn } from "../types";
-import { map2num, equal } from "../utils";
+import { map2num, map2bool, equal } from "../utils";
 
 export const binaryExpression: EvaluateNodeFn<"BinaryExpression"> = (expression, env, next) =>
   mapValue(
@@ -22,6 +22,10 @@ export const binaryExpression: EvaluateNodeFn<"BinaryExpression"> = (expression,
         return map2num(left, right)((l, r) => l > r).error(err => ({ ...err, occurence: expression }));
       case "GreaterEqualThan":
         return map2num(left, right)((l, r) => l >= r).error(err => ({ ...err, occurence: expression }));
+      case "Or":
+        return map2bool(left, right)((l, r) => l || r).error(err => ({ ...err, occurence: expression }));
+      case "And":
+        return map2bool(left, right)((l, r) => l && r).error(err => ({ ...err, occurence: expression }));
       case "Equal":
         return equal(left, right).error(err => ({ ...err, occurence: expression }));
       case "NotEqual":

@@ -13,6 +13,8 @@ const RESULT_TYPES_BY_OP: Record<BinaryOperation["kind"], "Bool" | "Int"> = {
   LessEqualThan: "Bool",
   GreaterThan: "Bool",
   GreaterEqualThan: "Bool",
+  Or: "Bool",
+  And: "Bool",
   Equal: "Bool",
   NotEqual: "Bool",
 };
@@ -24,14 +26,17 @@ function getConstraints(
 ): readonly TypeEquation[] {
   if (expression.op.kind === "Equal" || expression.op.kind === "NotEqual")
     return [{ lhs: left.expressionType, rhs: right.expressionType }];
+
+  const expectedNodeType = expression.op.kind === "And" || expression.op.kind === "Or" ? "Bool" : "Int";
+
   return [
     {
       lhs: left.expressionType,
-      rhs: { kind: "Int", referencedFrom: expression.left },
+      rhs: { kind: expectedNodeType, referencedFrom: expression.left },
     },
     {
       lhs: right.expressionType,
-      rhs: { kind: "Int", referencedFrom: expression.right },
+      rhs: { kind: expectedNodeType, referencedFrom: expression.right },
     },
   ];
 }

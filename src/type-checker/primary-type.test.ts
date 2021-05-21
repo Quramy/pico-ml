@@ -6,10 +6,15 @@ const fixture: Record<string, () => string> = {
   "1": () => "int",
   "-1": () => "int",
   true: () => "bool",
+  "0 + 0": () => "int",
+  "0 - 0": () => "int",
+  "0 * 0": () => "int",
   "0 < 1": () => "bool",
   "0 <= 1": () => "bool",
   "0 > 1": () => "bool",
   "0 >= 1": () => "bool",
+  "true || false": () => "bool",
+  "true && false": () => "bool",
   "true == false": () => "bool",
   "true != false": () => "bool",
   "1::2::[]": () => "int list",
@@ -41,6 +46,12 @@ describe(getPrimaryType, () => {
   test("failure", () => {
     expect(parse("1 + false").mapValue(getPrimaryType).ok).toBeFalsy();
     expect(parse("1 == false").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("true < true").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("true <= true").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("true > true").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("true >= true").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 || 1").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 && 1").mapValue(getPrimaryType).ok).toBeFalsy();
     expect(parse("true::1::[]").mapValue(getPrimaryType).ok).toBeFalsy();
   });
 });
