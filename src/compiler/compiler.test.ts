@@ -49,6 +49,17 @@ describe(compile, () => {
       expect(await evaluateMain("2<=1", toBoolean)).toBe(false);
     });
 
+    it("should compile logical operation", async () => {
+      expect(await evaluateMain("true || true", toBoolean)).toBe(true);
+      expect(await evaluateMain("true || false", toBoolean)).toBe(true);
+      expect(await evaluateMain("false || true", toBoolean)).toBe(true);
+      expect(await evaluateMain("false || false", toBoolean)).toBe(false);
+      expect(await evaluateMain("true && true", toBoolean)).toBe(true);
+      expect(await evaluateMain("true && false", toBoolean)).toBe(false);
+      expect(await evaluateMain("false && true", toBoolean)).toBe(false);
+      expect(await evaluateMain("false && false", toBoolean)).toBe(false);
+    });
+
     it("should compile equality", async () => {
       expect(await evaluateMain("0==0", toBoolean)).toBe(true);
       expect(await evaluateMain("0==1", toBoolean)).toBe(false);

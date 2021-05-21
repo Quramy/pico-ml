@@ -12,6 +12,8 @@ import {
   LEOperation,
   GTOperation,
   GEOperation,
+  AndOperation,
+  OrOperation,
   EQOperation,
   NEOperation,
   SubOperation,
@@ -85,6 +87,22 @@ const ge: GEOperation = {
   token: {
     tokenKind: "Symbol",
     symbol: ">=",
+  },
+};
+
+const or: OrOperation = {
+  kind: "Or",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "||",
+  },
+};
+
+const and: AndOperation = {
+  kind: "And",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "&&",
   },
 };
 
@@ -243,6 +261,32 @@ const fixture = {
         head: num(2),
         tail: empty(),
       },
+    }),
+  "true&&true": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: and,
+      left: bool(true),
+      right: bool(true),
+    }),
+  "true||true": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: or,
+      left: bool(true),
+      right: bool(true),
+    }),
+  "1 == 2 && 1 == 2 || 1 == 2 ": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: or,
+      left: {
+        kind: "BinaryExpression",
+        op: and,
+        left: fixture["1==2"](),
+        right: fixture["1==2"](),
+      },
+      right: fixture["1==2"](),
     }),
   "if true then 0 else 1": () =>
     expr({
