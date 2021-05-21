@@ -101,16 +101,17 @@ export const vec = <T extends Parser, S extends UnwrapToParseValue<T>>(parser: T
 export const leftAssociate =
   <S extends Parser, L extends UnwrapToParseValue<S>>(leftParser: S) =>
   <T extends readonly Parser[]>(...parsers: T) =>
-  (cb: (...args: [L, ...UnwrapToParseResultTuple<T>]) => L) => {
-    return (scanner: Scanner): ParseResult<L> => {
+  <R extends ParseValue>(cb: (...args: [L | R, ...UnwrapToParseResultTuple<T>]) => R) => {
+    return (scanner: Scanner): ParseResult<L | R> => {
       const first = leftParser(scanner) as ParseResult<L>;
       if (!first.ok) return first;
-      const inner = (node: L): Result<L, ParseError> => {
+      const inner = (node: L | R): Result<R, ParseError> => {
         const results: ParseValue[] = [];
         let i = 0;
         for (const parser of parsers) {
           const r = parser(scanner);
-          if (!r.ok) return i === 0 ? ok(node) : error({ ...r.value, message: "Missing operand.", confirmed: false });
+          if (!r.ok)
+            return (i === 0 ? ok(node) : error({ ...r.value, message: "Missing operand.", confirmed: false })) as any;
           results.push(r.value);
           i++;
         }
