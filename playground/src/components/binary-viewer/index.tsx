@@ -8,24 +8,35 @@ function createTableFrom(bin: Uint8Array) {
   const lines: {
     address: string;
     values: readonly string[];
+    ascii: string;
   }[] = [];
   let line: {
     address: string;
     values: string[];
+    ascii: string;
   };
   for (let i = 0; i < bin.byteLength; i += 2) {
     if (i % 0x10 === 0) {
       line = {
         address: toHex(i, 8),
         values: [],
+        ascii: "",
       };
       lines.push(line);
     }
+    const char = String.fromCharCode(bin[i]);
+    line!.ascii += bin[i] < 20 ? "." : char;
     if (i + 1 < bin.byteLength) {
+      const char = String.fromCharCode(bin[i + 1]);
+      line!.ascii += bin[i + 1] < 20 ? "." : char;
       line!.values.push(toHex(bin[i], 2) + toHex(bin[i + 1], 2));
     } else {
       line!.values.push(toHex(bin[i], 2));
     }
+  }
+  if (lines.length) {
+    const lastLine = lines[lines.length - 1];
+    lastLine.values = [...lastLine.values, ...[...new Array(8 - lastLine.values.length)].map(() => "")];
   }
   return lines;
 }
@@ -49,6 +60,7 @@ export function BinaryViewer() {
                   {v}
                 </td>
               ))}
+              <td className={styles.asciiCell}>{row.ascii}</td>
             </tr>
           ))}
         </tbody>
