@@ -34,7 +34,7 @@ export function useProgramStream<
   const program = useContext(programContext);
   const [state, setState] = useState<Result<V, E> | null>(initialValue ? ok(initialValue) : null);
   useEffect(() => {
-    const stream = program[key];
+    const stream = program[key] as unknown;
     if (!isObservable(stream)) {
       throw new Error(`${key} is not Observable`);
     }
