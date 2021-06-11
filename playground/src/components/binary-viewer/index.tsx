@@ -4,6 +4,10 @@ import { useProgramStream } from "../../hooks/use-program-stream";
 import styles from "./index.css";
 import { toHex } from "../../functions/hex";
 
+function n2c(n: number) {
+  return n < 0x20 || n >= 0x7f ? "." : String.fromCharCode(n);
+}
+
 function createTableFrom(bin: Uint8Array) {
   const lines: {
     address: string;
@@ -24,11 +28,9 @@ function createTableFrom(bin: Uint8Array) {
       };
       lines.push(line);
     }
-    const char = String.fromCharCode(bin[i]);
-    line!.ascii += bin[i] < 20 ? "." : char;
+    line!.ascii += n2c(bin[i]);
     if (i + 1 < bin.byteLength) {
-      const char = String.fromCharCode(bin[i + 1]);
-      line!.ascii += bin[i + 1] < 20 ? "." : char;
+      line!.ascii += n2c(bin[i + 1]);
       line!.values.push(toHex(bin[i], 2) + toHex(bin[i + 1], 2));
     } else {
       line!.values.push(toHex(bin[i], 2));

@@ -24,6 +24,7 @@
 }
 
 .asciiCell {
+  white-space: pre;
   color: #6b7089;
   padding-left: 2.5ch;
 }
