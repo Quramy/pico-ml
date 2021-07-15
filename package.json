@@ -2,7 +2,7 @@
   "name": "pico-ml",
   "version": "0.7.0",
   "description": "A toy programming language witch is a subset of OCaml",
-  "type": "commonks",
+  "type": "commonjs",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
