@@ -59,7 +59,11 @@ export interface IntegerToken extends TokenBase<"Integer"> {
   readonly value: number;
 }
 
-export type Token = SymbolToken | KeywordToken | IntegerToken | VariableToken;
+export interface FloatToken extends TokenBase<"Float"> {
+  readonly value: number;
+}
+
+export type Token = SymbolToken | KeywordToken | IntegerToken | FloatToken | VariableToken;
 
 export interface OperationBase<T extends string> {
   readonly kind: T;
@@ -107,6 +111,10 @@ export type BinaryOperation =
 export interface Node<T extends string> extends Tree<T>, Position {}
 
 export interface IntLiteralNode extends Node<"IntLiteral"> {
+  readonly value: number;
+}
+
+export interface FloatLiteralNode extends Node<"FloatLiteral"> {
   readonly value: number;
 }
 
@@ -199,6 +207,7 @@ export interface MatchExpressionNode extends Node<"MatchExpression"> {
 
 export type ExpressionNode =
   | IntLiteralNode
+  | FloatLiteralNode
   | BoolLiteralNode
   | EmptyListNode
   | IdentifierNode
