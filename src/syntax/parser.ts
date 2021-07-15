@@ -20,7 +20,7 @@ import {
   MatchExpressionNode,
   MatchPatternElementNode,
 } from "./types";
-import { symbolToken, numberToken, keywordToken, variableToken } from "./tokenizer";
+import { symbolToken, integerToken, keywordToken, variableToken } from "./tokenizer";
 
 /**
  *
@@ -397,7 +397,7 @@ const bool: Parser<BoolLiteralNode> = oneOf(
   ),
 );
 
-const num: Parser<IntLiteralNode> = expect(numberToken)(({ value, loc }) => ({
+const num: Parser<IntLiteralNode> = expect(integerToken)(({ value, loc }) => ({
   kind: "IntLiteral",
   value,
   loc,
