@@ -3,6 +3,7 @@ import { Scanner } from "./scanner";
 import {
   ExpressionNode,
   IntLiteralNode,
+  FloatLiteralNode,
   BoolLiteralNode,
   UnaryExpressionNode,
   IfExpressionNode,
@@ -20,7 +21,7 @@ import {
   MatchExpressionNode,
   MatchPatternElementNode,
 } from "./types";
-import { symbolToken, integerToken, keywordToken, variableToken } from "./tokenizer";
+import { symbolToken, integerToken, keywordToken, variableToken, decimalToken } from "./tokenizer";
 
 /**
  *
@@ -38,15 +39,17 @@ import { symbolToken, integerToken, keywordToken, variableToken } from "./tokeni
  * eq           ::= comp(("==" | "!=") (comp | cond | match | func | bind))*
  * comp         ::= cons(("<" | ">" | "<=" | ">=" | "==" | "!=") (cons | cond | match | func | bind))*
  * cons         ::= add("::" (add | cond | match | func | bind))*
- * add          ::= mul(("+"|"-") (mul | cond | match | func | bind))*
- * mul          ::= prfx("*" (prfx | cond | match | func | bind))*
- * prfx         ::= app | "-" app
+ * add          ::= mul(("+" | "-" | "+." | "-.") (mul | cond | match | func | bind))*
+ * mul          ::= prfx(("*" | "*.") (prfx | cond | match | func | bind))*
+ * prfx         ::= app | ("-" | "-.") app
  * app          ::= prim (prim)*
- * prim         ::= id | bool | number | empty | group
+ * prim         ::= id | bool | int | empty | group
  * group        ::= "(" expr ")"
  * empty        ::= "[" "]"
  * bool         ::= "true" | "false"
- * number       ::= "0" | "1" | "2" |  ...
+ * decimal      ::= digit+"."digit*
+ * int          ::= digit+
+ * digit        ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
  * id           ::= regExp([a-zA-Z_][a-zA-Z_0-9']*)
  *
  */
@@ -294,7 +297,7 @@ const cons: Parser<ExpressionNode> = rightAssociate(use(() => add))(
 }));
 
 const add: Parser<ExpressionNode> = leftAssociate(use(() => mul))(
-  oneOf(symbolToken("+"), symbolToken("-")),
+  oneOf(symbolToken("+"), symbolToken("-"), symbolToken("+."), symbolToken("-.")),
   oneOf(
     use(() => mul),
     use(() => cond),
@@ -304,14 +307,23 @@ const add: Parser<ExpressionNode> = leftAssociate(use(() => mul))(
   ),
 )((left, token, right) => ({
   kind: "BinaryExpression",
-  op: token.symbol === "+" ? { kind: "Add", token } : { kind: "Sub", token },
+  op:
+    token.symbol === "+"
+      ? { kind: "Add", token }
+      : token.symbol === "+."
+      ? { kind: "FAdd", token }
+      : token.symbol === "-"
+      ? { kind: "Sub", token }
+      : token.symbol === "-."
+      ? { kind: "FSub", token }
+      : (null as never),
   left,
   right,
   ...loc(left, token, right),
 }));
 
 const mul: Parser<ExpressionNode> = leftAssociate(use(() => prfx))(
-  symbolToken("*"),
+  oneOf(symbolToken("*"), symbolToken("*.")),
   oneOf(
     use(() => prfx),
     use(() => cond),
@@ -321,10 +333,13 @@ const mul: Parser<ExpressionNode> = leftAssociate(use(() => prfx))(
   ),
 )((left, token, right) => ({
   kind: "BinaryExpression",
-  op: {
-    kind: "Multiply",
-    token,
-  },
+  op:
+    token.symbol === "*"
+      ? {
+          kind: "Multiply",
+          token,
+        }
+      : { kind: "FMultiply", token },
   left,
   right,
   ...loc(left, token, right),
@@ -333,17 +348,23 @@ const mul: Parser<ExpressionNode> = leftAssociate(use(() => prfx))(
 const prfx: Parser<ExpressionNode> = oneOf(
   use(() => app),
   expect(
-    symbolToken("-"),
+    oneOf(symbolToken("-"), symbolToken("-.")),
     use(() => app),
   )(
-    (tMinus, expr): UnaryExpressionNode => ({
+    (token, expr): UnaryExpressionNode => ({
       kind: "UnaryExpression",
-      op: {
-        kind: "Minus",
-        token: tMinus,
-      },
+      op:
+        token.symbol === "-"
+          ? {
+              kind: "Minus",
+              token: token,
+            }
+          : {
+              kind: "FMinus",
+              token: token,
+            },
       exp: expr,
-      ...loc(tMinus, expr),
+      ...loc(token, expr),
     }),
   ),
 );
@@ -358,6 +379,7 @@ const app: Parser<ExpressionNode> = leftAssociate(use(() => prim))(use(() => pri
 const prim: Parser<ExpressionNode> = oneOf(
   use(() => id),
   use(() => num),
+  use(() => decimal),
   use(() => bool),
   use(() => empty),
   use(() => group),
@@ -396,6 +418,12 @@ const bool: Parser<BoolLiteralNode> = oneOf(
     }),
   ),
 );
+
+const decimal: Parser<FloatLiteralNode> = expect(decimalToken)(({ value, loc }) => ({
+  kind: "FloatLiteral",
+  value,
+  loc,
+}));
 
 const num: Parser<IntLiteralNode> = expect(integerToken)(({ value, loc }) => ({
   kind: "IntLiteral",

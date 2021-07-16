@@ -1,4 +1,4 @@
-import { integerToken, variableToken, keywordToken } from "./tokenizer";
+import { integerToken, decimalToken, variableToken, keywordToken } from "./tokenizer";
 import { Scanner } from "../parser-util";
 import { Token } from "./types";
 
@@ -15,6 +15,19 @@ test(integerToken.name, () => {
     tokenKind: "Integer",
     value: 20,
   });
+});
+
+test(decimalToken.name, () => {
+  expect(decimalToken(new Scanner("0.")).unwrap()).toMatchObject<Omit<Token, "value">>({
+    tokenKind: "Float",
+  });
+  expect(decimalToken(new Scanner("01.")).unwrap()).toMatchObject<Omit<Token, "value">>({
+    tokenKind: "Float",
+  });
+  expect(decimalToken(new Scanner("2.0")).unwrap()).toMatchObject<Omit<Token, "value">>({
+    tokenKind: "Float",
+  });
+  expect(Math.floor(decimalToken(new Scanner("2.0")).unwrap().value)).toBe(2);
 });
 
 test(keywordToken.name, () => {

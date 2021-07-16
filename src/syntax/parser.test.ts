@@ -3,9 +3,14 @@ import { parse } from "./parser";
 import {
   ExpressionNode,
   IntLiteralNode,
+  FloatLiteralNode,
   MinusOperation,
+  FMinusOperation,
   AddOperation,
   MultiplyOperation,
+  FAddOperation,
+  FSubOperation,
+  FMultiplyOperation,
   BoolLiteralNode,
   IdentifierNode,
   LTOperation,
@@ -18,7 +23,7 @@ import {
   NEOperation,
   SubOperation,
   EmptyListNode,
-} from "../syntax/types";
+} from "./types";
 
 const num = (value: number) =>
   ({
@@ -26,11 +31,25 @@ const num = (value: number) =>
     value,
   } as IntLiteralNode);
 
+const float = (value: number) =>
+  ({
+    kind: "FloatLiteral",
+    value,
+  } as FloatLiteralNode);
+
 const minus: MinusOperation = {
   kind: "Minus",
   token: {
     tokenKind: "Symbol",
     symbol: "-",
+  },
+};
+
+const fMinus: FMinusOperation = {
+  kind: "FMinus",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "-.",
   },
 };
 
@@ -55,6 +74,30 @@ const multiply: MultiplyOperation = {
   token: {
     tokenKind: "Symbol",
     symbol: "*",
+  },
+};
+
+const fAdd: FAddOperation = {
+  kind: "FAdd",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "+.",
+  },
+};
+
+const fSub: FSubOperation = {
+  kind: "FSub",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "-.",
+  },
+};
+
+const fMultiply: FMultiplyOperation = {
+  kind: "FMultiply",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "*.",
   },
 };
 
@@ -139,6 +182,7 @@ const expr = <T extends ExpressionNode = ExpressionNode>(node: T) => node;
 
 const fixture = {
   "0": () => num(0),
+  "0.": () => float(0),
   true: () => bool(true),
   false: () => bool(false),
   "-0": () =>
@@ -147,6 +191,12 @@ const fixture = {
       op: minus,
       exp: num(0),
     }),
+  "-.0.": () =>
+    expr({
+      kind: "UnaryExpression",
+      op: fMinus,
+      exp: float(0),
+    }),
   "1+2": () =>
     expr({
       kind: "BinaryExpression",
@@ -154,12 +204,26 @@ const fixture = {
       left: num(1),
       right: num(2),
     }),
+  "1.+.2.": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: fAdd,
+      left: float(1.0),
+      right: float(2.0),
+    }),
   "1-2": () =>
     expr({
       kind: "BinaryExpression",
       op: sub,
       left: num(1),
       right: num(2),
+    }),
+  "1.-.2.": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: fSub,
+      left: float(1.0),
+      right: float(2.0),
     }),
   "1+2*3": () =>
     expr({
@@ -184,6 +248,18 @@ const fixture = {
         right: num(2),
       },
       right: num(3),
+    }),
+  "1.*.2.+.3.": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: fAdd,
+      left: {
+        kind: "BinaryExpression",
+        op: fMultiply,
+        left: float(1.0),
+        right: float(2.0),
+      },
+      right: float(3.0),
     }),
   "(1+2)*3": () =>
     expr({

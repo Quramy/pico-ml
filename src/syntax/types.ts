@@ -11,6 +11,9 @@ export type Symbols = readonly [
   ">",
   "<=",
   ">=",
+  "+.",
+  "-.",
+  "*.",
   "||",
   "&&",
   "==",
@@ -72,6 +75,8 @@ export interface OperationBase<T extends string> {
 
 export interface MinusOperation extends OperationBase<"Minus"> {}
 
+export interface FMinusOperation extends OperationBase<"FMinus"> {}
+
 export interface AddOperation extends OperationBase<"Add"> {}
 
 export interface SubOperation extends OperationBase<"Sub"> {}
@@ -86,6 +91,12 @@ export interface LEOperation extends OperationBase<"LessEqualThan"> {}
 
 export interface GEOperation extends OperationBase<"GreaterEqualThan"> {}
 
+export interface FAddOperation extends OperationBase<"FAdd"> {}
+
+export interface FSubOperation extends OperationBase<"FSub"> {}
+
+export interface FMultiplyOperation extends OperationBase<"FMultiply"> {}
+
 export interface OrOperation extends OperationBase<"Or"> {}
 
 export interface AndOperation extends OperationBase<"And"> {}
@@ -94,7 +105,7 @@ export interface EQOperation extends OperationBase<"Equal"> {}
 
 export interface NEOperation extends OperationBase<"NotEqual"> {}
 
-export type UnaryOperation = MinusOperation;
+export type UnaryOperation = MinusOperation | FMinusOperation;
 export type BinaryOperation =
   | AddOperation
   | SubOperation
@@ -103,6 +114,9 @@ export type BinaryOperation =
   | GTOperation
   | LEOperation
   | GEOperation
+  | FAddOperation
+  | FSubOperation
+  | FMultiplyOperation
   | OrOperation
   | AndOperation
   | EQOperation
