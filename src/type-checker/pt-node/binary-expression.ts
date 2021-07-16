@@ -5,10 +5,13 @@ import { result } from "./_result";
 import { unify } from "../unify";
 import { toEquationSet } from "../substitute";
 
-const RESULT_TYPES_BY_OP: Record<BinaryOperation["kind"], "Bool" | "Int"> = {
+const RESULT_TYPES_BY_OP: Record<BinaryOperation["kind"], "Bool" | "Int" | "Float"> = {
   Add: "Int",
+  FAdd: "Float",
   Sub: "Int",
+  FSub: "Float",
   Multiply: "Int",
+  FMultiply: "Float",
   LessThan: "Bool",
   LessEqualThan: "Bool",
   GreaterThan: "Bool",
@@ -24,8 +27,16 @@ function getConstraints(
   left: PrimaryTypeValue,
   right: PrimaryTypeValue,
 ): readonly TypeEquation[] {
-  if (expression.op.kind === "Equal" || expression.op.kind === "NotEqual")
+  if (
+    expression.op.kind === "LessThan" ||
+    expression.op.kind === "LessEqualThan" ||
+    expression.op.kind === "GreaterThan" ||
+    expression.op.kind === "GreaterEqualThan" ||
+    expression.op.kind === "Equal" ||
+    expression.op.kind === "NotEqual"
+  ) {
     return [{ lhs: left.expressionType, rhs: right.expressionType }];
+  }
 
   const expectedNodeType = expression.op.kind === "And" || expression.op.kind === "Or" ? "Bool" : "Int";
 

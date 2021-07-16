@@ -3,6 +3,7 @@ import { TypeEquation, TypeSubstitution, TypeValue, TypeScheme, TypeEnvironment 
 function substituteTypeInner(type: TypeValue, substitution: TypeSubstitution): TypeValue {
   switch (type.kind) {
     case "Int":
+    case "Float":
     case "Bool":
       return type;
     case "TypeParameter":

@@ -30,6 +30,7 @@ function subtract(sortedA: FTV, sortedB: FTV): FTV {
 function getTypeFTVLoop(type: TypeValue): FTV {
   switch (type.kind) {
     case "Int":
+    case "Float":
     case "Bool":
       return [];
     case "TypeParameter":
