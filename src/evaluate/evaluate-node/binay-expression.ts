@@ -9,10 +9,13 @@ export const binaryExpression: EvaluateNodeFn<"BinaryExpression"> = (expression,
   )((left, right) => {
     switch (expression.op.kind) {
       case "Add":
+      case "FAdd":
         return map2num(left, right)((l, r) => l + r).error(err => ({ ...err, occurence: expression }));
       case "Sub":
+      case "FSub":
         return map2num(left, right)((l, r) => l - r).error(err => ({ ...err, occurence: expression }));
       case "Multiply":
+      case "FMultiply":
         return map2num(left, right)((l, r) => l * r).error(err => ({ ...err, occurence: expression }));
       case "LessThan":
         return map2num(left, right)((l, r) => l < r).error(err => ({ ...err, occurence: expression }));

@@ -20,6 +20,7 @@ export function evaluate(expression: ExpressionNode) {
   return createTreeTraverser<ExpressionNode, Environment, EvaluationResult>({
     boolLiteral: literal,
     intLiteral: literal,
+    floatLiteral: literal,
     emptyList,
     identifier,
     functionDefinition,
