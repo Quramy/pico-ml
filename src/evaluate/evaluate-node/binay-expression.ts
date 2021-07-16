@@ -1,6 +1,7 @@
 import { mapValue } from "../../structure";
 import { EvaluateNodeFn } from "../types";
-import { map2num, map2bool, equal } from "../utils";
+import { map2num, map2bool } from "../utils";
+import { compare } from "../comparetor";
 
 export const binaryExpression: EvaluateNodeFn<"BinaryExpression"> = (expression, env, next) =>
   mapValue(
@@ -17,24 +18,17 @@ export const binaryExpression: EvaluateNodeFn<"BinaryExpression"> = (expression,
       case "Multiply":
       case "FMultiply":
         return map2num(left, right)((l, r) => l * r).error(err => ({ ...err, occurence: expression }));
-      case "LessThan":
-        return map2num(left, right)((l, r) => l < r).error(err => ({ ...err, occurence: expression }));
-      case "LessEqualThan":
-        return map2num(left, right)((l, r) => l <= r).error(err => ({ ...err, occurence: expression }));
-      case "GreaterThan":
-        return map2num(left, right)((l, r) => l > r).error(err => ({ ...err, occurence: expression }));
-      case "GreaterEqualThan":
-        return map2num(left, right)((l, r) => l >= r).error(err => ({ ...err, occurence: expression }));
       case "Or":
         return map2bool(left, right)((l, r) => l || r).error(err => ({ ...err, occurence: expression }));
       case "And":
         return map2bool(left, right)((l, r) => l && r).error(err => ({ ...err, occurence: expression }));
+      case "LessThan":
+      case "LessEqualThan":
+      case "GreaterThan":
+      case "GreaterEqualThan":
       case "Equal":
-        return equal(left, right).error(err => ({ ...err, occurence: expression }));
       case "NotEqual":
-        return equal(left, right)
-          .map(r => !r)
-          .error(err => ({ ...err, occurence: expression }));
+        return compare(left, right, expression.op).error(err => ({ ...err, occurence: expression }));
       default:
         // @ts-expect-error
         throw new Error(`invalid operation: ${expression.op.kind}`);

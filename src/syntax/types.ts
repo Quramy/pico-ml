@@ -83,14 +83,6 @@ export interface SubOperation extends OperationBase<"Sub"> {}
 
 export interface MultiplyOperation extends OperationBase<"Multiply"> {}
 
-export interface LTOperation extends OperationBase<"LessThan"> {}
-
-export interface GTOperation extends OperationBase<"GreaterThan"> {}
-
-export interface LEOperation extends OperationBase<"LessEqualThan"> {}
-
-export interface GEOperation extends OperationBase<"GreaterEqualThan"> {}
-
 export interface FAddOperation extends OperationBase<"FAdd"> {}
 
 export interface FSubOperation extends OperationBase<"FSub"> {}
@@ -101,26 +93,31 @@ export interface OrOperation extends OperationBase<"Or"> {}
 
 export interface AndOperation extends OperationBase<"And"> {}
 
+export interface LTOperation extends OperationBase<"LessThan"> {}
+
+export interface GTOperation extends OperationBase<"GreaterThan"> {}
+
+export interface LEOperation extends OperationBase<"LessEqualThan"> {}
+
+export interface GEOperation extends OperationBase<"GreaterEqualThan"> {}
+
 export interface EQOperation extends OperationBase<"Equal"> {}
 
 export interface NEOperation extends OperationBase<"NotEqual"> {}
+
+export type ComparisonOperations = LTOperation | LEOperation | GTOperation | GEOperation | EQOperation | NEOperation;
 
 export type UnaryOperation = MinusOperation | FMinusOperation;
 export type BinaryOperation =
   | AddOperation
   | SubOperation
   | MultiplyOperation
-  | LTOperation
-  | GTOperation
-  | LEOperation
-  | GEOperation
   | FAddOperation
   | FSubOperation
   | FMultiplyOperation
   | OrOperation
   | AndOperation
-  | EQOperation
-  | NEOperation;
+  | ComparisonOperations;
 
 export interface Node<T extends string> extends Tree<T>, Position {}
 
