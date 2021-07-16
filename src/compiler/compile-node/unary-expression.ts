@@ -6,4 +6,6 @@ export const unaryExpression: CompileNodeFn<"UnaryExpression"> = (node, ctx, nex
     ...instructions,
     factory.numericInstr("i32.const", [factory.int32(-1)]),
     factory.numericInstr("i32.mul", []),
+    factory.numericInstr("i32.const", [factory.int32(2)]),
+    factory.numericInstr("i32.add", []),
   ]);

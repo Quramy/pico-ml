@@ -1,20 +1,34 @@
+export function fromNumber2IntBase(value: number) {
+  return (value << 1) | 1;
+}
+
+export interface ValueExtractor<T> {
+  (instance: WebAssembly.Instance, value: number): T;
+}
+
 export function toNumber(_instance: WebAssembly.Instance, value: number) {
-  return value;
+  return value >> 1;
 }
 
 export function toBoolean(_instance: WebAssembly.Instance, value: number) {
   return value ? true : false;
 }
 
-export function toList(instance: WebAssembly.Instance, value: number) {
-  const getTail = instance.exports["__list_tail__"] as (addr: number) => number;
-  const getHeadValue = instance.exports["__list_head__"] as (addr: number) => number;
-  const inner = (addr: number): readonly number[] => {
-    if (addr > 0) {
-      return [getHeadValue(addr), ...inner(getTail(addr))];
-    } else {
-      return [];
-    }
+export function toListAnd<T>(conv: ValueExtractor<T>) {
+  return (instance: WebAssembly.Instance, value: number) => {
+    const getTail = instance.exports["__list_tail__"] as (addr: number) => number;
+    const getHeadValue = instance.exports["__list_head__"] as (addr: number) => number;
+    const inner = (addr: number): readonly number[] => {
+      if (addr > 0) {
+        return [getHeadValue(addr), ...inner(getTail(addr))];
+      } else {
+        return [];
+      }
+    };
+    return inner(value).map(x => conv(instance, x));
   };
-  return inner(value);
+}
+
+export function toList(instance: WebAssembly.Instance, value: number) {
+  return toListAnd((_, x) => x)(instance, value);
 }

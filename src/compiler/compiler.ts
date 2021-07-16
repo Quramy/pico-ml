@@ -1,4 +1,4 @@
-import { createTreeTraverser } from "../structure";
+import { createTreeTraverser, error } from "../structure";
 import { factory } from "../wasm";
 import { ExpressionNode } from "../syntax";
 import { CompilationContext, CompilationResult, CompiledModuleResult } from "./types";
@@ -23,6 +23,7 @@ const traverse = createTreeTraverser<ExpressionNode, CompilationContext, Compila
   boolLiteral,
   emptyList,
   intLiteral,
+  floatLiteral: node => error({ message: "TODO: should be implemented", occurence: node }),
   unaryExpression,
   binaryExpression,
   listConstructor,

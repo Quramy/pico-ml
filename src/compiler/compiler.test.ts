@@ -1,18 +1,18 @@
 import { parse } from "../syntax";
 import { generateBinary } from "../wasm";
 import { compile } from "./compiler";
-import { toNumber, toBoolean, toList } from "./js-bindings";
+import { toNumber, toBoolean, toListAnd, toList } from "./js-bindings";
 
 describe(compile, () => {
   describe("literal", () => {
     it("should comiple int literal", async () => {
-      expect(await evaluateMain("0")).toBe(0);
-      expect(await evaluateMain("1")).toBe(1);
+      expect(await evaluateMain("0", toNumber)).toBe(0);
+      expect(await evaluateMain("1", toNumber)).toBe(1);
     });
 
-    it("should comiple bool literal as 1 or 0", async () => {
-      expect(await evaluateMain("true")).toBe(1);
-      expect(await evaluateMain("false")).toBe(0);
+    it("should comiple bool literal", async () => {
+      expect(await evaluateMain("true", toBoolean)).toBe(true);
+      expect(await evaluateMain("false", toBoolean)).toBe(false);
     });
 
     it("should comiple empty list as 0", async () => {
@@ -22,8 +22,7 @@ describe(compile, () => {
 
   describe("unary expression", () => {
     it("should compile minus operation", async () => {
-      expect(await evaluateMain("-1")).toBe(-1);
-      expect(await evaluateMain("-true")).toBe(-1);
+      expect(await evaluateMain("-1", toNumber)).toBe(-1);
     });
   });
 
@@ -85,9 +84,9 @@ describe(compile, () => {
 
   describe("list constructor", () => {
     it("shuld compile list construction", async () => {
-      expect(await evaluateMain("1::[]", toList)).toEqual([1]);
-      expect(await evaluateMain("1::2::[]", toList)).toEqual([1, 2]);
-      expect(await evaluateMain("true::false::[]", toList)).toEqual([1, 0]);
+      expect(await evaluateMain("1::[]", toListAnd(toNumber))).toEqual([1]);
+      expect(await evaluateMain("1::2::[]", toListAnd(toNumber))).toEqual([1, 2]);
+      expect(await evaluateMain("true::false::[]", toListAnd(toBoolean))).toEqual([true, false]);
     });
   });
 
@@ -145,7 +144,7 @@ describe(compile, () => {
         let rec map = fun f -> fun list -> match list with [] -> [] | x::y -> (f x)::(map f y) in
         map twice (1::2::3::[])
       `;
-      expect(await evaluateMain(code, toList)).toEqual([2, 4, 6]);
+      expect(await evaluateMain(code, toListAnd(toNumber))).toEqual([2, 4, 6]);
     });
 
     test("factorial for list", async () => {
@@ -155,7 +154,7 @@ describe(compile, () => {
         let rec map = fun f -> fun list -> match list with [] -> [] | x::y -> (f x)::(map f y) in
         map fact (range 1 7)
       `;
-      expect(await evaluateMain(code, toList)).toEqual([1, 2, 6, 24, 120, 720]);
+      expect(await evaluateMain(code, toListAnd(toNumber))).toEqual([1, 2, 6, 24, 120, 720]);
     });
   });
 });
