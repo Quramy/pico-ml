@@ -20,7 +20,23 @@ export const unaryExpression: PrimaryTypeNode<"UnaryExpression"> = (expression, 
           ),
         ),
       );
+    case "FMinus":
+      return next(expression.exp, ctx).mapValue(exp =>
+        unify([
+          ...toEquationSet(exp),
+          { lhs: exp.expressionType, rhs: { kind: "Float", referencedFrom: expression } },
+        ]).mapValue(unified =>
+          result.ok(
+            {
+              kind: "Int",
+              referencedFrom: expression,
+            },
+            unified,
+          ),
+        ),
+      );
     default:
+      // @ts-expect-error
       throw new Error(`invalid operation ${expression.op.kind}`);
   }
 };

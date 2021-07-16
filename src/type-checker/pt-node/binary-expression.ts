@@ -38,7 +38,12 @@ function getConstraints(
     return [{ lhs: left.expressionType, rhs: right.expressionType }];
   }
 
-  const expectedNodeType = expression.op.kind === "And" || expression.op.kind === "Or" ? "Bool" : "Int";
+  const expectedNodeType =
+    expression.op.kind === "And" || expression.op.kind === "Or"
+      ? "Bool"
+      : expression.op.kind === "Add" || expression.op.kind === "Sub" || expression.op.kind === "Multiply"
+      ? "Int"
+      : "Float";
 
   return [
     {
