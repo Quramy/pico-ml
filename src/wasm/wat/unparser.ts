@@ -222,7 +222,7 @@ function unparseExpr(node: ExprNode, writer: Writer) {
     switch (instr.kind) {
       case "IfInstruction":
         return unparseIfInstr(instr, writer);
-      case "NumericInstruction":
+      case "Int32NumericInstruction":
         return unparseNumericInstr(instr, writer);
       case "ControlInstruction":
         return unparseControlInstr(instr, writer);

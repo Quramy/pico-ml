@@ -1,6 +1,6 @@
 import {
   VariableInstructionKind,
-  NumericInstructionKind,
+  Int32NumericInstructionKind,
   ControlInstructionKind,
   MemoryInstructionKind,
 } from "./instructions-map";
@@ -58,7 +58,7 @@ export interface VariableInstruction {
 
 export interface NumericInstruction {
   readonly kind: "NumericInstruction";
-  readonly instructionKind: NumericInstructionKind;
+  readonly instructionKind: Int32NumericInstructionKind;
   readonly parameters: readonly number[];
 }
 

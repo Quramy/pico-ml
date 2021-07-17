@@ -14,49 +14,49 @@ function getOperationInstr(
       return ok([
         ...left,
         ...right,
-        factory.numericInstr("i32.add", []),
-        factory.numericInstr("i32.const", [factory.int32(1)]),
-        factory.numericInstr("i32.sub", []),
+        factory.int32NumericInstr("i32.add", []),
+        factory.int32NumericInstr("i32.const", [factory.int32(1)]),
+        factory.int32NumericInstr("i32.sub", []),
       ]);
     case "Sub":
       // 2(a - b) + 1 = (2a + 1) - (2b + 1) + 1 = A - B + 1
       return ok([
         ...left,
         ...right,
-        factory.numericInstr("i32.sub", []),
-        factory.numericInstr("i32.const", [factory.int32(1)]),
-        factory.numericInstr("i32.add", []),
+        factory.int32NumericInstr("i32.sub", []),
+        factory.int32NumericInstr("i32.const", [factory.int32(1)]),
+        factory.int32NumericInstr("i32.add", []),
       ]);
     case "Multiply": {
       // 2ab + 1 = (2a + 1 - 1) * b  + 1 = (A - 1) * (B >> 1) + 1
       return ok([
         ...left,
-        factory.numericInstr("i32.const", [factory.int32(1)]),
-        factory.numericInstr("i32.sub", []),
+        factory.int32NumericInstr("i32.const", [factory.int32(1)]),
+        factory.int32NumericInstr("i32.sub", []),
         ...right,
-        factory.numericInstr("i32.const", [factory.int32(1)]),
-        factory.numericInstr("i32.shr_s", []),
-        factory.numericInstr("i32.mul", []),
-        factory.numericInstr("i32.const", [factory.int32(1)]),
-        factory.numericInstr("i32.add", []),
+        factory.int32NumericInstr("i32.const", [factory.int32(1)]),
+        factory.int32NumericInstr("i32.shr_s", []),
+        factory.int32NumericInstr("i32.mul", []),
+        factory.int32NumericInstr("i32.const", [factory.int32(1)]),
+        factory.int32NumericInstr("i32.add", []),
       ]);
     }
     case "Or":
-      return ok([...left, ...right, factory.numericInstr("i32.or", [])]);
+      return ok([...left, ...right, factory.int32NumericInstr("i32.or", [])]);
     case "And":
-      return ok([...left, ...right, factory.numericInstr("i32.and", [])]);
+      return ok([...left, ...right, factory.int32NumericInstr("i32.and", [])]);
     case "LessThan":
-      return ok([...left, ...right, factory.numericInstr("i32.lt_s", [])]);
+      return ok([...left, ...right, factory.int32NumericInstr("i32.lt_s", [])]);
     case "LessEqualThan":
-      return ok([...left, ...right, factory.numericInstr("i32.le_s", [])]);
+      return ok([...left, ...right, factory.int32NumericInstr("i32.le_s", [])]);
     case "GreaterThan":
-      return ok([...left, ...right, factory.numericInstr("i32.gt_s", [])]);
+      return ok([...left, ...right, factory.int32NumericInstr("i32.gt_s", [])]);
     case "GreaterEqualThan":
-      return ok([...left, ...right, factory.numericInstr("i32.ge_s", [])]);
+      return ok([...left, ...right, factory.int32NumericInstr("i32.ge_s", [])]);
     case "Equal":
-      return ok([...left, ...right, factory.numericInstr("i32.eq", [])]);
+      return ok([...left, ...right, factory.int32NumericInstr("i32.eq", [])]);
     case "NotEqual":
-      return ok([...left, ...right, factory.numericInstr("i32.ne", [])]);
+      return ok([...left, ...right, factory.int32NumericInstr("i32.ne", [])]);
     case "FAdd": // TODO
     case "FSub": // TODO
     case "FMultiply": // TODO

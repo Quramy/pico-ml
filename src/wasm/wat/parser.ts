@@ -13,6 +13,7 @@ import {
   ValueTypeNode,
   FuncSigNode,
   IndexNode,
+  Int32NumericInstructionNode,
   NumericInstructionNode,
   VariableInstructionNode,
   InstructionNode,
@@ -45,7 +46,7 @@ import {
 import {
   getControlInstructionKinds,
   getVariableInstructionKinds,
-  getNumericInstructionKinds,
+  getInt32NumericInstructionKinds,
   getMemoryInstructionKinds,
 } from "../instructions-map";
 
@@ -269,11 +270,11 @@ const variableInstr: Parser<VariableInstructionNode> = tryWith(
 
 const numericInstr: Parser<NumericInstructionNode> = tryWith(
   expect(
-    keywordsToken(getNumericInstructionKinds()),
+    keywordsToken(getInt32NumericInstructionKinds()),
     vec(i32),
   )(
-    (tInstrKind, params): NumericInstructionNode => ({
-      kind: "NumericInstruction",
+    (tInstrKind, params): Int32NumericInstructionNode => ({
+      kind: "Int32NumericInstruction",
       instructionKind: tInstrKind.keyword,
       parameters: params.values,
       ...loc(tInstrKind, params),

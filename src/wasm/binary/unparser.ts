@@ -22,7 +22,7 @@ import { BinaryOutputOptions } from "../types";
 
 import {
   variableInstructions,
-  numericInstructions,
+  i32NumberInstructions,
   controlInstructions,
   structuredInstructions,
   memoryInstructions,
@@ -133,7 +133,7 @@ function instructions(instrs: readonly Instruction[]): readonly Uint8Array[] {
       const { code } = variableInstructions[instr.instructionKind];
       return concat(byteMark(code), ...instr.parameters.map(idx => uint32(idx)));
     } else if (instr.kind === "NumericInstruction") {
-      const { code, args } = numericInstructions[instr.instructionKind];
+      const { code, args } = i32NumberInstructions[instr.instructionKind];
       return concat(
         byteMark(code),
         ...instr.parameters.map((p, argIdx) => {

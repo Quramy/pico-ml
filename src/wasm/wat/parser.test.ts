@@ -27,7 +27,7 @@ describe(parseFuncSig, () => {
 });
 
 describe(parseIfInstr, () => {
-  const instr = f.numericInstr("i32.const", [f.int32(0)]);
+  const instr = f.int32NumericInstr("i32.const", [f.int32(0)]);
   test("success", () => {
     expect(use(parseIfInstr)("if (result i32) i32.const 0 else i32.const 0 end")).toMatchObject(
       f.ifInstr(f.blockType([f.valueType("i32")]), [instr], [instr]),
@@ -70,7 +70,7 @@ describe(parseVariableInstr, () => {
 
 describe(parseNumericInstr, () => {
   test("success", () => {
-    expect(use(parseNumericInstr)("i32.const 0")).toMatchObject(f.numericInstr("i32.const", [f.int32(0)]));
+    expect(use(parseNumericInstr)("i32.const 0")).toMatchObject(f.int32NumericInstr("i32.const", [f.int32(0)]));
   });
 });
 
@@ -108,7 +108,7 @@ describe(parseFunc, () => {
   test("success", () => {
     expect(use(parseFunc)("(func)")).toMatchObject(f.func(f.funcSig([], []), [], []));
     expect(use(parseFunc)("(func (result i32) i32.const 100)")).toMatchObject(
-      f.func(f.funcSig([], [f.valueType("i32")]), [], [f.numericInstr("i32.const", [f.int32(100)])]),
+      f.func(f.funcSig([], [f.valueType("i32")]), [], [f.int32NumericInstr("i32.const", [f.int32(100)])]),
     );
     expect(
       use(parseFunc)(
@@ -128,7 +128,7 @@ describe(parseFunc, () => {
         [
           f.variableInstr("local.get", [f.identifier("a")]),
           f.variableInstr("local.get", [f.identifier("b")]),
-          f.numericInstr("i32.add", []),
+          f.int32NumericInstr("i32.add", []),
         ],
         f.identifier("add"),
       ),
@@ -167,10 +167,14 @@ describe(parseMemory, () => {
 describe(parseGlobal, () => {
   test("success", () => {
     expect(use(parseGlobal)("(global i32 i32.const 0)")).toMatchObject(
-      f.globalNode(f.valueType("i32"), [f.numericInstr("i32.const", [f.int32(0)])]),
+      f.globalNode(f.valueType("i32"), [f.int32NumericInstr("i32.const", [f.int32(0)])]),
     );
     expect(use(parseGlobal)("(global $g (mut i32) i32.const 0)")).toMatchObject(
-      f.globalNode(f.mutValueType(f.valueType("i32")), [f.numericInstr("i32.const", [f.int32(0)])], f.identifier("g")),
+      f.globalNode(
+        f.mutValueType(f.valueType("i32")),
+        [f.int32NumericInstr("i32.const", [f.int32(0)])],
+        f.identifier("g"),
+      ),
     );
   });
 });
@@ -195,7 +199,7 @@ describe(parseExport, () => {
 describe(parseElem, () => {
   test("success", () => {
     expect(use(parseElem)("(elem (offset i32.const 0) func 0)")).toMatchObject(
-      f.elem(f.functionIndexList([f.uint32(0)]), [f.numericInstr("i32.const", [f.int32(0)])]),
+      f.elem(f.functionIndexList([f.uint32(0)]), [f.int32NumericInstr("i32.const", [f.int32(0)])]),
     );
   });
 });
@@ -208,7 +212,7 @@ describe(parseModule, () => {
     expect(use(parseModule)("(module (memory 1))")).toMatchObject(f.mod([mem]));
     expect(use(parseModule)("(module (memory 1) (type (func)))")).toMatchObject(f.mod([mem, typedef]));
     expect(use(parseModule)("(module (func (result i32) i32.const 1))")).toMatchObject(
-      f.mod([f.func(f.funcSig([], [f.valueType("i32")]), [], [f.numericInstr("i32.const", [f.int32(1)])])]),
+      f.mod([f.func(f.funcSig([], [f.valueType("i32")]), [], [f.int32NumericInstr("i32.const", [f.int32(1)])])]),
     );
   });
 });

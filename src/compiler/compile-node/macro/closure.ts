@@ -10,6 +10,10 @@ export function newClosureInstr(ctx: CompilationContext) {
     // Note
     // Function closure is represented as a tuple:
     //   (recursive_flag, env_address, function_index_of_table_elements)
-    return [...getEnvAddrInstr(), factory.numericInstr("i32.const", [factory.int32(funcIndex)]), ...newTupleInstr()];
+    return [
+      ...getEnvAddrInstr(),
+      factory.int32NumericInstr("i32.const", [factory.int32(funcIndex)]),
+      ...newTupleInstr(),
+    ];
   };
 }

@@ -24,7 +24,7 @@ export const variableInstructions = {
   "global.set": { code: 0x24, args: ["globals"] },
 } as const;
 
-export const numericInstructions = {
+export const i32NumberInstructions = {
   "i32.const": { code: 0x41, args: ["SignedInteger"] },
 
   "i32.eqz": { code: 0x45, args: [] },
@@ -74,14 +74,16 @@ export type ControlInstructionParamKind = typeof controlInstructions[ControlInst
 export type VariableInstructionKind = keyof typeof variableInstructions;
 export type VariableInstructionParamKind = typeof variableInstructions[VariableInstructionKind]["args"][number];
 
-export type NumericInstructionKind = keyof typeof numericInstructions;
-export type NumericInstructionParamKind = typeof numericInstructions[NumericInstructionKind]["args"][number];
+export type Int32NumericInstructionKind = keyof typeof i32NumberInstructions;
+export type Int32NumericInstructionParamKind =
+  typeof i32NumberInstructions[Int32NumericInstructionKind]["args"][number];
 
 export type MemoryInstructionKind = keyof typeof memoryInstructions;
 
 export const getControlInstructionKinds = () => Object.keys(controlInstructions) as readonly ControlInstructionKind[];
 export const getVariableInstructionKinds = () =>
   Object.keys(variableInstructions) as readonly VariableInstructionKind[];
-export const getNumericInstructionKinds = () => Object.keys(numericInstructions) as readonly NumericInstructionKind[];
+export const getInt32NumericInstructionKinds = () =>
+  Object.keys(i32NumberInstructions) as readonly Int32NumericInstructionKind[];
 
 export const getMemoryInstructionKinds = () => Object.keys(memoryInstructions) as readonly MemoryInstructionKind[];

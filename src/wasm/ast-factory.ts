@@ -14,8 +14,6 @@ import {
   TypeNode,
   FuncSigNode,
   IndexNode,
-  NumericInstructionNode,
-  VariableInstructionNode,
   LocalVarNode,
   InstructionNode,
   FuncNode,
@@ -41,9 +39,11 @@ import {
   GlobalTypeNode,
   GlobalNode,
   ExportedGlobalNode,
+  Int32NumericInstructionNode,
+  VariableInstructionNode,
 } from "./ast-types";
 import {
-  NumericInstructionKind,
+  Int32NumericInstructionKind,
   VariableInstructionKind,
   ControlInstructionKind,
   MemoryInstructionKind,
@@ -241,13 +241,13 @@ export function variableInstr(
   };
 }
 
-export function numericInstr(
-  instructionKind: NumericInstructionKind,
+export function int32NumericInstr(
+  instructionKind: Int32NumericInstructionKind,
   params?: readonly Int32LiteralNode[],
   pos?: Position,
-): NumericInstructionNode {
+): Int32NumericInstructionNode {
   return {
-    kind: "NumericInstruction",
+    kind: "Int32NumericInstruction",
     instructionKind,
     parameters: params ?? [],
     loc: pos?.loc,

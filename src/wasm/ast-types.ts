@@ -2,7 +2,7 @@ import { Tree } from "../structure";
 import { Position } from "../parser-util";
 import {
   ControlInstructionKind,
-  NumericInstructionKind,
+  Int32NumericInstructionKind,
   VariableInstructionKind,
   MemoryInstructionKind,
 } from "./instructions-map";
@@ -31,6 +31,9 @@ export type ReservedWords = [
   "result",
   "local",
   "i32",
+  "i64",
+  "f32",
+  "f64",
   "if",
   "else",
   "end",
@@ -45,7 +48,7 @@ export type ReservedWordKind =
   | ReservedWords[number]
   | ControlInstructionKind
   | VariableInstructionKind
-  | NumericInstructionKind
+  | Int32NumericInstructionKind
   | MemoryInstructionKind;
 
 export interface TokenBase<T extends string> extends Position {
@@ -143,10 +146,12 @@ export interface VariableInstructionNode extends Node<"VariableInstruction"> {
   readonly parameters: readonly IndexNode[];
 }
 
-export interface NumericInstructionNode extends Node<"NumericInstruction"> {
-  readonly instructionKind: NumericInstructionKind;
+export interface Int32NumericInstructionNode extends Node<"Int32NumericInstruction"> {
+  readonly instructionKind: Int32NumericInstructionKind;
   readonly parameters: readonly Int32LiteralNode[];
 }
+
+export type NumericInstructionNode = Int32NumericInstructionNode;
 
 export interface MemoryInstructionNode extends Node<"MemoryInstruction"> {
   readonly instructionKind: MemoryInstructionKind;

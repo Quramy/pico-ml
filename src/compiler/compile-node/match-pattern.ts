@@ -53,7 +53,7 @@ export const matchPattern = createTreeTraverser<MatchPatternNode, CompilationCon
             factory.variableInstr("local.set", [factory.identifier("value")]),
             ...tailInstr,
           ],
-          [factory.numericInstr("i32.const", [factory.int32(0)])],
+          [factory.int32NumericInstr("i32.const", [factory.int32(0)])],
         ),
       ]);
     });
