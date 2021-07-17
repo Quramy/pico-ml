@@ -222,6 +222,9 @@ function unparseExpr(node: ExprNode, writer: Writer) {
       case "IfInstruction":
         return unparseIfInstr(instr, writer);
       case "Int32NumericInstruction":
+      case "Int64NumericInstruction":
+      case "Float32NumericInstruction":
+      case "Float64NumericInstruction":
         return unparseNumericInstr(instr, writer);
       case "ControlInstruction":
         return unparseControlInstr(instr, writer);
