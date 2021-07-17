@@ -148,11 +148,28 @@ export const f64NumberInstructions = {
 
 export const memoryInstructions = {
   "i32.load": { code: 0x28, defaultAlign: 2 },
+  "i64.load": { code: 0x29, defaultAlign: 3 },
+  "f32.load": { code: 0x2a, defaultAlign: 2 },
+  "f64.load": { code: 0x2b, defaultAlign: 3 },
   "i32.load8_s": { code: 0x2c, defaultAlign: 0 },
   "i32.load8_u": { code: 0x2d, defaultAlign: 0 },
+  "i32.load16_s": { code: 0x2e, defaultAlign: 0 },
+  "i32.load16_u": { code: 0x2f, defaultAlign: 0 },
+  "i64.load8_s": { code: 0x30, defaultAlign: 0 },
+  "i64.load8_u": { code: 0x31, defaultAlign: 0 },
+  "i64.load16_s": { code: 0x32, defaultAlign: 0 },
+  "i64.load16_u": { code: 0x33, defaultAlign: 0 },
+  "i64.load32_s": { code: 0x34, defaultAlign: 0 },
+  "i64.load32_u": { code: 0x35, defaultAlign: 0 },
   "i32.store": { code: 0x36, defaultAlign: 2 },
+  "i64.store": { code: 0x37, defaultAlign: 3 },
+  "f32.store": { code: 0x38, defaultAlign: 2 },
+  "f64.store": { code: 0x39, defaultAlign: 3 },
   "i32.store8": { code: 0x3a, defaultAlign: 0 },
   "i32.store16": { code: 0x3b, defaultAlign: 0 },
+  "i64.store8": { code: 0x3c, defaultAlign: 0 },
+  "i64.store16": { code: 0x3d, defaultAlign: 0 },
+  "i64.store64": { code: 0x3e, defaultAlign: 0 },
 } as const;
 
 export const numberInstructions = {
