@@ -4,6 +4,9 @@ import {
   ModuleNode,
   Uint32LiteralNode,
   Int32LiteralNode,
+  Int64LiteralNode,
+  Float32LiteralNode,
+  Float64LiteralNode,
   LimitsNode,
   MemoryNode,
   IdentifierNode,
@@ -25,6 +28,11 @@ import {
   ControlInstructionNode,
   IfInstructionNode,
   MemoryInstructionNode,
+  VariableInstructionNode,
+  Int32NumericInstructionNode,
+  Int64NumericInstructionNode,
+  Float32NumericInstructionNode,
+  Float64NumericInstructionNode,
   FuncTypeRefNode,
   ExportedTableNode,
   RefKind,
@@ -39,11 +47,12 @@ import {
   GlobalTypeNode,
   GlobalNode,
   ExportedGlobalNode,
-  Int32NumericInstructionNode,
-  VariableInstructionNode,
 } from "./ast-types";
 import {
   Int32NumericInstructionKind,
+  Int64NumericInstructionKind,
+  Float32NumericInstructionKind,
+  Float64NumericInstructionKind,
   VariableInstructionKind,
   ControlInstructionKind,
   MemoryInstructionKind,
@@ -60,6 +69,30 @@ export function uint32(value: number, pos?: Position): Uint32LiteralNode {
 export function int32(value: number, pos?: Position): Int32LiteralNode {
   return {
     kind: "Int32Literal",
+    value,
+    loc: pos?.loc,
+  };
+}
+
+export function int64(value: number, pos?: Position): Int64LiteralNode {
+  return {
+    kind: "Int64Literal",
+    value,
+    loc: pos?.loc,
+  };
+}
+
+export function float32(value: number, pos?: Position): Float32LiteralNode {
+  return {
+    kind: "Float32Literal",
+    value,
+    loc: pos?.loc,
+  };
+}
+
+export function float64(value: number, pos?: Position): Float64LiteralNode {
+  return {
+    kind: "Float64Literal",
     value,
     loc: pos?.loc,
   };
@@ -248,6 +281,45 @@ export function int32NumericInstr(
 ): Int32NumericInstructionNode {
   return {
     kind: "Int32NumericInstruction",
+    instructionKind,
+    parameters: params ?? [],
+    loc: pos?.loc,
+  };
+}
+
+export function int64NumericInstr(
+  instructionKind: Int64NumericInstructionKind,
+  params?: readonly Int64LiteralNode[],
+  pos?: Position,
+): Int64NumericInstructionNode {
+  return {
+    kind: "Int64NumericInstruction",
+    instructionKind,
+    parameters: params ?? [],
+    loc: pos?.loc,
+  };
+}
+
+export function float32NumericInstr(
+  instructionKind: Float32NumericInstructionKind,
+  params?: readonly Float32LiteralNode[],
+  pos?: Position,
+): Float32NumericInstructionNode {
+  return {
+    kind: "Float32NumericInstruction",
+    instructionKind,
+    parameters: params ?? [],
+    loc: pos?.loc,
+  };
+}
+
+export function float64NumericInstr(
+  instructionKind: Float64NumericInstructionKind,
+  params?: readonly Float64LiteralNode[],
+  pos?: Position,
+): Float64NumericInstructionNode {
+  return {
+    kind: "Float64NumericInstruction",
     instructionKind,
     parameters: params ?? [],
     loc: pos?.loc,

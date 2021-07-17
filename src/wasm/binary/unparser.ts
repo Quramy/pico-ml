@@ -22,10 +22,10 @@ import { BinaryOutputOptions } from "../types";
 
 import {
   variableInstructions,
-  i32NumberInstructions,
   controlInstructions,
   structuredInstructions,
   memoryInstructions,
+  numberInstructions,
 } from "../instructions-map";
 
 import { encodeUnsigned, encodeSigned } from "./leb";
@@ -50,6 +50,18 @@ function uint32(value: number) {
 
 function int32(value: number) {
   return encodeSigned(value);
+}
+
+function int64(value: number) {
+  return encodeSigned(value);
+}
+
+function float32(value: number) {
+  return new Uint8Array(new Float32Array(value).buffer);
+}
+
+function float64(value: number) {
+  return new Uint8Array(new Float64Array(value).buffer);
 }
 
 function str(value: string) {
@@ -133,14 +145,22 @@ function instructions(instrs: readonly Instruction[]): readonly Uint8Array[] {
       const { code } = variableInstructions[instr.instructionKind];
       return concat(byteMark(code), ...instr.parameters.map(idx => uint32(idx)));
     } else if (instr.kind === "NumericInstruction") {
-      const { code, args } = i32NumberInstructions[instr.instructionKind];
+      const { code, args } = numberInstructions[instr.instructionKind];
       return concat(
         byteMark(code),
         ...instr.parameters.map((p, argIdx) => {
-          if (args[argIdx] === "SignedInteger") {
-            return int32(p);
+          switch (args[argIdx]) {
+            case "SignedInteger":
+              return int32(p);
+            case "DoubleSignedInteger":
+              return int64(p);
+            case "SignedFloat":
+              return float32(p);
+            case "DoubleSignedFloat":
+              return float64(p);
+            default:
+              throw new Error(`invalit argument type: ${args[argIdx]}`);
           }
-          return undefined as never;
         }),
       );
     } else if (instr.kind === "MemoryInstruction") {

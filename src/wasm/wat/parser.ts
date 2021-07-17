@@ -7,6 +7,9 @@ import {
   LimitsNode,
   Uint32LiteralNode,
   Int32LiteralNode,
+  Int64LiteralNode,
+  Float32LiteralNode,
+  Float64LiteralNode,
   TypeNode,
   FuncTypeNode,
   ParamTypeNode,
@@ -14,6 +17,9 @@ import {
   FuncSigNode,
   IndexNode,
   Int32NumericInstructionNode,
+  Int64NumericInstructionNode,
+  Float32NumericInstructionNode,
+  Float64NumericInstructionNode,
   NumericInstructionNode,
   VariableInstructionNode,
   InstructionNode,
@@ -40,13 +46,17 @@ import {
   identifierToken,
   uintToken,
   intToken,
+  decimalToken,
   strToken,
   memArgToken,
 } from "./tokenizer";
 import {
+  getInt32NumericInstructionKinds,
+  getInt64NumericInstructionKinds,
+  getFloat32NumericInstructionKinds,
+  getFloat64NumericInstructionKinds,
   getControlInstructionKinds,
   getVariableInstructionKinds,
-  getInt32NumericInstructionKinds,
   getMemoryInstructionKinds,
 } from "../instructions-map";
 
@@ -71,6 +81,24 @@ const u32: Parser<Uint32LiteralNode> = expect(uintToken)(token => ({
 
 const i32: Parser<Int32LiteralNode> = expect(intToken)(token => ({
   kind: "Int32Literal",
+  value: token.value,
+  ...loc(token),
+}));
+
+const i64: Parser<Int64LiteralNode> = expect(intToken)(token => ({
+  kind: "Int64Literal",
+  value: token.value,
+  ...loc(token),
+}));
+
+const f32: Parser<Float32LiteralNode> = expect(decimalToken)(token => ({
+  kind: "Float32Literal",
+  value: token.value,
+  ...loc(token),
+}));
+
+const f64: Parser<Float64LiteralNode> = expect(decimalToken)(token => ({
+  kind: "Float64Literal",
   value: token.value,
   ...loc(token),
 }));
@@ -268,13 +296,55 @@ const variableInstr: Parser<VariableInstructionNode> = tryWith(
   ),
 );
 
-const numericInstr: Parser<NumericInstructionNode> = tryWith(
+const i32NumericInstr: Parser<Int32NumericInstructionNode> = tryWith(
   expect(
     keywordsToken(getInt32NumericInstructionKinds()),
     vec(i32),
   )(
     (tInstrKind, params): Int32NumericInstructionNode => ({
       kind: "Int32NumericInstruction",
+      instructionKind: tInstrKind.keyword,
+      parameters: params.values,
+      ...loc(tInstrKind, params),
+    }),
+  ),
+);
+
+const i64NumericInstr: Parser<Int64NumericInstructionNode> = tryWith(
+  expect(
+    keywordsToken(getInt64NumericInstructionKinds()),
+    vec(i64),
+  )(
+    (tInstrKind, params): Int64NumericInstructionNode => ({
+      kind: "Int64NumericInstruction",
+      instructionKind: tInstrKind.keyword,
+      parameters: params.values,
+      ...loc(tInstrKind, params),
+    }),
+  ),
+);
+
+const f32NumericInstr: Parser<Float32NumericInstructionNode> = tryWith(
+  expect(
+    keywordsToken(getFloat32NumericInstructionKinds()),
+    vec(f32),
+  )(
+    (tInstrKind, params): Float32NumericInstructionNode => ({
+      kind: "Float32NumericInstruction",
+      instructionKind: tInstrKind.keyword,
+      parameters: params.values,
+      ...loc(tInstrKind, params),
+    }),
+  ),
+);
+
+const f64NumericInstr: Parser<Float64NumericInstructionNode> = tryWith(
+  expect(
+    keywordsToken(getFloat64NumericInstructionKinds()),
+    vec(f64),
+  )(
+    (tInstrKind, params): Float64NumericInstructionNode => ({
+      kind: "Float64NumericInstruction",
       instructionKind: tInstrKind.keyword,
       parameters: params.values,
       ...loc(tInstrKind, params),
@@ -313,6 +383,13 @@ const local: Parser<LocalVarNode> = tryWith(
       ...loc(tLp, tLocal, tMaybeId, valueType, tRp),
     }),
   ),
+);
+
+const numericInstr: Parser<NumericInstructionNode> = oneOf(
+  i32NumericInstr,
+  i64NumericInstr,
+  f32NumericInstr,
+  f64NumericInstr,
 );
 
 const instr: Parser<InstructionNode> = oneOf(ifInstr, controlInstr, numericInstr, variableInstr, memoryInstr);

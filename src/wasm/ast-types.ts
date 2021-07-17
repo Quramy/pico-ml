@@ -3,6 +3,9 @@ import { Position } from "../parser-util";
 import {
   ControlInstructionKind,
   Int32NumericInstructionKind,
+  Int64NumericInstructionKind,
+  Float32NumericInstructionKind,
+  Float64NumericInstructionKind,
   VariableInstructionKind,
   MemoryInstructionKind,
 } from "./instructions-map";
@@ -49,6 +52,9 @@ export type ReservedWordKind =
   | ControlInstructionKind
   | VariableInstructionKind
   | Int32NumericInstructionKind
+  | Int64NumericInstructionKind
+  | Float32NumericInstructionKind
+  | Float64NumericInstructionKind
   | MemoryInstructionKind;
 
 export interface TokenBase<T extends string> extends Position {
@@ -67,6 +73,10 @@ export interface IntToken extends TokenBase<"Int"> {
   readonly value: number;
 }
 
+export interface DecimalToken extends TokenBase<"Decimal"> {
+  readonly value: number;
+}
+
 export interface StringToken extends TokenBase<"String"> {
   readonly value: string;
 }
@@ -75,13 +85,19 @@ export interface IdentifierToken extends TokenBase<"Identifier"> {
   readonly name: string;
 }
 
-interface NumberLiteral {
+export interface NumberLiteral {
   readonly value: number;
 }
 
 export interface Uint32LiteralNode extends NumberLiteral, Node<"Uint32Literal"> {}
 
 export interface Int32LiteralNode extends NumberLiteral, Node<"Int32Literal"> {}
+
+export interface Int64LiteralNode extends NumberLiteral, Node<"Int64Literal"> {}
+
+export interface Float32LiteralNode extends NumberLiteral, Node<"Float32Literal"> {}
+
+export interface Float64LiteralNode extends NumberLiteral, Node<"Float64Literal"> {}
 
 export interface IdentifierNode extends Node<"Identifier"> {
   readonly value: string;
@@ -151,13 +167,32 @@ export interface Int32NumericInstructionNode extends Node<"Int32NumericInstructi
   readonly parameters: readonly Int32LiteralNode[];
 }
 
-export type NumericInstructionNode = Int32NumericInstructionNode;
+export interface Int64NumericInstructionNode extends Node<"Int64NumericInstruction"> {
+  readonly instructionKind: Int64NumericInstructionKind;
+  readonly parameters: readonly Int64LiteralNode[];
+}
+
+export interface Float32NumericInstructionNode extends Node<"Float32NumericInstruction"> {
+  readonly instructionKind: Float32NumericInstructionKind;
+  readonly parameters: readonly Float32LiteralNode[];
+}
+
+export interface Float64NumericInstructionNode extends Node<"Float64NumericInstruction"> {
+  readonly instructionKind: Float64NumericInstructionKind;
+  readonly parameters: readonly Float64LiteralNode[];
+}
 
 export interface MemoryInstructionNode extends Node<"MemoryInstruction"> {
   readonly instructionKind: MemoryInstructionKind;
   readonly offset: Uint32LiteralNode | null;
   readonly align: Uint32LiteralNode | null;
 }
+
+export type NumericInstructionNode =
+  | Int32NumericInstructionNode
+  | Int64NumericInstructionNode
+  | Float32NumericInstructionNode
+  | Float64NumericInstructionNode;
 
 export type StructuredControleInstructionNode = IfInstructionNode;
 export type PlainInstructionNode =

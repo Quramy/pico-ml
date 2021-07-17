@@ -3,8 +3,8 @@ import { FuncNode, InstructionNode } from "../../ast-types";
 import { Func, FuncType, Instruction, ValType, UInt32Index, ResultType } from "../../structure-types";
 import { RefereneceContext, findIndex, createIndex } from "../ref";
 import {
+  numberInstructions,
   variableInstructions,
-  i32NumberInstructions,
   controlInstructions,
   memoryInstructions,
 } from "../../instructions-map";
@@ -82,8 +82,10 @@ const variableInstruction: ConvertInstrFn<"VariableInstruction"> = (node, { refC
   );
 };
 
-const numericInstruction: ConvertInstrFn<"Int32NumericInstruction"> = node => {
-  const { args } = i32NumberInstructions[node.instructionKind];
+const numericInstruction: ConvertInstrFn<
+  "Int32NumericInstruction" | "Int64NumericInstruction" | "Float32NumericInstruction" | "Float64NumericInstruction"
+> = node => {
+  const { args } = numberInstructions[node.instructionKind];
   return all(
     node.parameters.map((p, i) => {
       if (!args[i]) return error({ message: `${node.instructionKind} can not have ${i}th param` }) as Result<number>;
@@ -156,6 +158,9 @@ export const convertInstr = createTreeTraverser<InstructionNode, ConvertInstrCon
   variableInstruction,
   memoryInstruction,
   int32NumericInstruction: numericInstruction,
+  int64NumericInstruction: numericInstruction,
+  float32NumericInstruction: numericInstruction,
+  float64NumericInstruction: numericInstruction,
 });
 
 export function convertFunc(node: FuncNode, idx: number, prev: State, refCtx: RefereneceContext): Result<State> {

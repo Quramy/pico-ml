@@ -72,6 +72,15 @@ describe(parseNumericInstr, () => {
   test("success", () => {
     expect(use(parseNumericInstr)("i32.const 0")).toMatchObject(f.int32NumericInstr("i32.const", [f.int32(0)]));
   });
+  test("success", () => {
+    expect(use(parseNumericInstr)("i64.const 0")).toMatchObject(f.int64NumericInstr("i64.const", [f.int64(0)]));
+  });
+  test("success", () => {
+    expect(use(parseNumericInstr)("f32.const 0")).toMatchObject(f.float32NumericInstr("f32.const", [f.float32(0)]));
+  });
+  test("success", () => {
+    expect(use(parseNumericInstr)("f64.const 0")).toMatchObject(f.float64NumericInstr("f64.const", [f.float64(0)]));
+  });
 });
 
 describe(parseMemoryInstr, () => {

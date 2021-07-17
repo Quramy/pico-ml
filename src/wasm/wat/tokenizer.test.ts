@@ -1,6 +1,29 @@
 import { Scanner } from "../../parser-util";
-import { strToken } from "./tokenizer";
-import { StringToken } from "../ast-types";
+import { decimalToken, strToken } from "./tokenizer";
+import { StringToken, DecimalToken } from "../ast-types";
+
+test(decimalToken.name, () => {
+  expect(decimalToken(new Scanner("0")).unwrap()).toMatchObject<DecimalToken>({
+    tokenKind: "Decimal",
+    value: 0,
+  });
+  expect(decimalToken(new Scanner("0.")).unwrap()).toMatchObject<DecimalToken>({
+    tokenKind: "Decimal",
+    value: 0,
+  });
+  expect(decimalToken(new Scanner("0.1")).unwrap()).toMatchObject<DecimalToken>({
+    tokenKind: "Decimal",
+    value: 0.1,
+  });
+  expect(decimalToken(new Scanner("+0.1")).unwrap()).toMatchObject<DecimalToken>({
+    tokenKind: "Decimal",
+    value: 0.1,
+  });
+  expect(decimalToken(new Scanner("-0.1")).unwrap()).toMatchObject<DecimalToken>({
+    tokenKind: "Decimal",
+    value: -0.1,
+  });
+});
 
 test(strToken.name, () => {
   expect(strToken(new Scanner('""')).unwrap()).toMatchObject<StringToken>({
