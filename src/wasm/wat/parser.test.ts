@@ -97,7 +97,19 @@ describe(parseType, () => {
     expect(use(parseType)("(type (func (param i32)))")).toMatchObject(
       f.typedef(f.funcType([f.paramType(f.valueType("i32"))], [])),
     );
+    expect(use(parseType)("(type (func (param i64)))")).toMatchObject(
+      f.typedef(f.funcType([f.paramType(f.valueType("i64"))], [])),
+    );
+    expect(use(parseType)("(type (func (param f32)))")).toMatchObject(
+      f.typedef(f.funcType([f.paramType(f.valueType("f32"))], [])),
+    );
+    expect(use(parseType)("(type (func (param f64)))")).toMatchObject(
+      f.typedef(f.funcType([f.paramType(f.valueType("f64"))], [])),
+    );
     expect(use(parseType)("(type (func (result i32)))")).toMatchObject(f.typedef(f.funcType([], [f.valueType("i32")])));
+    expect(use(parseType)("(type (func (result i64)))")).toMatchObject(f.typedef(f.funcType([], [f.valueType("i64")])));
+    expect(use(parseType)("(type (func (result f32)))")).toMatchObject(f.typedef(f.funcType([], [f.valueType("f32")])));
+    expect(use(parseType)("(type (func (result f64)))")).toMatchObject(f.typedef(f.funcType([], [f.valueType("f64")])));
     expect(use(parseType)("(type (func (param i32) (result i32)))")).toMatchObject(
       f.typedef(f.funcType([f.paramType(f.valueType("i32"))], [f.valueType("i32")])),
     );
@@ -116,6 +128,7 @@ describe(parseType, () => {
 describe(parseFunc, () => {
   test("success", () => {
     expect(use(parseFunc)("(func)")).toMatchObject(f.func(f.funcSig([], []), [], []));
+    expect(use(parseFunc)("(func (result i64))")).toMatchObject(f.func(f.funcSig([], [f.valueType("i64")]), [], []));
     expect(use(parseFunc)("(func (result i32) i32.const 100)")).toMatchObject(
       f.func(f.funcSig([], [f.valueType("i32")]), [], [f.int32NumericInstr("i32.const", [f.int32(100)])]),
     );

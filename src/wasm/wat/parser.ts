@@ -37,6 +37,7 @@ import {
   ElemNode,
   MutValueTypeNode,
   GlobalNode,
+  ValueTypeKind,
 } from "../ast-types";
 import { Scanner } from "./scanner";
 import {
@@ -105,10 +106,12 @@ const f64: Parser<Float64LiteralNode> = expect(decimalToken)(token => ({
 
 const index: Parser<IndexNode> = oneOf(identifier, u32);
 
-const valType: Parser<ValueTypeNode> = expect(keywordToken("i32"))(
+const valType: Parser<ValueTypeNode> = expect(
+  oneOf(keywordToken("i32"), keywordToken("i64"), keywordToken("f32"), keywordToken("f64")),
+)(
   (t): ValueTypeNode => ({
     kind: "ValueType",
-    valueKind: "i32",
+    valueKind: t.keyword as ValueTypeKind,
     ...loc(t),
   }),
 );
@@ -149,12 +152,12 @@ const result: Parser<ValueTypeNode> = tryWith(
   expect(
     symbolToken("("),
     keywordToken("result"),
-    keywordToken("i32"),
+    oneOf(keywordToken("i32"), keywordToken("i64"), keywordToken("f32"), keywordToken("f64")),
     symbolToken(")"),
   )(
     (tLp, tResult, tVk, tRp): ValueTypeNode => ({
       kind: "ValueType",
-      valueKind: "i32",
+      valueKind: tVk.keyword as ValueTypeKind,
       ...loc(tLp, tResult, tVk, tRp),
     }),
   ),

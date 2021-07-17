@@ -9,7 +9,19 @@ export interface Int32Type {
   readonly kind: "Int32Type";
 }
 
-export type ValType = Int32Type;
+export interface Int64Type {
+  readonly kind: "Int64Type";
+}
+
+export interface Float32Type {
+  readonly kind: "Float32Type";
+}
+
+export interface Float64Type {
+  readonly kind: "Float64Type";
+}
+
+export type ValType = Int32Type | Int64Type | Float32Type | Float64Type;
 
 export type ResultType = readonly ValType[];
 

@@ -106,8 +106,20 @@ function indirectMap(nmap: readonly IndirectNameMap[]): readonly Uint8Array[] {
   return nmap.map(({ idx, nameMap: subMap }) => concat(uint32(idx), vec(nameMap(subMap))));
 }
 
-function numType(_valueType: ValType): Uint8Array {
-  return byteMark(0x7f); // for i32
+function numType(valType: ValType): Uint8Array {
+  switch (valType.kind) {
+    case "Int32Type":
+      return byteMark(0x7f);
+    case "Int64Type":
+      return byteMark(0x7e);
+    case "Float32Type":
+      return byteMark(0x7d);
+    case "Float64Type":
+      return byteMark(0x7c);
+    default:
+      // @ts-expect-error
+      throw new Error(`Invalid value type kind: ${valType.kind}`);
+  }
 }
 
 function funcType(ft: FuncType): Uint8Array {

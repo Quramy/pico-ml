@@ -15,7 +15,7 @@ interface Node<T extends string> extends Tree<T>, Position {}
 export type Symbols = ["(", ")"];
 export type SymbolKind = Symbols[number];
 
-export type ValueTypes = ["i32"];
+export type ValueTypes = ["i32", "i64", "f32", "f64"];
 export type ValueTypeKind = ValueTypes[number];
 
 export type ReservedWords = [

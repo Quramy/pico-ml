@@ -9,6 +9,7 @@ import {
   memoryInstructions,
 } from "../../instructions-map";
 import { convertMaybeUint32 } from "./uint32";
+import { toValType, mapToValTypeListFrom } from "./val-type";
 
 export interface State {
   readonly funcs: readonly Func[];
@@ -121,16 +122,13 @@ const ifInstruction: ConvertInstrFn<"IfInstruction"> = (node, ctx, next) => {
   if (!node.blockType.type && node.blockType.results.length === 0) {
     blockType = null;
   } else if (!node.blockType.type && node.blockType.results.length === 1) {
-    blockType = { kind: "Int32Type" };
+    blockType = toValType(node.blockType.results[0]);
   } else if (node.blockType.type) {
     const foundResult = findIndex(ctx.refCtx.types, node.blockType.type);
     if (!foundResult.ok) return error(foundResult.value);
     blockType = foundResult.value;
   } else {
-    const ft = funcType(
-      [],
-      node.blockType.results.map(() => ({ kind: "Int32Type" })),
-    );
+    const ft = funcType([], node.blockType.results.map(toValType));
     const foundIndex = ctx.types.findIndex(t => compareFuncType(t, ft));
     if (foundIndex === -1) {
       blockType = ctx.types.length;
@@ -170,10 +168,7 @@ export function convertFunc(node: FuncNode, idx: number, prev: State, refCtx: Re
   const { signature } = node;
   if (signature.type === null) {
     // create new func type
-    const ft = funcType(
-      signature.params.map(() => ({ kind: "Int32Type" })),
-      signature.results.map(() => ({ kind: "Int32Type" })),
-    );
+    const ft = funcType(mapToValTypeListFrom(signature.params), signature.results.map(toValType));
     const foundIdx = prev.types.findIndex(t => compareFuncType(t, ft));
     if (foundIdx === -1) {
       typeidx = prev.types.length;
@@ -199,7 +194,7 @@ export function convertFunc(node: FuncNode, idx: number, prev: State, refCtx: Re
         ({
           kind: "Func",
           type: typeidx,
-          locals: node.locals.map(() => ({ kind: "Int32Type" })),
+          locals: mapToValTypeListFrom(node.locals),
           body,
         } as Func),
     )
