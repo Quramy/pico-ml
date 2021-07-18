@@ -13,9 +13,15 @@ const definition: ModuleDefinition = {
         local.get $value
         f64.store offset=0
         local.get $addr
+        i32.const 3
+        i32.shl 
+        i32.const 2
+        i32.or
       )
       (func $__float_get__ (param $addr i32) (result f64)
         local.get $addr
+        i32.const 3
+        i32.shr_u
         f64.load offset=0
       )
       (export "__float_get__" (func $__float_get__))
@@ -33,6 +39,10 @@ export function newFloatInstr(value: number) {
     factory.float64NumericInstr("f64.const", [factory.float64(value)]),
     factory.controlInstr("call", [factory.identifier("__float_new__")]),
   ];
+}
+
+export function storeFloatValueInstr() {
+  return [factory.controlInstr("call", [factory.identifier("__float_new__")])];
 }
 
 export function getFloatValueInstr() {

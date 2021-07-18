@@ -31,10 +31,16 @@ describe(compile, () => {
   });
 
   describe("binary expression", () => {
-    it("should compile arithmetic operations", async () => {
+    it("should compile integer arithmetic operations", async () => {
       expect(await evaluateMain("1+1")).toBe(2);
       expect(await evaluateMain("1-2")).toBe(-1);
       expect(await evaluateMain("1*3")).toBe(3);
+    });
+
+    it("should compile floating number arithmetic operations", async () => {
+      expect(await evaluateMain("1.0 +. 1.0", toFloat)).toBe(2.0);
+      expect(await evaluateMain("1.0 -. 2.0", toFloat)).toBe(-1.0);
+      expect(await evaluateMain("1.0 *. 3.0", toFloat)).toBe(3.0);
     });
 
     it("should compile numeric compare operation", async () => {
