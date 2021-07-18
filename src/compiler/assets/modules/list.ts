@@ -15,6 +15,14 @@ const definition: ModuleDefinition = {
         local.get $list_addr
         local.get $value
         call $__tuple_new__
+
+        ;; Note:
+        ;; We should add the following tag to LSB 4-bits of the list address.
+        ;; [0100] = 0x4
+        i32.const 4
+        i32.shl
+        i32.const 4
+        i32.or
       )
 
       (func $__list_is_empty__ (param $list_addr i32) (result i32)
@@ -25,11 +33,15 @@ const definition: ModuleDefinition = {
 
       (func $__list_head__ (param $list_addr i32) (result i32)
         local.get $list_addr
+        i32.const 4
+        i32.shr_u
         call $__tuple_get_v1__
       )
 
       (func $__list_tail__ (param $list_addr i32) (result i32)
         local.get $list_addr
+        i32.const 4
+        i32.shr_u
         call $__tuple_get_v0__
       )
 

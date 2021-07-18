@@ -25,8 +25,11 @@ describe(compile, () => {
   });
 
   describe("unary expression", () => {
-    it("should compile minus operation", async () => {
+    it("should compile integer minus operation", async () => {
       expect(await evaluateMain("-1", toNumber)).toBe(-1);
+    });
+    it("should compile floating minus operation", async () => {
+      expect(await evaluateMain("-.1.", toFloat)).toBe(-1);
     });
   });
 
