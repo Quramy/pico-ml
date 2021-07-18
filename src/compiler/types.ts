@@ -24,6 +24,7 @@ export interface DefinitionStack<T, S = number> {
 export interface CompilationContext {
   readonly pushInstruction: (instruction: InstructionNode | readonly InstructionNode[]) => void;
   readonly useAllocator: () => void;
+  readonly useFloat: () => void;
   readonly useList: () => void;
   readonly useTuple: () => void;
   readonly useEnvironment: () => void;

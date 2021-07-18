@@ -1,13 +1,17 @@
 import { parse } from "../syntax";
 import { generateBinary } from "../wasm";
 import { compile } from "./compiler";
-import { toNumber, toBoolean, toListAnd, toList } from "./js-bindings";
+import { toNumber, toFloat, toBoolean, toListAnd, toList } from "./js-bindings";
 
 describe(compile, () => {
   describe("literal", () => {
     it("should comiple int literal", async () => {
       expect(await evaluateMain("0", toNumber)).toBe(0);
       expect(await evaluateMain("1", toNumber)).toBe(1);
+    });
+
+    it("should comiple int literal", async () => {
+      expect(await evaluateMain("1.0", toFloat)).toBe(1.0);
     });
 
     it("should comiple bool literal", async () => {

@@ -2,6 +2,7 @@ import { InstructionNode, LocalVarNode } from "../wasm";
 import { CompilationContext, Environment } from "./types";
 import { ModuleDefinition } from "./module-builder";
 import { getAllocatorModuleDefinition } from "./assets/modules/alloc";
+import { getFloatModuleDefinition } from "./assets/modules/float";
 import { getListModuleDefinition } from "./assets/modules/list";
 import { getTupleModuleDefinition } from "./assets/modules/tuple";
 import { getEnvModuleDefinition, localVarTypeForEnv, initEnvInstr } from "./assets/modules/env";
@@ -14,6 +15,7 @@ export class Context implements CompilationContext {
   private _env: Environment = createRootEnvironment();
   private _instructions: InstructionNode[] = [];
   private _enabledAllocator = false;
+  private _enabledFloat = false;
   private _enabledList = false;
   private _enabledTuple = false;
   private _enabledEnv = false;
@@ -68,6 +70,12 @@ export class Context implements CompilationContext {
     if (this._enabledAllocator) return;
     this._enabledAllocator = true;
     this._dependencies.push(getAllocatorModuleDefinition());
+  }
+
+  useFloat() {
+    if (this._enabledFloat) return;
+    this._enabledFloat = true;
+    this._dependencies.push(getFloatModuleDefinition());
   }
 
   useList() {

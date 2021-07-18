@@ -10,6 +10,11 @@ export function toNumber(_instance: WebAssembly.Instance, value: number) {
   return value >> 1;
 }
 
+export function toFloat(instance: WebAssembly.Instance, value: number) {
+  const getFloat = instance.exports["__float_get__"] as (addr: number) => number;
+  return getFloat(value);
+}
+
 export function toBoolean(_instance: WebAssembly.Instance, value: number) {
   return value ? true : false;
 }
