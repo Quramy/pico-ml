@@ -10,7 +10,7 @@ describe(compile, () => {
       expect(await evaluateMain("1", toNumber)).toBe(1);
     });
 
-    it("should comiple int literal", async () => {
+    it("should comiple float literal", async () => {
       expect(await evaluateMain("1.0", toFloat)).toBe(1.0);
     });
 
