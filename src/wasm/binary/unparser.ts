@@ -57,11 +57,11 @@ function int64(value: number) {
 }
 
 function float32(value: number) {
-  return new Uint8Array(new Float32Array(value).buffer);
+  return new Uint8Array(new Float32Array([value]).buffer);
 }
 
 function float64(value: number) {
-  return new Uint8Array(new Float64Array(value).buffer);
+  return new Uint8Array(new Float64Array([value]).buffer);
 }
 
 function str(value: string) {

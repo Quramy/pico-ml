@@ -85,15 +85,10 @@ describe(unparse, () => {
     test("Float32 function example", async () => {
       const source = `
         (module
-          (func $add (param $a f32) (param $b f32) (result f32)
-            local.get $a
-            local.get $b
-            f32.add
-          )
           (func $twice (param $x f32) (result f32)
+            f32.const 2.0
             local.get $x
-            local.get $x
-            call $add
+            f32.mul
           )
           (export "main" (func $twice))
         )
@@ -106,15 +101,10 @@ describe(unparse, () => {
     test("Float64 function example", async () => {
       const source = `
         (module
-          (func $add (param $a f64) (param $b f64) (result f64)
-            local.get $a
-            local.get $b
-            f64.add
-          )
           (func $twice (param $x f64) (result f64)
+            f64.const 2.0
             local.get $x
-            local.get $x
-            call $add
+            f64.mul
           )
           (export "main" (func $twice))
         )
