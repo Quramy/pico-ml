@@ -16,9 +16,13 @@ type LogMessage =
       readonly value: ValueTypeTree;
     };
 
+const floatFormatter = new Intl.NumberFormat(undefined, { useGrouping: false, minimumFractionDigits: 1 });
+
 function EvaluatedValueNode({ node }: { node: ValueTypeTree }): React.ReactElement | null {
   if (node.kind === "Int") {
     return <span className={styles.intNode}>{`${node.value}`}</span>;
+  } else if (node.kind === "Float") {
+    return <span className={styles.intNode}>{`${floatFormatter.format(node.value)}`}</span>;
   } else if (node.kind === "Bool") {
     return <span className={styles.boolNode}>{`${node.value}`}</span>;
   } else if (node.kind === "List") {
