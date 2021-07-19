@@ -1,11 +1,28 @@
 import { parseMatchPattern } from "../../syntax";
-import { Context } from "../compiler-context";
 import { generateBinaryWithDefaultOptions as generateBinary } from "../../wasm";
-import { ModuleBuilder } from "../module-builder";
+import { Context } from "../compiler-context";
 import { matchPattern } from "./match-pattern";
-import { toList } from "../js-bindings";
+import { ModuleBuilder } from "../module-builder";
+import { ValueExtractor } from "../js-bindings";
 
-const toEnvironmentList = toList;
+export function toListAnd<T>(conv: ValueExtractor<T>) {
+  return (instance: WebAssembly.Instance, value: number) => {
+    const getTail = instance.exports["__tuple_get_v0__"] as (addr: number) => number;
+    const getHeadValue = instance.exports["__tuple_get_v1__"] as (addr: number) => number;
+    const inner = (addr: number): readonly number[] => {
+      if (addr > 0) {
+        return [getHeadValue(addr), ...inner(getTail(addr))];
+      } else {
+        return [];
+      }
+    };
+    return inner(value).map(x => conv(instance, x));
+  };
+}
+
+export function toEnvironmentList(instance: WebAssembly.Instance, value: number) {
+  return toListAnd((_, x) => x)(instance, value);
+}
 
 describe(matchPattern, () => {
   describe("compilation empty list pattern", () => {
@@ -165,6 +182,15 @@ const build = (patternCode: string, testCode: string) => {
       name: "test",
       code: testCode,
     })
+      .addDependency({
+        name: "test-tuple-exports",
+        code: `
+          (module
+            (export "__tuple_get_v0__" (func $__tuple_get_v0__))
+            (export "__tuple_get_v1__" (func $__tuple_get_v1__))
+          )
+        `,
+      })
       .addDependencies(ctx.getDependencies())
       .addFields(ctx.matcherDefStack.buildFuncs())
       .build()
