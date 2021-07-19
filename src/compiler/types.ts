@@ -29,6 +29,7 @@ export interface CompilationContext {
   readonly useTuple: () => void;
   readonly useEnvironment: () => void;
   readonly useMatcher: () => void;
+  readonly useComparator: (op: "lt" | "le" | "gt" | "ge") => void;
   readonly useLocalVar: (node: LocalVarNode) => void;
   readonly setEnv: (env: Environment) => void;
   readonly getEnv: () => Environment;

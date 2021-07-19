@@ -10,6 +10,7 @@ import { getMatcherModuleDefinition } from "./assets/modules/matcher";
 import { createRootEnvironment } from "./environment";
 import { FunctionDefinitionStack } from "./function-definition-stack";
 import { MatcherDefinitionStack } from "./matcher-definition-stack";
+import { getComparatorModuleDefinition } from "./assets/modules/comparator";
 
 export class Context implements CompilationContext {
   private _env: Environment = createRootEnvironment();
@@ -20,6 +21,8 @@ export class Context implements CompilationContext {
   private _enabledTuple = false;
   private _enabledEnv = false;
   private _enabledMatcher = false;
+  private _enableComparator = false;
+  private _includingComparisonOperators: ("lt" | "le" | "gt" | "ge")[] = [];
   private _localsMainFn: LocalVarNode[] = [];
   private _dependencies: ModuleDefinition[] = [];
 
@@ -41,7 +44,16 @@ export class Context implements CompilationContext {
   }
 
   getDependencies(): readonly ModuleDefinition[] {
-    return this._dependencies;
+    if (this._enableComparator) {
+      const comparatorDependency = getComparatorModuleDefinition({
+        includeOperators: this._includingComparisonOperators,
+        withFloat: this._enabledFloat,
+        withList: this._enabledList,
+      });
+      return [...this._dependencies, comparatorDependency];
+    } else {
+      return this._dependencies;
+    }
   }
 
   setEnv(env: Environment) {
@@ -102,5 +114,10 @@ export class Context implements CompilationContext {
     if (this._enabledMatcher) return;
     this._enabledMatcher = true;
     this._dependencies.push(getMatcherModuleDefinition());
+  }
+
+  useComparator(op: "lt" | "le" | "gt" | "ge") {
+    this._enableComparator = true;
+    this._includingComparisonOperators = [...new Set([...this._includingComparisonOperators, op])];
   }
 }

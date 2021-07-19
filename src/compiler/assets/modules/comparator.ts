@@ -1,3 +1,4 @@
+import { factory } from "../../../wasm";
 import { ModuleDefinition } from "../../module-builder";
 import { getListModuleDefinition } from "./list";
 import { getFloatModuleDefinition } from "./float";
@@ -237,4 +238,8 @@ export function getComparatorModuleDefinition({
       ...(withList ? [getListModuleDefinition()] : []),
     ],
   };
+}
+
+export function compareInstr(op: ComparisonOperators) {
+  return [factory.controlInstr("call", [factory.identifier(`__comparator_poly_${op}__`)])];
 }

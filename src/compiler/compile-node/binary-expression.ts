@@ -1,13 +1,15 @@
 import { mapValue, ok, error, Result } from "../../structure";
 import { BinaryOperation } from "../../syntax";
-import { CompileNodeFn, CompilationValue } from "../types";
+import { CompileNodeFn, CompilationValue, CompilationContext } from "../types";
 import { factory, InstructionNode } from "../../wasm";
 import { getFloatValueInstr, storeFloatValueInstr } from "../assets/modules/float";
+import { compareInstr } from "../assets/modules/comparator";
 
 function getOperationInstr(
   left: CompilationValue,
   right: CompilationValue,
   op: BinaryOperation,
+  ctx: CompilationContext,
 ): Result<readonly InstructionNode[]> {
   switch (op.kind) {
     case "Add":
@@ -46,19 +48,28 @@ function getOperationInstr(
       return ok([...left, ...right, factory.int32NumericInstr("i32.or", [])]);
     case "And":
       return ok([...left, ...right, factory.int32NumericInstr("i32.and", [])]);
-    case "LessThan":
-      return ok([...left, ...right, factory.int32NumericInstr("i32.lt_s", [])]);
-    case "LessEqualThan":
-      return ok([...left, ...right, factory.int32NumericInstr("i32.le_s", [])]);
-    case "GreaterThan":
-      return ok([...left, ...right, factory.int32NumericInstr("i32.gt_s", [])]);
-    case "GreaterEqualThan":
-      return ok([...left, ...right, factory.int32NumericInstr("i32.ge_s", [])]);
+    case "LessThan": {
+      ctx.useComparator("lt");
+      return ok([...left, ...right, ...compareInstr("lt")]);
+    }
+    case "LessEqualThan": {
+      ctx.useComparator("le");
+      return ok([...left, ...right, ...compareInstr("le")]);
+    }
+    case "GreaterThan": {
+      ctx.useComparator("gt");
+      return ok([...left, ...right, ...compareInstr("gt")]);
+    }
+    case "GreaterEqualThan": {
+      ctx.useComparator("ge");
+      return ok([...left, ...right, ...compareInstr("ge")]);
+    }
     case "Equal":
       return ok([...left, ...right, factory.int32NumericInstr("i32.eq", [])]);
     case "NotEqual":
       return ok([...left, ...right, factory.int32NumericInstr("i32.ne", [])]);
-    case "FAdd":
+    case "FAdd": {
+      ctx.useFloat();
       return ok([
         ...left,
         ...getFloatValueInstr(),
@@ -67,7 +78,9 @@ function getOperationInstr(
         factory.float64NumericInstr("f64.add", []),
         ...storeFloatValueInstr(),
       ]);
-    case "FSub":
+    }
+    case "FSub": {
+      ctx.useFloat();
       return ok([
         ...left,
         ...getFloatValueInstr(),
@@ -76,7 +89,9 @@ function getOperationInstr(
         factory.float64NumericInstr("f64.sub", []),
         ...storeFloatValueInstr(),
       ]);
-    case "FMultiply":
+    }
+    case "FMultiply": {
+      ctx.useFloat();
       return ok([
         ...left,
         ...getFloatValueInstr(),
@@ -85,6 +100,7 @@ function getOperationInstr(
         factory.float64NumericInstr("f64.mul", []),
         ...storeFloatValueInstr(),
       ]);
+    }
     default:
       // @ts-expect-error
       return error({ message: `invalid kind: ${op.kind}` });
@@ -92,12 +108,8 @@ function getOperationInstr(
 }
 
 export const binaryExpression: CompileNodeFn<"BinaryExpression"> = (node, ctx, next) => {
-  const opKind = node.op.kind;
-  if (opKind === "FAdd" || opKind === "FSub" || opKind === "FMultiply") {
-    ctx.useFloat();
-  }
   return mapValue(
     next(node.left, ctx),
     next(node.right, ctx),
-  )((left, right) => getOperationInstr(left, right, node.op).error(err => ({ ...err, occurence: node })));
+  )((left, right) => getOperationInstr(left, right, node.op, ctx).error(err => ({ ...err, occurence: node })));
 };
