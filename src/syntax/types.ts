@@ -62,11 +62,11 @@ export interface IntegerToken extends TokenBase<"Integer"> {
   readonly value: number;
 }
 
-export interface FloatToken extends TokenBase<"Float"> {
+export interface DecimalToken extends TokenBase<"Decimal"> {
   readonly value: number;
 }
 
-export type Token = SymbolToken | KeywordToken | IntegerToken | FloatToken | VariableToken;
+export type Token = SymbolToken | KeywordToken | IntegerToken | DecimalToken | VariableToken;
 
 export interface OperationBase<T extends string> {
   readonly kind: T;

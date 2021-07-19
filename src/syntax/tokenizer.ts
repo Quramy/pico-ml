@@ -4,7 +4,7 @@ import {
   SymbolKind,
   SymbolToken,
   IntegerToken,
-  FloatToken,
+  DecimalToken,
   ReservedWords,
   ReservedWordKind,
   KeywordToken,
@@ -72,7 +72,7 @@ export const integerToken: Parser<IntegerToken> = scanner => {
   });
 };
 
-export const decimalToken: Parser<FloatToken> = scanner => {
+export const decimalToken: Parser<DecimalToken> = scanner => {
   const hit = scanner.match(/^(\d+\.\d*)/);
   if (!hit)
     return error({
@@ -81,7 +81,7 @@ export const decimalToken: Parser<FloatToken> = scanner => {
       occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
     });
   return ok({
-    tokenKind: "Float",
+    tokenKind: "Decimal",
     value: parseFloat(hit[1]),
     loc: scanner.consume(hit[1].length),
   });

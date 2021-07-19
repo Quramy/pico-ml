@@ -43,7 +43,7 @@ import { symbolToken, integerToken, keywordToken, variableToken, decimalToken } 
  * mul          ::= prfx(("*" | "*.") (prfx | cond | match | func | bind))*
  * prfx         ::= app | ("-" | "-.") app
  * app          ::= prim (prim)*
- * prim         ::= id | bool | int | empty | group
+ * prim         ::= id | bool | int | decimal | empty | group
  * group        ::= "(" expr ")"
  * empty        ::= "[" "]"
  * bool         ::= "true" | "false"

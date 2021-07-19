@@ -19,13 +19,13 @@ test(integerToken.name, () => {
 
 test(decimalToken.name, () => {
   expect(decimalToken(new Scanner("0.")).unwrap()).toMatchObject<Omit<Token, "value">>({
-    tokenKind: "Float",
+    tokenKind: "Decimal",
   });
   expect(decimalToken(new Scanner("01.")).unwrap()).toMatchObject<Omit<Token, "value">>({
-    tokenKind: "Float",
+    tokenKind: "Decimal",
   });
   expect(decimalToken(new Scanner("2.0")).unwrap()).toMatchObject<Omit<Token, "value">>({
-    tokenKind: "Float",
+    tokenKind: "Decimal",
   });
   expect(Math.floor(decimalToken(new Scanner("2.0")).unwrap().value)).toBe(2);
 });
