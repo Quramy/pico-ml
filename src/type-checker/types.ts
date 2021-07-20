@@ -9,6 +9,8 @@ export interface TypeValueBase<T> {
 
 export interface IntType extends TypeValueBase<"Int"> {}
 
+export interface FloatType extends TypeValueBase<"Float"> {}
+
 export interface BoolType extends TypeValueBase<"Bool"> {}
 
 export interface TypeParameterType extends TypeValueBase<"TypeParameter"> {
@@ -24,7 +26,7 @@ export interface FunctionType extends TypeValueBase<"Function"> {
   readonly returnType: TypeValue;
 }
 
-export type TypeValue = IntType | BoolType | TypeParameterType | ListType | FunctionType;
+export type TypeValue = IntType | FloatType | BoolType | TypeParameterType | ListType | FunctionType;
 
 export interface TypeScheme {
   readonly kind: "TypeScheme";

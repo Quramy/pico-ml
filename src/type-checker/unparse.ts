@@ -6,6 +6,7 @@ const priorityMap: {
 } = {
   Bool: 0,
   Int: 0,
+  Float: 0,
   TypeParameter: 0,
   List: 10,
   Function: 20,
@@ -47,6 +48,8 @@ function printType(type: TypeValue, ctx: Context): string {
   switch (type.kind) {
     case "Int":
       return "int";
+    case "Float":
+      return "float";
     case "Bool":
       return "bool";
     case "TypeParameter":
@@ -61,6 +64,7 @@ function printType(type: TypeValue, ctx: Context): string {
 function minId(type: TypeValue, current: number = Number.MAX_SAFE_INTEGER): number {
   switch (type.kind) {
     case "Int":
+    case "Float":
     case "Bool":
       return current;
     case "TypeParameter":

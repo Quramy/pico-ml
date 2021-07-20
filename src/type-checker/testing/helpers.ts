@@ -1,5 +1,6 @@
 import {
   IntType,
+  FloatType,
   BoolType,
   TypeParameterType,
   TypeValue,
@@ -14,6 +15,11 @@ const referencedFrom = {};
 
 export const int = (): IntType => ({
   kind: "Int",
+  referencedFrom,
+});
+
+export const float = (): FloatType => ({
+  kind: "Float",
   referencedFrom,
 });
 

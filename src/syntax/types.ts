@@ -11,6 +11,9 @@ export type Symbols = readonly [
   ">",
   "<=",
   ">=",
+  "+.",
+  "-.",
+  "*.",
   "||",
   "&&",
   "==",
@@ -59,7 +62,11 @@ export interface IntegerToken extends TokenBase<"Integer"> {
   readonly value: number;
 }
 
-export type Token = SymbolToken | KeywordToken | IntegerToken | VariableToken;
+export interface DecimalToken extends TokenBase<"Decimal"> {
+  readonly value: number;
+}
+
+export type Token = SymbolToken | KeywordToken | IntegerToken | DecimalToken | VariableToken;
 
 export interface OperationBase<T extends string> {
   readonly kind: T;
@@ -68,11 +75,23 @@ export interface OperationBase<T extends string> {
 
 export interface MinusOperation extends OperationBase<"Minus"> {}
 
+export interface FMinusOperation extends OperationBase<"FMinus"> {}
+
 export interface AddOperation extends OperationBase<"Add"> {}
 
 export interface SubOperation extends OperationBase<"Sub"> {}
 
 export interface MultiplyOperation extends OperationBase<"Multiply"> {}
+
+export interface FAddOperation extends OperationBase<"FAdd"> {}
+
+export interface FSubOperation extends OperationBase<"FSub"> {}
+
+export interface FMultiplyOperation extends OperationBase<"FMultiply"> {}
+
+export interface OrOperation extends OperationBase<"Or"> {}
+
+export interface AndOperation extends OperationBase<"And"> {}
 
 export interface LTOperation extends OperationBase<"LessThan"> {}
 
@@ -82,31 +101,31 @@ export interface LEOperation extends OperationBase<"LessEqualThan"> {}
 
 export interface GEOperation extends OperationBase<"GreaterEqualThan"> {}
 
-export interface OrOperation extends OperationBase<"Or"> {}
-
-export interface AndOperation extends OperationBase<"And"> {}
-
 export interface EQOperation extends OperationBase<"Equal"> {}
 
 export interface NEOperation extends OperationBase<"NotEqual"> {}
 
-export type UnaryOperation = MinusOperation;
+export type ComparisonOperations = LTOperation | LEOperation | GTOperation | GEOperation | EQOperation | NEOperation;
+
+export type UnaryOperation = MinusOperation | FMinusOperation;
 export type BinaryOperation =
   | AddOperation
   | SubOperation
   | MultiplyOperation
-  | LTOperation
-  | GTOperation
-  | LEOperation
-  | GEOperation
+  | FAddOperation
+  | FSubOperation
+  | FMultiplyOperation
   | OrOperation
   | AndOperation
-  | EQOperation
-  | NEOperation;
+  | ComparisonOperations;
 
 export interface Node<T extends string> extends Tree<T>, Position {}
 
 export interface IntLiteralNode extends Node<"IntLiteral"> {
+  readonly value: number;
+}
+
+export interface FloatLiteralNode extends Node<"FloatLiteral"> {
   readonly value: number;
 }
 
@@ -199,6 +218,7 @@ export interface MatchExpressionNode extends Node<"MatchExpression"> {
 
 export type ExpressionNode =
   | IntLiteralNode
+  | FloatLiteralNode
   | BoolLiteralNode
   | EmptyListNode
   | IdentifierNode

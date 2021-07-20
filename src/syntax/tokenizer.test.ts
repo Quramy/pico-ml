@@ -1,20 +1,33 @@
-import { numberToken, variableToken, keywordToken } from "./tokenizer";
+import { integerToken, decimalToken, variableToken, keywordToken } from "./tokenizer";
 import { Scanner } from "../parser-util";
 import { Token } from "./types";
 
-test(numberToken.name, () => {
-  expect(numberToken(new Scanner("0")).unwrap()).toMatchObject<Token>({
+test(integerToken.name, () => {
+  expect(integerToken(new Scanner("0")).unwrap()).toMatchObject<Token>({
     tokenKind: "Integer",
     value: 0,
   });
-  expect(numberToken(new Scanner("01")).unwrap()).toMatchObject<Token>({
+  expect(integerToken(new Scanner("01")).unwrap()).toMatchObject<Token>({
     tokenKind: "Integer",
     value: 1,
   });
-  expect(numberToken(new Scanner("20")).unwrap()).toMatchObject<Token>({
+  expect(integerToken(new Scanner("20")).unwrap()).toMatchObject<Token>({
     tokenKind: "Integer",
     value: 20,
   });
+});
+
+test(decimalToken.name, () => {
+  expect(decimalToken(new Scanner("0.")).unwrap()).toMatchObject<Omit<Token, "value">>({
+    tokenKind: "Decimal",
+  });
+  expect(decimalToken(new Scanner("01.")).unwrap()).toMatchObject<Omit<Token, "value">>({
+    tokenKind: "Decimal",
+  });
+  expect(decimalToken(new Scanner("2.0")).unwrap()).toMatchObject<Omit<Token, "value">>({
+    tokenKind: "Decimal",
+  });
+  expect(Math.floor(decimalToken(new Scanner("2.0")).unwrap().value)).toBe(2);
 });
 
 test(keywordToken.name, () => {

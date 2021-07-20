@@ -21,6 +21,8 @@ function createCommands(rl: readline.Interface) {
   const examples: string[][] = [
     ["1 + 1 ;;"],
     ["1 < 2 ;;"],
+    ["3.14 ;;"],
+    ["2.0 *. 1.5 ;;"],
     ["true != false ;;"],
     ["if 2 * 2 < 3 then true else false ;;"],
     ["fun x -> x ;;"],

@@ -18,10 +18,12 @@ import {
   pos2location,
   toBoolean,
   toNumber,
+  toFloat,
   toList,
   IntType,
-  ListType,
+  FloatType,
   BoolType,
+  ListType,
   FunctionType,
   TypeParameterType,
 } from "pico-ml";
@@ -36,6 +38,10 @@ export interface Diagnostic {
 }
 
 type IntValueType = IntType & {
+  value: number;
+};
+
+type FloatValueType = FloatType & {
   value: number;
 };
 
@@ -55,11 +61,19 @@ type TypeValueType = TypeParameterType & {
   value: string;
 };
 
-export type ValueTypeTree = IntValueType | BoolValueType | ListValueType | FunctionValueType | TypeValueType;
+export type ValueTypeTree =
+  | IntValueType
+  | FloatValueType
+  | BoolValueType
+  | ListValueType
+  | FunctionValueType
+  | TypeValueType;
 
 function createFormatter(instance: WebAssembly.Instance, pt: TypeValue): (value: number) => ValueTypeTree {
   if (pt.kind === "Int") {
     return (value: number) => ({ ...pt, value: toNumber(instance, value) });
+  } else if (pt.kind === "Float") {
+    return (value: number) => ({ ...pt, value: toFloat(instance, value) });
   } else if (pt.kind === "Bool") {
     return (value: number) => ({ ...pt, value: toBoolean(instance, value) });
   } else if (pt.kind === "List") {

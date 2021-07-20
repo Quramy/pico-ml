@@ -93,37 +93,40 @@ $ pmlc example.ml -t
 ### BNF
 
 ```
-expr   ::= id |
-           int |
-           bool |
-           "[]" |
-           expr expr |
-           unop expr |
-           expr binop expr |
-           expr "::" expr |
-           "if" expr "then" expr "else" expr |
-           "match" expr "with" clause |
-           "fun" id "->" expr |
-           "let" id "=" expr "in" expr |
-           "let" "rec" id "=" "fun" id "->" expr "in" expr
+expr    ::= id |
+            int |
+            decimal |
+            bool |
+            "[]" |
+            expr expr |
+            unop expr |
+            expr binop expr |
+            expr "::" expr |
+            "if" expr "then" expr "else" expr |
+            "match" expr "with" clause |
+            "fun" id "->" expr |
+            "let" id "=" expr "in" expr |
+            "let" "rec" id "=" "fun" id "->" expr "in" expr
 
-clause ::= pat "->" expr | pat "->" expr "|" clause
+clause  ::= pat "->" expr | pat "->" expr "|" clause
 
-pat    ::= id | "[]" | "_" | pat "::" pat
+pat     ::= id | "[]" | "_" | pat "::" pat
 
-id     ::= (letter | "_"){ letter | digit | "_" | "'" }
+id      ::= (letter | "_"){ letter | digit | "_" | "'" }
 
-unop   ::= "-"
+unop    ::= "-" | "-."
 
-binop  ::= "+" | "-" | "*" | "<" | ">" | "<=" | ">=" | "==" | "!=" | "&&" | "||"
+binop   ::= "+" | "-" | "*" | +." | "-." | "*." | "<" | ">" | "<=" | ">=" | "==" | "!=" | "&&" | "||"
 
-bool   ::= "true" | "false"
+bool    ::= "true" | "false"
 
-int    ::= (digit)+
+int     ::= (digit)+
 
-letter ::= "a" | ... | "z" | "A" | ... | "Z"
+decimal ::= digit+"."digit*
 
-digit  ::= "0" | ... | "9"
+letter  ::= "a" | ... | "z" | "A" | ... | "Z"
+
+digit   ::= "0" | ... | "9"
 ```
 
 ## License

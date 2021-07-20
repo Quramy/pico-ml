@@ -7,6 +7,7 @@ import { MatchExpressionNode, PatternMatchClauseNode, MatchClauseNode } from "..
 export function equal(a: TypeValue, b: TypeValue): boolean {
   switch (a.kind) {
     case "Int":
+    case "Float":
     case "Bool":
       return a.kind === b.kind;
     case "Function": {

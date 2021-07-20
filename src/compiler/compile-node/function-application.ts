@@ -2,7 +2,7 @@ import { mapValue, ok } from "../../structure";
 import { CompileNodeFn } from "../types";
 import { factory } from "../../wasm";
 import { newEnvInstr } from "../assets/modules/env";
-import { getTupleValueInstr } from "../assets/modules/tuple";
+import { getClosureEnvInstr, getClosureFuncBodyInstr } from "./macro/closure";
 
 export const functionApplication: CompileNodeFn<"FunctionApplication"> = (node, ctx, next) => {
   ctx.useEnvironment();
@@ -18,7 +18,7 @@ export const functionApplication: CompileNodeFn<"FunctionApplication"> = (node, 
       factory.variableInstr("local.set", [factory.identifier("prev_closure_addr")]),
       ...closureInstr,
       factory.variableInstr("local.tee", [factory.identifier("closure_addr")]),
-      ...getTupleValueInstr(0), // env for the closure is stored as the 1st value
+      ...getClosureEnvInstr(),
 
       // Note
       // bind the closure's own  address for recursive call
@@ -29,7 +29,7 @@ export const functionApplication: CompileNodeFn<"FunctionApplication"> = (node, 
       ...newEnvInstr(),
 
       factory.variableInstr("local.get", [factory.identifier("closure_addr")]),
-      ...getTupleValueInstr(1), // function body index for the closure is stored as the 2nd value
+      ...getClosureFuncBodyInstr(),
       ...ctx.funcDefStack.callInstr(),
       factory.variableInstr("local.get", [factory.identifier("prev_closure_addr")]),
       factory.variableInstr("local.set", [factory.identifier("closure_addr")]),

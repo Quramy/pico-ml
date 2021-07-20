@@ -4,6 +4,7 @@ import {
   SymbolKind,
   SymbolToken,
   IntegerToken,
+  DecimalToken,
   ReservedWords,
   ReservedWordKind,
   KeywordToken,
@@ -56,17 +57,32 @@ export const keywordToken: (keyword: ReservedWordKind) => Parser<KeywordToken> =
   };
 };
 
-export const numberToken: Parser<IntegerToken> = scanner => {
+export const integerToken: Parser<IntegerToken> = scanner => {
   const hit = scanner.match(/^(\d+)/);
   if (!hit)
     return error({
       confirmed: false,
-      message: "Number expected.",
+      message: "Integer expected.",
       occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
     });
   return ok({
     tokenKind: "Integer",
     value: parseInt(hit[1], 10),
+    loc: scanner.consume(hit[1].length),
+  });
+};
+
+export const decimalToken: Parser<DecimalToken> = scanner => {
+  const hit = scanner.match(/^(\d+\.\d*)/);
+  if (!hit)
+    return error({
+      confirmed: false,
+      message: "Floating number expected.",
+      occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
+    });
+  return ok({
+    tokenKind: "Decimal",
+    value: parseFloat(hit[1]),
     loc: scanner.consume(hit[1].length),
   });
 };

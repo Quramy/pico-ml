@@ -3,6 +3,7 @@ import {
   ModuleNode,
   ModuleBodyNode,
   ParamTypeNode,
+  NumberLiteral,
   TypeNode,
   IdentifierNode,
   FuncTypeNode,
@@ -10,8 +11,6 @@ import {
   FuncNode,
   FuncSigNode,
   IndexNode,
-  Uint32LiteralNode,
-  Int32LiteralNode,
   LocalVarNode,
   ExprNode,
   NumericInstructionNode,
@@ -102,7 +101,7 @@ class Writer {
   }
 }
 
-function unparseInt(node: Uint32LiteralNode | Int32LiteralNode, writer: Writer) {
+function unparseInt(node: NumberLiteral, writer: Writer) {
   writer.append(`${node.value}`);
 }
 
@@ -222,7 +221,10 @@ function unparseExpr(node: ExprNode, writer: Writer) {
     switch (instr.kind) {
       case "IfInstruction":
         return unparseIfInstr(instr, writer);
-      case "NumericInstruction":
+      case "Int32NumericInstruction":
+      case "Int64NumericInstruction":
+      case "Float32NumericInstruction":
+      case "Float64NumericInstruction":
         return unparseNumericInstr(instr, writer);
       case "ControlInstruction":
         return unparseControlInstr(instr, writer);

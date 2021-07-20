@@ -8,6 +8,7 @@ import {
   IdentifierToken,
   IntToken,
   StringToken,
+  DecimalToken,
 } from "../ast-types";
 
 export const symbolToken: (sym: SymbolKind) => Parser<SymbolToken> = sym => {
@@ -96,6 +97,23 @@ const intTokenGen =
 
 export const intToken = intTokenGen(true);
 export const uintToken = intTokenGen(false);
+
+export const decimalToken: Parser<DecimalToken> = scanner => {
+  const intPart = scanner.match(/^([\+-]?\d+)/);
+  if (!intPart)
+    return error({
+      confirmed: false,
+      message: "Decimal number expected.",
+      occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
+    });
+  const fractionHit = scanner.match(/^(\.\d*)/, intPart[1].length);
+  const str = intPart[1] + (fractionHit ? fractionHit[1] : "");
+  return ok({
+    tokenKind: "Decimal",
+    value: parseFloat(str),
+    loc: scanner.consume(str.length),
+  });
+};
 
 export const strToken: Parser<StringToken> = scanner => {
   if (!scanner.startsWith('"')) {

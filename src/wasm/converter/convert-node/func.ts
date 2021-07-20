@@ -3,12 +3,13 @@ import { FuncNode, InstructionNode } from "../../ast-types";
 import { Func, FuncType, Instruction, ValType, UInt32Index, ResultType } from "../../structure-types";
 import { RefereneceContext, findIndex, createIndex } from "../ref";
 import {
+  numberInstructions,
   variableInstructions,
-  numericInstructions,
   controlInstructions,
   memoryInstructions,
 } from "../../instructions-map";
 import { convertMaybeUint32 } from "./uint32";
+import { toValType, mapToValTypeListFrom } from "./val-type";
 
 export interface State {
   readonly funcs: readonly Func[];
@@ -82,8 +83,10 @@ const variableInstruction: ConvertInstrFn<"VariableInstruction"> = (node, { refC
   );
 };
 
-const numericInstruction: ConvertInstrFn<"NumericInstruction"> = node => {
-  const { args } = numericInstructions[node.instructionKind];
+const numericInstruction: ConvertInstrFn<
+  "Int32NumericInstruction" | "Int64NumericInstruction" | "Float32NumericInstruction" | "Float64NumericInstruction"
+> = node => {
+  const { args } = numberInstructions[node.instructionKind];
   return all(
     node.parameters.map((p, i) => {
       if (!args[i]) return error({ message: `${node.instructionKind} can not have ${i}th param` }) as Result<number>;
@@ -119,16 +122,13 @@ const ifInstruction: ConvertInstrFn<"IfInstruction"> = (node, ctx, next) => {
   if (!node.blockType.type && node.blockType.results.length === 0) {
     blockType = null;
   } else if (!node.blockType.type && node.blockType.results.length === 1) {
-    blockType = { kind: "Int32Type" };
+    blockType = toValType(node.blockType.results[0]);
   } else if (node.blockType.type) {
     const foundResult = findIndex(ctx.refCtx.types, node.blockType.type);
     if (!foundResult.ok) return error(foundResult.value);
     blockType = foundResult.value;
   } else {
-    const ft = funcType(
-      [],
-      node.blockType.results.map(() => ({ kind: "Int32Type" })),
-    );
+    const ft = funcType([], node.blockType.results.map(toValType));
     const foundIndex = ctx.types.findIndex(t => compareFuncType(t, ft));
     if (foundIndex === -1) {
       blockType = ctx.types.length;
@@ -154,8 +154,11 @@ export const convertInstr = createTreeTraverser<InstructionNode, ConvertInstrCon
   ifInstruction,
   controlInstruction,
   variableInstruction,
-  numericInstruction,
   memoryInstruction,
+  int32NumericInstruction: numericInstruction,
+  int64NumericInstruction: numericInstruction,
+  float32NumericInstruction: numericInstruction,
+  float64NumericInstruction: numericInstruction,
 });
 
 export function convertFunc(node: FuncNode, idx: number, prev: State, refCtx: RefereneceContext): Result<State> {
@@ -165,10 +168,7 @@ export function convertFunc(node: FuncNode, idx: number, prev: State, refCtx: Re
   const { signature } = node;
   if (signature.type === null) {
     // create new func type
-    const ft = funcType(
-      signature.params.map(() => ({ kind: "Int32Type" })),
-      signature.results.map(() => ({ kind: "Int32Type" })),
-    );
+    const ft = funcType(mapToValTypeListFrom(signature.params), signature.results.map(toValType));
     const foundIdx = prev.types.findIndex(t => compareFuncType(t, ft));
     if (foundIdx === -1) {
       typeidx = prev.types.length;
@@ -194,7 +194,7 @@ export function convertFunc(node: FuncNode, idx: number, prev: State, refCtx: Re
         ({
           kind: "Func",
           type: typeidx,
-          locals: node.locals.map(() => ({ kind: "Int32Type" })),
+          locals: mapToValTypeListFrom(node.locals),
           body,
         } as Func),
     )

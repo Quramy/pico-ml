@@ -19,21 +19,9 @@ describe(evaluate, () => {
     expect(parseAndEval("1 - 1")).toBe(0);
     expect(parseAndEval("2 * 3")).toBe(6);
 
-    expect(parseAndEval("0 < 1")).toBe(true);
-    expect(parseAndEval("1 < 1")).toBe(false);
-    expect(parseAndEval("2 < 1")).toBe(false);
-
-    expect(parseAndEval("1 > 0")).toBe(true);
-    expect(parseAndEval("1 > 1")).toBe(false);
-    expect(parseAndEval("1 > 2")).toBe(false);
-
-    expect(parseAndEval("0 <= 1")).toBe(true);
-    expect(parseAndEval("1 <= 1")).toBe(true);
-    expect(parseAndEval("2 <= 1")).toBe(false);
-
-    expect(parseAndEval("1 >= 0")).toBe(true);
-    expect(parseAndEval("1 >= 1")).toBe(true);
-    expect(parseAndEval("1 >= 2")).toBe(false);
+    expect(parseAndEval("1.1 +. 1.1")).toBe(2.2);
+    expect(parseAndEval("1.1 -. 1.1")).toBe(0.0);
+    expect(parseAndEval("2.0 *. 3.1")).toBe(6.2);
   });
 
   test("logical operation", () => {
@@ -48,7 +36,12 @@ describe(evaluate, () => {
     expect(parseAndEval("false && false")).toBe(false);
   });
 
-  test("equality", () => {
+  test("comparison", () => {
+    expect(parseAndEval("0 < 1")).toBe(true);
+    expect(parseAndEval("0.0 < 1.0")).toBe(true);
+    expect(parseAndEval("false < true")).toBe(true);
+    expect(parseAndEval("[] < 1::[]")).toBe(true);
+
     expect(parseAndEval("1 == 0")).toBe(false);
     expect(parseAndEval("1 == 1")).toBe(true);
 

@@ -1,12 +1,14 @@
 import { parseMatchPattern } from "../syntax";
 import { equal, getTypeEnvForPattern } from "./utils";
-import { int, bool, func, param, list } from "./testing/helpers";
+import { int, float, bool, func, param, list } from "./testing/helpers";
 import { createRootEnvironment, ParmGenerator } from "./type-environment";
 import { TypeScheme, TypeValue, TypeEquation } from "./types";
 
 describe(equal, () => {
   test(equal.name, () => {
     expect(equal(int(), int())).toBeTruthy();
+    expect(equal(float(), float())).toBeTruthy();
+    expect(equal(float(), int())).toBeFalsy();
     expect(equal(bool(), int())).toBeFalsy();
     expect(equal(int(), bool())).toBeFalsy();
     expect(equal(func(int(), int()), func(int(), int()))).toBeTruthy();

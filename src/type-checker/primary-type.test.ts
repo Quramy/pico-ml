@@ -9,10 +9,21 @@ const fixture: Record<string, () => string> = {
   "0 + 0": () => "int",
   "0 - 0": () => "int",
   "0 * 0": () => "int",
+  "0.0 +. 0.0": () => "float",
+  "0.0 -. 0.0": () => "float",
+  "0.0 *. 0.0": () => "float",
   "0 < 1": () => "bool",
   "0 <= 1": () => "bool",
   "0 > 1": () => "bool",
   "0 >= 1": () => "bool",
+  "0.0 < 1.0": () => "bool",
+  "0.0 <= 1.0": () => "bool",
+  "0.0 > 1.0": () => "bool",
+  "0.0 >= 1.0": () => "bool",
+  "true < true": () => "bool",
+  "true <= true": () => "bool",
+  "true > true": () => "bool",
+  "true >=  true": () => "bool",
   "true || false": () => "bool",
   "true && false": () => "bool",
   "true == false": () => "bool",
@@ -44,12 +55,39 @@ describe(getPrimaryType, () => {
   });
 
   test("failure", () => {
+    expect(parse("-.1").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("-1.").mapValue(getPrimaryType).ok).toBeFalsy();
     expect(parse("1 + false").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 +. 1").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 -. 1").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 *. 1").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1. + 1.").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1. - 1.").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1. * 1.").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 < false").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 < 1.0").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 < []").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 < fun x -> x").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 <= false").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 <= 1.0").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 <= []").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 <= fun x -> x").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 > false").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 > 1.0").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 > []").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 > fun x -> x").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 >= false").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 >= 1.0").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 >= []").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 >= fun x -> x").mapValue(getPrimaryType).ok).toBeFalsy();
     expect(parse("1 == false").mapValue(getPrimaryType).ok).toBeFalsy();
-    expect(parse("true < true").mapValue(getPrimaryType).ok).toBeFalsy();
-    expect(parse("true <= true").mapValue(getPrimaryType).ok).toBeFalsy();
-    expect(parse("true > true").mapValue(getPrimaryType).ok).toBeFalsy();
-    expect(parse("true >= true").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 == 1.0").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 == []").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 == fun x -> x").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 != false").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 != 1.0").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 != []").mapValue(getPrimaryType).ok).toBeFalsy();
+    expect(parse("1 != fun x -> x").mapValue(getPrimaryType).ok).toBeFalsy();
     expect(parse("1 || 1").mapValue(getPrimaryType).ok).toBeFalsy();
     expect(parse("1 && 1").mapValue(getPrimaryType).ok).toBeFalsy();
     expect(parse("true::1::[]").mapValue(getPrimaryType).ok).toBeFalsy();

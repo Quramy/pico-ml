@@ -3,6 +3,7 @@ import { PrimaryTypeResult, PrimaryTypeContext } from "./types";
 import { createRootEnvironment, ParmGenerator } from "./type-environment";
 import { createTreeTraverser } from "../structure/traverser";
 import { intLiteral } from "./pt-node/int-literal";
+import { floatLiteral } from "./pt-node/float-literal";
 import { boolLiteral } from "./pt-node/bool-literal";
 import { emptyList } from "./pt-node/empty-list";
 import { identifier } from "./pt-node/identifier";
@@ -19,6 +20,7 @@ import { functionApplication } from "./pt-node/function-application";
 export function getPrimaryType(expression: ExpressionNode) {
   return createTreeTraverser<ExpressionNode, PrimaryTypeContext, PrimaryTypeResult>({
     intLiteral,
+    floatLiteral,
     boolLiteral,
     emptyList,
     identifier,

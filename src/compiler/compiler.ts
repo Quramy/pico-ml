@@ -6,6 +6,7 @@ import { Context } from "./compiler-context";
 import { ModuleBuilder } from "./module-builder";
 
 import { intLiteral } from "./compile-node/int-literal";
+import { floatLiteral } from "./compile-node/float-literal";
 import { boolLiteral } from "./compile-node/bool-literal";
 import { emptyList } from "./compile-node/empty-list";
 import { unaryExpression } from "./compile-node/unary-expression";
@@ -23,6 +24,7 @@ const traverse = createTreeTraverser<ExpressionNode, CompilationContext, Compila
   boolLiteral,
   emptyList,
   intLiteral,
+  floatLiteral,
   unaryExpression,
   binaryExpression,
   listConstructor,

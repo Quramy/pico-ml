@@ -1,12 +1,13 @@
 import { createTypePrinter } from "./unparse";
 import { TypeValue } from "./types";
-import { int, list, param, func, bool } from "./testing/helpers";
+import { int, float, list, param, func, bool } from "./testing/helpers";
 
 describe(createTypePrinter, () => {
   describe("without option", () => {
     const print = (type: TypeValue) => createTypePrinter()(type);
     test("unparse", () => {
       expect(print(int())).toBe("int");
+      expect(print(float())).toBe("float");
       expect(print(param(0))).toBe("'a");
       expect(print(func(param(0), param(25)))).toBe("'a -> 'z");
       expect(print(func(param(0), param(26)))).toBe("'a -> 'aa");

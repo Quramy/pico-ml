@@ -7,22 +7,6 @@ const unparse = (mod: Module) => baseUnparse(mod, { enableNameSection: false });
 
 describe(unparse, () => {
   describe("unparse result should work as WebAssembly buffered source", () => {
-    test("Add function example", async () => {
-      const source = `
-        (module
-          (func $add (param $a i32) (param $b i32) (result i32)
-            local.get $a
-            local.get $b
-            i32.add
-          )
-          (export "main" (func $add))
-        )
-      `;
-      const buf = parse(source).mapValue(convertModule).map(unparse).unwrap();
-      const { instance } = await WebAssembly.instantiate(buf, {});
-      expect((instance.exports["main"] as Function)(1, 2)).toBe(3);
-    });
-
     test("Local variable  example", async () => {
       const source = `
         (module
@@ -62,7 +46,7 @@ describe(unparse, () => {
       expect((instance.exports["main"] as Function)(0)).toBe(1);
     });
 
-    test("Add function example", async () => {
+    test("Int32 function example", async () => {
       const source = `
         (module
           (func $add (param $a i32) (param $b i32) (result i32)
@@ -81,6 +65,53 @@ describe(unparse, () => {
       const buf = parse(source).mapValue(convertModule).map(unparse).unwrap();
       const { instance } = await WebAssembly.instantiate(buf, {});
       expect((instance.exports["main"] as Function)(2)).toBe(4);
+    });
+
+    // Node v14 can't compile this case
+    test.skip("Int64 function example", async () => {
+      const source = `
+        (module
+          (func $twice (result i64)
+            i64.const 1
+          )
+          (export "main" (func $twice))
+        )
+      `;
+      const buf = parse(source).mapValue(convertModule).map(unparse).unwrap();
+      const { instance } = await WebAssembly.instantiate(buf, {});
+      expect((instance.exports["main"] as Function)(2)).toBe(4);
+    });
+
+    test("Float32 function example", async () => {
+      const source = `
+        (module
+          (func $twice (param $x f32) (result f32)
+            f32.const 2.0
+            local.get $x
+            f32.mul
+          )
+          (export "main" (func $twice))
+        )
+      `;
+      const buf = parse(source).mapValue(convertModule).map(unparse).unwrap();
+      const { instance } = await WebAssembly.instantiate(buf, {});
+      expect((instance.exports["main"] as Function)(2.0)).toBe(4.0);
+    });
+
+    test("Float64 function example", async () => {
+      const source = `
+        (module
+          (func $twice (param $x f64) (result f64)
+            f64.const 2.0
+            local.get $x
+            f64.mul
+          )
+          (export "main" (func $twice))
+        )
+      `;
+      const buf = parse(source).mapValue(convertModule).map(unparse).unwrap();
+      const { instance } = await WebAssembly.instantiate(buf, {});
+      expect((instance.exports["main"] as Function)(2.0)).toBe(4.0);
     });
 
     test("Memory instruction example", async () => {

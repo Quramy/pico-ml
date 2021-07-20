@@ -40,6 +40,27 @@ const fixtures = [
   `,
   `
   (module
+    (func $main (result i64)
+      i64.const 20
+    )
+  )
+  `,
+  `
+  (module
+    (func $main (result f32)
+      f32.const 1.5
+    )
+  )
+  `,
+  `
+  (module
+    (func $main (result f64)
+      f64.const 1.5
+    )
+  )
+  `,
+  `
+  (module
     (func $main (param $a i32) (result i32)
       local.get $a
     )
