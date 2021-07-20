@@ -49,8 +49,8 @@ describe(compile, () => {
     it("should compile compare operation", async () => {
       expect(await evaluateMain("0<1", toBoolean)).toBe(true);
       expect(await evaluateMain("0.<1.", toBoolean)).toBe(true);
-      expect(await evaluateMain("false < true.", toBoolean)).toBe(true);
-      expect(await evaluateMain("[] < false:[].", toBoolean)).toBe(true);
+      expect(await evaluateMain("false < true", toBoolean)).toBe(true);
+      expect(await evaluateMain("[] < false::[]", toBoolean)).toBe(true);
     });
 
     it("should compile logical operation", async () => {
