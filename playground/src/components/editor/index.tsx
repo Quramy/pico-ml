@@ -27,6 +27,20 @@ function setupEditor(element: HTMLElement | null, program: Program) {
   editor.on("change", () => program.code$.next(editSession.getValue()));
   const subscription = program.diagnostics$.subscribe(diagnostics => editSession.setAnnotations([...diagnostics]));
 
+  editSession.selection.on("changeSelection", () => {
+    const range = editSession.selection.getRange();
+    program.selection$.next({
+      start: {
+        line: range.start.row,
+        character: range.start.column,
+      },
+      end: {
+        line: range.end.row,
+        character: range.end.column,
+      },
+    });
+  });
+
   const dispose = () => {
     editor.destroy();
     subscription.unsubscribe();

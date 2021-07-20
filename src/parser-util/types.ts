@@ -2,6 +2,7 @@ import { ResultErrorBase, Result } from "../structure";
 import type { Scanner } from "./scanner";
 
 export interface Position {
+  readonly _nodeId?: string;
   readonly loc?: {
     readonly pos: number;
     readonly end: number;

@@ -404,37 +404,37 @@ const empty: Parser<EmptyListNode> = expect(
 
 const bool: Parser<BoolLiteralNode> = oneOf(
   expect(keywordToken("true"))(
-    ({ loc }): BoolLiteralNode => ({
+    (t): BoolLiteralNode => ({
       kind: "BoolLiteral",
       value: true,
-      loc,
+      ...loc(t),
     }),
   ),
   expect(keywordToken("false"))(
-    ({ loc }): BoolLiteralNode => ({
+    (t): BoolLiteralNode => ({
       kind: "BoolLiteral",
       value: false,
-      loc,
+      ...loc(t),
     }),
   ),
 );
 
-const decimal: Parser<FloatLiteralNode> = expect(decimalToken)(({ value, loc }) => ({
+const decimal: Parser<FloatLiteralNode> = expect(decimalToken)(token => ({
   kind: "FloatLiteral",
-  value,
-  loc,
+  value: token.value,
+  ...loc(token),
 }));
 
-const num: Parser<IntLiteralNode> = expect(integerToken)(({ value, loc }) => ({
+const num: Parser<IntLiteralNode> = expect(integerToken)(token => ({
   kind: "IntLiteral",
-  value,
-  loc,
+  value: token.value,
+  ...loc(token),
 }));
 
-const id: Parser<IdentifierNode> = expect(variableToken)(({ name, loc }) => ({
+const id: Parser<IdentifierNode> = expect(variableToken)(token => ({
   kind: "Identifier",
-  name,
-  loc,
+  name: token.name,
+  ...loc(token),
 }));
 
 export function parse(input: string) {

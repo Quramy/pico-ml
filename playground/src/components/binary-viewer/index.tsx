@@ -1,8 +1,8 @@
 import cx from "classnames";
 
+import { toHex } from "pico-ml";
 import { useProgramStream } from "../../hooks/use-program-stream";
 import styles from "./index.css";
-import { toHex } from "../../functions/hex";
 
 function n2c(n: number) {
   return n < 0x20 || n >= 0x7f ? "." : String.fromCharCode(n);

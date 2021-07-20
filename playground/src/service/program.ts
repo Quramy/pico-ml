@@ -1,7 +1,8 @@
 import type { Observable, BehaviorSubject } from "rxjs";
 import { combineLatest, Subject } from "rxjs";
-import { map, scan, debounceTime, switchMap, withLatestFrom } from "rxjs/operators";
+import { map, scan, share, debounceTime, switchMap, withLatestFrom } from "rxjs/operators";
 import {
+  toHex,
   parse,
   Result,
   ParseResult,
@@ -26,9 +27,12 @@ import {
   ListType,
   FunctionType,
   TypeParameterType,
+  location2pos,
+  Node,
+  mlVisitorKeys,
+  createVisitorFunctions,
 } from "pico-ml";
 import { SettingsService } from "./settings";
-import { toHex } from "../functions/hex";
 
 export interface Diagnostic {
   readonly row: number;
@@ -90,10 +94,19 @@ function createFormatter(instance: WebAssembly.Instance, pt: TypeValue): (value:
   throw new Error(`${pt.kind}`);
 }
 
+const forEachChild = createVisitorFunctions(mlVisitorKeys).forEachChild;
+
+export interface Location {
+  readonly line: number;
+  readonly character: number;
+}
+
 export interface Program {
   readonly initialContent: string;
   readonly code$: Subject<string>;
+  readonly selection$: Subject<{ readonly start: Location; readonly end: Location }>;
   readonly execute$: Subject<boolean | null>;
+  readonly selectedAstNode$: Observable<Result<{ readonly path: string[]; readonly found: Node | null }>>;
   readonly parseResult$: Observable<ParseResult<ExpressionNode>>;
   readonly primaryType$: Observable<Result<TypeValue, ParseError | TypeError>>;
   readonly diagnostics$: Observable<readonly Diagnostic[]>;
@@ -111,7 +124,31 @@ export type CreateProgramOptions = {
 
 export function createProgram({ code$, settingsService }: CreateProgramOptions) {
   const execute$ = new Subject<null | boolean>();
-  const parseResult$ = code$.asObservable().pipe(debounceTime(100), map(parse));
+  const parseResult$ = code$.asObservable().pipe(debounceTime(100), map(parse), share());
+  const selection$ = new Subject<{ readonly start: Location; readonly end: Location }>();
+
+  const selectedAstNode$ = combineLatest(selection$, code$, parseResult$).pipe(
+    debounceTime(50),
+    map(([selectedRange, code, parseResult]) => {
+      return parseResult.map(ast => {
+        const pos = location2pos(code, selectedRange.start);
+        const end = location2pos(code, selectedRange.end);
+        let found: Node | null = null;
+        const selectedPath: string[] = [];
+        const visitor = (node: Node) => {
+          if ((node.loc?.pos ?? Number.MAX_SAFE_INTEGER) <= pos && end <= (node.loc?.end ?? -1)) {
+            found = node;
+            selectedPath.push(node._nodeId!);
+          }
+          forEachChild(node, visitor);
+        };
+        visitor(ast);
+        return { path: selectedPath, found };
+      });
+    }),
+    share(),
+  );
+
   const primaryType$ = parseResult$.pipe(
     map(pr =>
       pr
@@ -122,8 +159,12 @@ export function createProgram({ code$, settingsService }: CreateProgramOptions) 
   );
   const compileResult$ = combineLatest(parseResult$, primaryType$).pipe(
     map(([pr, ptr]) => mapValue(pr, ptr)(expression => compile(expression))),
+    share(),
   );
-  const wat$ = compileResult$.pipe(map(cr => cr.map(printAST)));
+  const wat$ = compileResult$.pipe(
+    map(cr => cr.map(printAST)),
+    share(),
+  );
   const wasm$ = combineLatest([compileResult$, settingsService.settings$]).pipe(
     map(([cr, { enableNameSection }]) => cr.mapValue(mod => generateBinary(mod, { enableNameSection }))),
   );
@@ -143,6 +184,7 @@ export function createProgram({ code$, settingsService }: CreateProgramOptions) 
         return [];
       }
     }),
+    share(),
   );
   const evaluatedResult$ = execute$.pipe(
     withLatestFrom(combineLatest(primaryType$, wasm$)),
@@ -165,6 +207,8 @@ export function createProgram({ code$, settingsService }: CreateProgramOptions) 
     initialContent: code$.getValue(),
     code$,
     execute$,
+    selection$,
+    selectedAstNode$,
     parseResult$,
     primaryType$,
     diagnostics$,

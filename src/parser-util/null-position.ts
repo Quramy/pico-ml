@@ -15,6 +15,7 @@ export function fromOptional<T extends Position>(x: T | NullPosition) {
 export function nullPosition(scanner: Scanner): NullPosition {
   return {
     _brand: "NullPosition",
+    _nodeId: "null",
     loc: {
       pos: scanner.pos,
       end: scanner.pos,

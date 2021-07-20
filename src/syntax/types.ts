@@ -119,99 +119,99 @@ export type BinaryOperation =
   | AndOperation
   | ComparisonOperations;
 
-export interface Node<T extends string> extends Tree<T>, Position {}
+export interface NodeBase<T extends string> extends Tree<T>, Position {}
 
-export interface IntLiteralNode extends Node<"IntLiteral"> {
+export interface IntLiteralNode extends NodeBase<"IntLiteral"> {
   readonly value: number;
 }
 
-export interface FloatLiteralNode extends Node<"FloatLiteral"> {
+export interface FloatLiteralNode extends NodeBase<"FloatLiteral"> {
   readonly value: number;
 }
 
-export interface BoolLiteralNode extends Node<"BoolLiteral"> {
+export interface BoolLiteralNode extends NodeBase<"BoolLiteral"> {
   readonly value: boolean;
 }
 
-export interface IdentifierNode extends Node<"Identifier"> {
+export interface IdentifierNode extends NodeBase<"Identifier"> {
   readonly name: string;
 }
 
-export interface UnaryExpressionNode extends Node<"UnaryExpression"> {
+export interface UnaryExpressionNode extends NodeBase<"UnaryExpression"> {
   readonly op: UnaryOperation;
   readonly exp: ExpressionNode;
 }
 
-export interface BinaryExpressionNode extends Node<"BinaryExpression"> {
+export interface BinaryExpressionNode extends NodeBase<"BinaryExpression"> {
   readonly op: BinaryOperation;
   readonly left: ExpressionNode;
   readonly right: ExpressionNode;
 }
 
-export interface IfExpressionNode extends Node<"IfExpression"> {
+export interface IfExpressionNode extends NodeBase<"IfExpression"> {
   readonly cond: ExpressionNode;
   readonly then: ExpressionNode;
   readonly else: ExpressionNode;
 }
 
-export interface LetExpressionNode extends Node<"LetExpression"> {
+export interface LetExpressionNode extends NodeBase<"LetExpression"> {
   readonly identifier: IdentifierNode;
   readonly binding: ExpressionNode;
   readonly exp: ExpressionNode;
 }
 
-export interface FunctionDefinitionNode extends Node<"FunctionDefinition"> {
+export interface FunctionDefinitionNode extends NodeBase<"FunctionDefinition"> {
   readonly param: IdentifierNode;
   readonly body: ExpressionNode;
 }
 
-export interface LetRecExpressionNode extends Node<"LetRecExpression"> {
+export interface LetRecExpressionNode extends NodeBase<"LetRecExpression"> {
   readonly identifier: IdentifierNode;
   readonly binding: FunctionDefinitionNode;
   readonly exp: ExpressionNode;
 }
 
-export interface FunctionApplicationNode extends Node<"FunctionApplication"> {
+export interface FunctionApplicationNode extends NodeBase<"FunctionApplication"> {
   readonly callee: ExpressionNode;
   readonly argument: ExpressionNode;
 }
 
-export interface EmptyListNode extends Node<"EmptyList"> {}
+export interface EmptyListNode extends NodeBase<"EmptyList"> {}
 
-export interface ListConstructorNode extends Node<"ListConstructor"> {
+export interface ListConstructorNode extends NodeBase<"ListConstructor"> {
   readonly head: ExpressionNode;
   readonly tail: ExpressionNode;
 }
 
-export interface IdPatternNode extends Node<"IdPattern"> {
+export interface IdPatternNode extends NodeBase<"IdPattern"> {
   readonly identifier: IdentifierNode;
 }
 
-export interface ListConsPatternNode extends Node<"ListConsPattern"> {
+export interface ListConsPatternNode extends NodeBase<"ListConsPattern"> {
   readonly head: MatchPatternElementNode;
   readonly tail: MatchPatternNode;
 }
 
-export interface WildcardPatternNode extends Node<"WildcardPattern"> {}
+export interface WildcardPatternNode extends NodeBase<"WildcardPattern"> {}
 
-export interface EmptyListPatternNode extends Node<"EmptyListPattern"> {}
+export interface EmptyListPatternNode extends NodeBase<"EmptyListPattern"> {}
 
 export type MatchPatternElementNode = IdPatternNode | WildcardPatternNode | EmptyListPatternNode;
 export type MatchPatternNode = ListConsPatternNode | MatchPatternElementNode;
 
-export interface PatternMatchClauseNode extends Node<"PatternMatchClause"> {
+export interface PatternMatchClauseNode extends NodeBase<"PatternMatchClause"> {
   readonly pattern: MatchPatternNode;
   readonly exp: ExpressionNode;
 }
 
-export interface MatchOrClauseNode extends Node<"MatchOrClause"> {
+export interface MatchOrClauseNode extends NodeBase<"MatchOrClause"> {
   readonly patternMatch: PatternMatchClauseNode;
   readonly or: MatchClauseNode;
 }
 
 export type MatchClauseNode = PatternMatchClauseNode | MatchOrClauseNode;
 
-export interface MatchExpressionNode extends Node<"MatchExpression"> {
+export interface MatchExpressionNode extends NodeBase<"MatchExpression"> {
   readonly exp: ExpressionNode;
   readonly matchClause: MatchClauseNode;
 }
@@ -231,3 +231,5 @@ export type ExpressionNode =
   | FunctionApplicationNode
   | ListConstructorNode
   | MatchExpressionNode;
+
+export type Node = ExpressionNode | MatchClauseNode | MatchPatternNode;

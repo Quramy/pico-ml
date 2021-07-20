@@ -26,3 +26,25 @@ export function createTreeTraverser<T extends Tree, Context, Result>(
   };
   return fn;
 }
+
+function isTree(x: any): x is Tree<any> {
+  return typeof x === "object" && typeof x["kind"] === "string";
+}
+
+export function createVisitorFunctions(visitorKeys: readonly string[]) {
+  const forEachChild = <T extends Tree>(root: T, cb: (node: T) => void) => {
+    for (const key of visitorKeys) {
+      const childOrChildren = (root as any)[key];
+      if (!childOrChildren) continue;
+      if (Array.isArray(childOrChildren)) {
+        childOrChildren.forEach(x => {
+          if (!isTree(x)) return;
+          cb(x as T);
+        });
+      } else if (isTree(childOrChildren)) {
+        cb(childOrChildren as T);
+      }
+    }
+  };
+  return { forEachChild };
+}

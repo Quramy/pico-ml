@@ -1,5 +1,5 @@
 export type { Result } from "./structure";
-export { mapValue, ok, error } from "./structure";
+export { mapValue, ok, error, createTreeTraverser, createVisitorFunctions } from "./structure";
 export * from "./parser-util";
 export * from "./syntax";
 export * from "./evaluate";

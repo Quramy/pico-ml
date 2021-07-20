@@ -13,7 +13,7 @@ export function pos2location(content: string, pos: number) {
   return { line: l, character: c };
 }
 
-export function location2pos(content: string, location: { line: number; character: number }) {
+export function location2pos(content: string, location: { readonly line: number; readonly character: number }) {
   let il = 0,
     ic = 0;
   for (let i = 0; i < content.length; i++) {
