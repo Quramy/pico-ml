@@ -46,19 +46,11 @@ describe(compile, () => {
       expect(await evaluateMain("1.0 *. 3.0", toFloat)).toBe(3.0);
     });
 
-    it("should compile numeric compare operation", async () => {
-      expect(await evaluateMain("1>0", toBoolean)).toBe(true);
-      expect(await evaluateMain("1>1", toBoolean)).toBe(false);
-      expect(await evaluateMain("1>2", toBoolean)).toBe(false);
+    it("should compile compare operation", async () => {
       expect(await evaluateMain("0<1", toBoolean)).toBe(true);
-      expect(await evaluateMain("1<1", toBoolean)).toBe(false);
-      expect(await evaluateMain("2<1", toBoolean)).toBe(false);
-      expect(await evaluateMain("1>=0", toBoolean)).toBe(true);
-      expect(await evaluateMain("1>=1", toBoolean)).toBe(true);
-      expect(await evaluateMain("1>=2", toBoolean)).toBe(false);
-      expect(await evaluateMain("0<=1", toBoolean)).toBe(true);
-      expect(await evaluateMain("1<=1", toBoolean)).toBe(true);
-      expect(await evaluateMain("2<=1", toBoolean)).toBe(false);
+      expect(await evaluateMain("0.<1.", toBoolean)).toBe(true);
+      expect(await evaluateMain("false < true.", toBoolean)).toBe(true);
+      expect(await evaluateMain("[] < false:[].", toBoolean)).toBe(true);
     });
 
     it("should compile logical operation", async () => {

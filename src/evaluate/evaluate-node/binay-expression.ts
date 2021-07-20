@@ -1,7 +1,7 @@
 import { mapValue } from "../../structure";
 import { EvaluateNodeFn } from "../types";
 import { map2num, map2bool } from "../utils";
-import { compare } from "../comparetor";
+import { compare } from "./comparetor";
 
 export const binaryExpression: EvaluateNodeFn<"BinaryExpression"> = (expression, env, next) =>
   mapValue(

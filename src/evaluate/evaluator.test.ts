@@ -38,44 +38,9 @@ describe(evaluate, () => {
 
   test("comparison", () => {
     expect(parseAndEval("0 < 1")).toBe(true);
-    expect(parseAndEval("1 < 1")).toBe(false);
-    expect(parseAndEval("2 < 1")).toBe(false);
-
-    expect(parseAndEval("1 > 0")).toBe(true);
-    expect(parseAndEval("1 > 1")).toBe(false);
-    expect(parseAndEval("1 > 2")).toBe(false);
-
-    expect(parseAndEval("0 <= 1")).toBe(true);
-    expect(parseAndEval("1 <= 1")).toBe(true);
-    expect(parseAndEval("2 <= 1")).toBe(false);
-
-    expect(parseAndEval("1 >= 0")).toBe(true);
-    expect(parseAndEval("1 >= 1")).toBe(true);
-    expect(parseAndEval("1 >= 2")).toBe(false);
-
     expect(parseAndEval("0.0 < 1.0")).toBe(true);
-    expect(parseAndEval("0.0 > 1.0")).toBe(false);
-    expect(parseAndEval("0.0 <= 1.0")).toBe(true);
-    expect(parseAndEval("0.0 >= 1.0")).toBe(false);
-    expect(parseAndEval("1.0 <= 1.0")).toBe(true);
-    expect(parseAndEval("1.0 >= 1.0")).toBe(true);
-
-    expect(parseAndEval("[] < []")).toBe(false);
-    expect(parseAndEval("[] > []")).toBe(false);
-    expect(parseAndEval("[] < 1::[]")).toBe(false);
-    expect(parseAndEval("[] > 1::[]")).toBe(false);
-    expect(parseAndEval("[] <= []")).toBe(true);
-    expect(parseAndEval("1::[] <= 1::[]")).toBe(true);
-    expect(parseAndEval("1::[] >= 1::[]")).toBe(true);
-    expect(parseAndEval("[] <= 1::[]")).toBe(false);
-    expect(parseAndEval("[] >= 1::[]")).toBe(false);
-
     expect(parseAndEval("false < true")).toBe(true);
-    expect(parseAndEval("false > true")).toBe(false);
-    expect(parseAndEval("false <= true")).toBe(true);
-    expect(parseAndEval("false >= true")).toBe(false);
-    expect(parseAndEval("true <= true")).toBe(true);
-    expect(parseAndEval("true >= true")).toBe(true);
+    expect(parseAndEval("[] < 1::[]")).toBe(true);
 
     expect(parseAndEval("1 == 0")).toBe(false);
     expect(parseAndEval("1 == 1")).toBe(true);

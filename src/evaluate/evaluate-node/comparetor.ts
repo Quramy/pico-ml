@@ -1,7 +1,7 @@
-import { ok, error, mapValue, Result } from "../structure";
-import { ComparisonOperations } from "../syntax";
-import { EvaluationValue } from "./types";
-import { isClosure, isList } from "./utils";
+import { ok, error, mapValue, Result } from "../../structure";
+import { ComparisonOperations } from "../../syntax";
+import { EvaluationValue } from "../types";
+import { isClosure, isList } from "../utils";
 
 function deepEqual<T extends EvaluationValue>(left: T, right: T): Result<boolean> {
   if (typeof left === "number" || typeof left === "boolean") {
@@ -59,13 +59,28 @@ export function compare(left: EvaluationValue, right: EvaluationValue, op: Compa
       return ok((left.length === 0 && right.length === 0) || left === right);
     } else if (op.kind === "NotEqual") {
       return ok((left.length !== 0 || right.length !== 0) && left !== right);
-    } else if (op.kind === "LessThan" || op.kind === "GreaterThan") {
-      return ok(false);
     } else {
-      return deepEqual(left, right);
+      if (left.length === 0 || right.length === 0) {
+        return compare(left.length, right.length, op);
+      } else {
+        const [lHead, ...lTail] = left;
+        const [rHead, ...rTail] = right;
+        return compare(lHead, rHead, op).mapValue(headComparisonResult => {
+          if (headComparisonResult) {
+            return ok(true);
+          }
+          return deepEqual(lHead, rHead).mapValue(isHeadEqual => {
+            if (isHeadEqual) {
+              return compare(lTail, rTail, op);
+            } else {
+              return ok(false);
+            }
+          });
+        });
+      }
     }
   }
   return error({
-    message: "Type mismatch.",
+    message: `Type mismatch. left: ${left}, right: ${right}`,
   });
 }
