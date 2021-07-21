@@ -48,7 +48,9 @@ describe(getPrimaryType, () => {
   Object.keys(fixture).forEach(input => {
     test(`Primary type for: "${input}"`, () => {
       const expectedValue = (fixture as Record<string, () => string>)[input]();
-      const { expressionType, substitutions } = parse(input).mapValue(getPrimaryType).unwrap();
+      const {
+        rootPrimaryType: { expressionType, substitutions },
+      } = parse(input).mapValue(getPrimaryType).unwrap();
       const printer = createTypePrinter({ remapWithSubstitutions: substitutions });
       expect(printer(expressionType)).toBe(expectedValue);
     });

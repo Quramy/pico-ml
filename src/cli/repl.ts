@@ -114,8 +114,8 @@ function evaluateExpression(code: string, reporter: ErrorReporter) {
     return;
   }
 
-  const typePrinter = createTypePrinter({ remapWithSubstitutions: typeResult.value.substitutions });
-  const typeStr = typePrinter(typeResult.value.expressionType);
+  const typePrinter = createTypePrinter({ remapWithSubstitutions: typeResult.value.rootPrimaryType.substitutions });
+  const typeStr = typePrinter(typeResult.value.rootPrimaryType.expressionType);
   process.stdout.write(`${color.yellow("==> ")}${typeStr}: `);
 
   // evaluation

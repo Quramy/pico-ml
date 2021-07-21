@@ -1,7 +1,7 @@
 import { Observable, BehaviorSubject } from "rxjs";
-import { BinaryOutputOptions } from "pico-ml";
+import { OutputOptions } from "pico-ml";
 
-export type SettingsOptions = BinaryOutputOptions;
+export type SettingsOptions = OutputOptions;
 
 type PartialOptions = { [K in keyof SettingsOptions]?: boolean };
 
@@ -12,6 +12,7 @@ export interface SettingsService {
 
 export const defaultSettingOptions: SettingsOptions = {
   enableNameSection: true,
+  dispatchUsingInferredType: true,
 };
 
 export function createSettingsService(): SettingsService {

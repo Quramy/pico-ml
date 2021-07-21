@@ -6,5 +6,5 @@ export * from "./evaluate";
 export * from "./type-checker";
 export * from "./compiler";
 export * from "./string-util";
-export type { BinaryOutputOptions } from "./wasm";
 export { printAST, generateBinary } from "./wasm";
+export * from "./types";

@@ -48,6 +48,7 @@ export interface TypeParemeterGenerator {
 export interface PrimaryTypeContext {
   readonly generator: TypeParemeterGenerator;
   readonly env: TypeEnvironment;
+  readonly ptMap?: Map<string, TypeValue>;
 }
 
 export interface TypeEquation {
@@ -72,11 +73,18 @@ export interface PrimaryTypeValue {
   readonly substitutions: readonly TypeSubstitution[];
   readonly expressionType: TypeValue;
 }
-export type PrimaryTypeResult = Result<PrimaryTypeValue, TypeError>;
+export type PrimaryTypeNodeResult = Result<PrimaryTypeValue, TypeError>;
 
 export type PrimaryTypeNode<K extends ExpressionNode["kind"]> = TraverserCallbackFn<
   ExpressionNode,
   PrimaryTypeContext,
-  PrimaryTypeResult,
+  PrimaryTypeNodeResult,
   K
 >;
+
+export interface PrimaryTypeResultValue {
+  readonly rootPrimaryType: PrimaryTypeValue;
+  readonly typeValueMap: Map<string, TypeValue>;
+}
+
+export type PrimaryTypeResult = Result<PrimaryTypeResultValue, TypeError>;

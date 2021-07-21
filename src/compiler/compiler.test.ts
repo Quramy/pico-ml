@@ -1,4 +1,6 @@
 import { parse } from "../syntax";
+import { ok } from "../structure";
+import { TypeValue, getPrimaryType } from "../type-checker";
 import { generateBinary } from "../wasm";
 import { compile } from "./compiler";
 import { toNumber, toFloat, toBoolean, toListAnd, toList } from "./js-bindings";
@@ -46,11 +48,18 @@ describe(compile, () => {
       expect(await evaluateMain("1.0 *. 3.0", toFloat)).toBe(3.0);
     });
 
-    it("should compile compare operation", async () => {
+    it("should compile compare operation without optimization", async () => {
       expect(await evaluateMain("0<1", toBoolean)).toBe(true);
       expect(await evaluateMain("0.<1.", toBoolean)).toBe(true);
       expect(await evaluateMain("false < true", toBoolean)).toBe(true);
       expect(await evaluateMain("[] < false::[]", toBoolean)).toBe(true);
+    });
+
+    it("should compile compare operation with optimization", async () => {
+      expect(await evaluateMain("0<1", toBoolean, { dispatchUsingInferredType: true })).toBe(true);
+      expect(await evaluateMain("0.<1.", toBoolean, { dispatchUsingInferredType: true })).toBe(true);
+      expect(await evaluateMain("false < true", toBoolean, { dispatchUsingInferredType: true })).toBe(true);
+      expect(await evaluateMain("[] < false::[]", toBoolean, { dispatchUsingInferredType: true })).toBe(true);
     });
 
     it("should compile logical operation", async () => {
@@ -164,17 +173,25 @@ describe(compile, () => {
   });
 });
 
-const compile2wasm = (code: string) =>
+const compile2wasm = (code: string, { dispatchUsingInferredType }: { readonly dispatchUsingInferredType: boolean }) =>
   parse(code)
-    .mapValue(compile)
+    .mapValue(ast => {
+      if (!dispatchUsingInferredType) {
+        return ok({ ast, typeValueMap: new Map<string, TypeValue>() });
+      } else {
+        return getPrimaryType(ast).map(({ typeValueMap }) => ({ ast, typeValueMap }));
+      }
+    })
+    .mapValue(({ ast, typeValueMap }) => compile(ast, { dispatchUsingInferredType, typeValueMap }))
     .mapValue(mod => generateBinary(mod, { enableNameSection: false }))
     .unwrap();
 
 const evaluateMain = async (
   code: string,
   converter: (instance: WebAssembly.Instance, value: number) => any = toNumber,
+  options: { readonly dispatchUsingInferredType: boolean } = { dispatchUsingInferredType: false },
 ) => {
-  const source = compile2wasm(code);
+  const source = compile2wasm(code, options);
   const { instance } = await WebAssembly.instantiate(source, {});
   const v = (instance.exports["main"] as Function)() as number;
   return converter(instance, v);

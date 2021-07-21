@@ -94,7 +94,36 @@ function createFormatter(instance: WebAssembly.Instance, pt: TypeValue): (value:
   throw new Error(`${pt.kind}`);
 }
 
-const forEachChild = createVisitorFunctions(mlVisitorKeys).forEachChild;
+const typePrinter = createTypePrinter();
+
+const { forEachChild, visitEachChild } = createVisitorFunctions(mlVisitorKeys);
+
+type ExtendedExpressionNode = ExpressionNode & {
+  typeInfo?: string;
+};
+
+function createExtendedAstTree(
+  parseResult: ParseResult<ExpressionNode>,
+  typeMapResult: Result<Map<string, TypeValue>, ParseError | TypeError>,
+) {
+  return parseResult.map(rootNode => {
+    if (!typeMapResult.ok) {
+      return rootNode;
+    }
+    const typeMap = typeMapResult.value;
+    const visitor = (node: ExpressionNode): ExtendedExpressionNode => {
+      const x = visitEachChild(node, visitor);
+      if (!node._nodeId) return x;
+      const typeValue = typeMap.get(node._nodeId);
+      if (!typeValue) return x;
+      return {
+        typeInfo: typePrinter(typeValue),
+        ...x,
+      };
+    };
+    return visitor(rootNode);
+  });
+}
 
 export interface Location {
   readonly line: number;
@@ -109,6 +138,8 @@ export interface Program {
   readonly selectedAstNode$: Observable<Result<{ readonly path: string[]; readonly found: Node | null }>>;
   readonly parseResult$: Observable<ParseResult<ExpressionNode>>;
   readonly primaryType$: Observable<Result<TypeValue, ParseError | TypeError>>;
+  readonly ast$: Observable<Result<ExtendedExpressionNode, ParseError>>;
+  readonly typeValueMap$: Observable<Result<Map<string, TypeValue>, ParseError | TypeError>>;
   readonly diagnostics$: Observable<readonly Diagnostic[]>;
   readonly wat$: Observable<Result<string>>;
   readonly wasm$: Observable<Result<Uint8Array>>;
@@ -149,16 +180,23 @@ export function createProgram({ code$, settingsService }: CreateProgramOptions) 
     share(),
   );
 
-  const primaryType$ = parseResult$.pipe(
-    map(pr =>
-      pr
-        .error(err => ({ ...err, messageWithTypes: undefined }))
-        .mapValue(getPrimaryType)
-        .map(({ expressionType }) => expressionType),
-    ),
+  const primaryTypeResult$ = parseResult$.pipe(
+    map(pr => pr.error(err => ({ ...err, messageWithTypes: undefined })).mapValue(getPrimaryType)),
+    share(),
   );
-  const compileResult$ = combineLatest(parseResult$, primaryType$).pipe(
-    map(([pr, ptr]) => mapValue(pr, ptr)(expression => compile(expression))),
+  const typeValueMap$ = primaryTypeResult$.pipe(map(ptr => ptr.map(v => v.typeValueMap)));
+  const primaryType$ = primaryTypeResult$.pipe(map(ptr => ptr.map(v => v.rootPrimaryType.expressionType)));
+  const ast$ = combineLatest(parseResult$, typeValueMap$).pipe(
+    map(([pr, tvmr]) => createExtendedAstTree(pr, tvmr)),
+    share(),
+  );
+  const compileResult$ = combineLatest(parseResult$, typeValueMap$, settingsService.settings$).pipe(
+    map(([pr, tvmr, { dispatchUsingInferredType }]) =>
+      mapValue(
+        pr,
+        tvmr,
+      )((expression, typeValueMap) => compile(expression, { typeValueMap, dispatchUsingInferredType })),
+    ),
     share(),
   );
   const wat$ = compileResult$.pipe(
@@ -172,7 +210,7 @@ export function createProgram({ code$, settingsService }: CreateProgramOptions) 
     map(([code, ptr]) => {
       if (!ptr.ok) {
         const { line, character } = pos2location(code, ptr.value.occurence.loc!.pos);
-        const text = ptr.value.messageWithTypes ? ptr.value.messageWithTypes(createTypePrinter()) : ptr.value.message;
+        const text = ptr.value.messageWithTypes ? ptr.value.messageWithTypes(typePrinter) : ptr.value.message;
         const diagnostic: Diagnostic = {
           type: "error",
           text,
@@ -210,6 +248,8 @@ export function createProgram({ code$, settingsService }: CreateProgramOptions) 
     selection$,
     selectedAstNode$,
     parseResult$,
+    typeValueMap$,
+    ast$,
     primaryType$,
     diagnostics$,
     wat$,

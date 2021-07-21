@@ -8,6 +8,7 @@ type Props = {
 };
 
 export function AppHeader({ className }: Props) {
+  const [dispatchUsingInferredType, setDispatchUsingInferredType] = useSettingsValue("dispatchUsingInferredType");
   const [enableNameSection, setenableNameSection] = useSettingsValue("enableNameSection");
   const [settingsIsOpening, setSettingsIsOpening] = useState(false);
   const closeCb = useCallback(() => setSettingsIsOpening(false), []);
@@ -32,12 +33,26 @@ export function AppHeader({ className }: Props) {
                 <label>
                   <input
                     type="checkbox"
+                    checked={dispatchUsingInferredType}
+                    onChange={() => setDispatchUsingInferredType(!dispatchUsingInferredType)}
+                  />
+                  <span>Static Dispatch</span>
+                </label>
+                <p>
+                  If enabled, compilation of some polymorphic operations will be optimized using inferred type
+                  statically.
+                </p>
+              </div>
+              <div className={styles.settingItem}>
+                <label>
+                  <input
+                    type="checkbox"
                     checked={enableNameSection}
                     onChange={() => setenableNameSection(!enableNameSection)}
                   />
                   <span>Emit WASM name section</span>
                 </label>
-                <p>If enabled, the names of functions or variables are refrected to Chrome devtool. </p>
+                <p>If enabled, the names of functions or variables are reflected to Chrome devtool. </p>
               </div>
             </div>
           )}
