@@ -48,6 +48,7 @@ export interface TypeParemeterGenerator {
 export interface PrimaryTypeContext {
   readonly generator: TypeParemeterGenerator;
   readonly env: TypeEnvironment;
+  readonly ptMap?: Map<string, TypeValue>;
 }
 
 export interface TypeEquation {
