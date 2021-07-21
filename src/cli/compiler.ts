@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { OutputOptions } from "../types";
 import { parse } from "../syntax";
 import { getPrimaryType, createTypePrinter } from "../type-checker";
 import { compile } from "../compiler";
@@ -10,13 +11,17 @@ import { ErrorReporter } from "./error-reporter";
 import { createParser } from "./parser";
 import { ConsoleLogger } from "./logger";
 
-type MainOption = {
+interface MainOption extends OutputOptions {
   readonly inputFilename: string;
   readonly target?: "binary" | "wat";
-  readonly enableNameSection?: boolean;
-};
+}
 
-async function main({ inputFilename, target = "binary", enableNameSection = false }: MainOption) {
+async function main({
+  inputFilename,
+  target = "binary",
+  enableNameSection = false,
+  dispatchUsingInferredType = true,
+}: MainOption) {
   const errorReporter = new ErrorReporter(process.cwd(), msg => console.error(msg));
   const code = await fs.readFile(inputFilename, "utf-8").catch(err => {
     console.error(err.message);
@@ -47,7 +52,8 @@ async function main({ inputFilename, target = "binary", enableNameSection = fals
     process.exit(1);
   }
 
-  const compileResult = compile(parseResult.value);
+  const { typeValueMap } = typeCheckResult.value;
+  const compileResult = compile(parseResult.value, { dispatchUsingInferredType, typeValueMap });
   if (!compileResult.ok) {
     errorReporter.outputError({
       message: color.red("Type error: " + compileResult.value.message),
@@ -91,6 +97,10 @@ const cliParser = createParser({
       type: "boolean",
       description: "Emit WASM name section.",
     },
+    noOptimize: {
+      type: "boolean",
+      description: "Disable compile optimization.",
+    },
   },
   logger: new ConsoleLogger(),
 });
@@ -109,5 +119,6 @@ if (!inputFilename) {
 }
 const target = options.text ? "wat" : "binary";
 const enableNameSection = options.enableNameSection;
+const dispatchUsingInferredType = !options.noOptimize;
 
-main({ inputFilename, target, enableNameSection });
+main({ inputFilename, target, enableNameSection, dispatchUsingInferredType });

@@ -1,5 +1,6 @@
 import { InstructionNode, LocalVarNode } from "../wasm";
-import { CompilationContext, Environment } from "./types";
+
+import { CompilationContext, Environment, CompileNodeOptions } from "./types";
 import { ModuleDefinition } from "./module-builder";
 import { getAllocatorModuleDefinition } from "./assets/modules/alloc";
 import { getFloatModuleDefinition } from "./assets/modules/float";
@@ -12,7 +13,7 @@ import { FunctionDefinitionStack } from "./function-definition-stack";
 import { MatcherDefinitionStack } from "./matcher-definition-stack";
 import { getComparatorModuleDefinition } from "./assets/modules/comparator";
 
-export class Context implements CompilationContext {
+export class Context implements CompilationContext<CompileNodeOptions> {
   private _env: Environment = createRootEnvironment();
   private _instructions: InstructionNode[] = [];
   private _enabledAllocator = false;
@@ -29,7 +30,11 @@ export class Context implements CompilationContext {
   public readonly funcDefStack = new FunctionDefinitionStack();
   public readonly matcherDefStack = new MatcherDefinitionStack();
 
-  constructor() {}
+  constructor(private readonly _options: CompileNodeOptions = { typeValueMap: new Map() }) {}
+
+  getOptions() {
+    return this._options;
+  }
 
   pushInstruction(instruction: InstructionNode | readonly InstructionNode[]) {
     if (Array.isArray(instruction)) {
@@ -116,7 +121,8 @@ export class Context implements CompilationContext {
     this._dependencies.push(getMatcherModuleDefinition());
   }
 
-  useComparator(op: "lt" | "le" | "gt" | "ge") {
+  useComparator(op: "lt" | "le" | "gt" | "ge" | "eq") {
+    if (op === "eq") return;
     this._enableComparator = true;
     this._includingComparisonOperators = [...new Set([...this._includingComparisonOperators, op])];
   }

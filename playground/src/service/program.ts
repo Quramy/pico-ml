@@ -190,8 +190,13 @@ export function createProgram({ code$, settingsService }: CreateProgramOptions) 
     map(([pr, tvmr]) => createExtendedAstTree(pr, tvmr)),
     share(),
   );
-  const compileResult$ = combineLatest(parseResult$, primaryType$).pipe(
-    map(([pr, ptr]) => mapValue(pr, ptr)(expression => compile(expression))),
+  const compileResult$ = combineLatest(parseResult$, typeValueMap$, settingsService.settings$).pipe(
+    map(([pr, tvmr, { dispatchUsingInferredType }]) =>
+      mapValue(
+        pr,
+        tvmr,
+      )((expression, typeValueMap) => compile(expression, { typeValueMap, dispatchUsingInferredType })),
+    ),
     share(),
   );
   const wat$ = compileResult$.pipe(

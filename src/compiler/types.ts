@@ -1,6 +1,7 @@
 import { Result, ResultErrorBase, TraverserCallbackFn } from "../structure";
 import { Position } from "../parser-util";
 import { ExpressionNode, IdentifierNode } from "../syntax";
+import { TypeValue } from "../type-checker";
 import { ModuleNode, InstructionNode, ExprNode, LocalVarNode, IdentifierNode as WATIdNode } from "../wasm";
 
 export interface CompilationError extends ResultErrorBase {
@@ -8,6 +9,11 @@ export interface CompilationError extends ResultErrorBase {
 }
 
 export type CompilationValue = readonly InstructionNode[];
+
+export interface CompileNodeOptions {
+  readonly typeValueMap: Map<string, TypeValue>;
+  readonly dispatchUsingInferredType?: boolean;
+}
 
 export type CompiledModuleResult = Result<ModuleNode, CompilationError>;
 export type CompilationResult = Result<CompilationValue, CompilationError>;
@@ -21,7 +27,8 @@ export interface DefinitionStack<T, S = number> {
   readonly leave: (param: T) => S;
 }
 
-export interface CompilationContext {
+export interface CompilationContext<T extends {} = {}> {
+  readonly getOptions: () => T;
   readonly pushInstruction: (instruction: InstructionNode | readonly InstructionNode[]) => void;
   readonly useAllocator: () => void;
   readonly useFloat: () => void;
@@ -29,7 +36,7 @@ export interface CompilationContext {
   readonly useTuple: () => void;
   readonly useEnvironment: () => void;
   readonly useMatcher: () => void;
-  readonly useComparator: (op: "lt" | "le" | "gt" | "ge") => void;
+  readonly useComparator: (op: "lt" | "le" | "gt" | "ge" | "eq") => void;
   readonly useLocalVar: (node: LocalVarNode) => void;
   readonly setEnv: (env: Environment) => void;
   readonly getEnv: () => Environment;
@@ -41,7 +48,7 @@ export interface CompilationContext {
 
 export type CompileNodeFn<K extends ExpressionNode["kind"]> = TraverserCallbackFn<
   ExpressionNode,
-  CompilationContext,
+  CompilationContext<CompileNodeOptions>,
   CompilationResult,
   K
 >;

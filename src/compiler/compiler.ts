@@ -1,7 +1,8 @@
 import { createTreeTraverser } from "../structure";
 import { factory } from "../wasm";
 import { ExpressionNode } from "../syntax";
-import { CompilationContext, CompilationResult, CompiledModuleResult } from "./types";
+
+import { CompilationContext, CompilationResult, CompiledModuleResult, CompileNodeOptions } from "./types";
 import { Context } from "./compiler-context";
 import { ModuleBuilder } from "./module-builder";
 
@@ -20,7 +21,7 @@ import { functionApplication } from "./compile-node/function-application";
 import { letExpression } from "./compile-node/let-expression";
 import { letRecExpression } from "./compile-node/let-rec-expression";
 
-const traverse = createTreeTraverser<ExpressionNode, CompilationContext, CompilationResult>({
+const traverse = createTreeTraverser<ExpressionNode, CompilationContext<CompileNodeOptions>, CompilationResult>({
   boolLiteral,
   emptyList,
   intLiteral,
@@ -37,8 +38,11 @@ const traverse = createTreeTraverser<ExpressionNode, CompilationContext, Compila
   letRecExpression,
 });
 
-export function compile(node: ExpressionNode): CompiledModuleResult {
-  const ctx = new Context();
+export function compile(
+  node: ExpressionNode,
+  options: CompileNodeOptions = { dispatchUsingInferredType: true, typeValueMap: new Map() },
+): CompiledModuleResult {
+  const ctx = new Context(options);
   return traverse(node, ctx).mapValue(instructions => {
     const mainFunc = factory.func(
       factory.funcSig([], [factory.valueType("i32")]),

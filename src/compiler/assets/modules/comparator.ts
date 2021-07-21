@@ -243,3 +243,15 @@ export function getComparatorModuleDefinition({
 export function compareInstr(op: ComparisonOperators) {
   return [factory.controlInstr("call", [factory.identifier(`__comparator_poly_${op}__`)])];
 }
+
+export function intCompareInstr(op: ComparisonOperators) {
+  if (op !== "eq") {
+    return [factory.int32NumericInstr(`i32.${op}_s`)];
+  } else {
+    return [factory.int32NumericInstr("i32.eq")];
+  }
+}
+
+export function floatCompareInstr(op: ComparisonOperators) {
+  return [factory.float64NumericInstr(`f64.${op}`)];
+}
