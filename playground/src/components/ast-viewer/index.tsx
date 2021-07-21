@@ -5,7 +5,7 @@ import { JsonViewer } from "../json";
 import { useProgramStream } from "../../hooks/use-program-stream";
 
 export function AstViewer() {
-  const astResult = useProgramStream("parseResult$");
+  const astResult = useProgramStream("ast$");
   const selectedNodeResult = useProgramStream("selectedAstNode$");
   const shouldCollapse = (field: CollapsedFieldProps) => {
     const { _nodeId } = field.src as any as { readonly _nodeId: string };
