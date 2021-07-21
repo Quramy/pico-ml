@@ -1,7 +1,7 @@
 import { useResult } from "../../structure";
-import { PrimaryTypeResult, TypeValue, TypeSubstitution } from "../types";
+import { PrimaryTypeNodeResult, TypeValue, TypeSubstitution } from "../types";
 
-const { ok: _ok, error } = useResult<PrimaryTypeResult>();
+const { ok: _ok, error } = useResult<PrimaryTypeNodeResult>();
 
 const ok = (type: TypeValue, substitutions: readonly TypeSubstitution[] = [] as const) =>
   _ok({

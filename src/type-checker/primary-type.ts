@@ -1,5 +1,5 @@
 import { ExpressionNode } from "../syntax";
-import { PrimaryTypeNode, PrimaryTypeResult, PrimaryTypeContext } from "./types";
+import { PrimaryTypeResult, PrimaryTypeNode, PrimaryTypeNodeResult, PrimaryTypeContext, TypeValue } from "./types";
 import { createRootEnvironment, ParmGenerator } from "./type-environment";
 import { createTreeTraverser, TraverserCallbackFnMap } from "../structure/traverser";
 import { intLiteral } from "./pt-node/int-literal";
@@ -17,7 +17,7 @@ import { letExpression } from "./pt-node/let-expression";
 import { letRecExpression } from "./pt-node/let-rec-expression";
 import { functionApplication } from "./pt-node/function-application";
 
-type FunctionMap = TraverserCallbackFnMap<ExpressionNode, PrimaryTypeContext, PrimaryTypeResult>;
+type FunctionMap = TraverserCallbackFnMap<ExpressionNode, PrimaryTypeContext, PrimaryTypeNodeResult>;
 
 function wrapWithFunctionAfterTraverse(mapObj: FunctionMap): FunctionMap {
   const keys = Object.keys(mapObj) as (keyof FunctionMap)[];
@@ -36,8 +36,9 @@ function wrapWithFunctionAfterTraverse(mapObj: FunctionMap): FunctionMap {
   return ret;
 }
 
-export function getPrimaryType(expression: ExpressionNode) {
-  return createTreeTraverser<ExpressionNode, PrimaryTypeContext, PrimaryTypeResult>(
+export function getPrimaryType(expression: ExpressionNode): PrimaryTypeResult {
+  const ptMap = new Map<string, TypeValue>();
+  return createTreeTraverser<ExpressionNode, PrimaryTypeContext, PrimaryTypeNodeResult>(
     wrapWithFunctionAfterTraverse({
       intLiteral,
       floatLiteral,
@@ -57,6 +58,6 @@ export function getPrimaryType(expression: ExpressionNode) {
   )(expression, {
     generator: new ParmGenerator(),
     env: createRootEnvironment(),
-    ptMap: new Map(),
-  });
+    ptMap,
+  }).map(ptv => ({ rootPrimaryType: ptv, typeValueMap: ptMap }));
 }
