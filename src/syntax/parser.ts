@@ -232,26 +232,6 @@ const and: Parser<ExpressionNode> = rightAssociate(use(() => comp))(
   ...loc(left, token, right),
 }));
 
-// const eq: Parser<ExpressionNode> = leftAssociate(use(() => comp))(
-//   oneOf(symbolToken("=="), symbolToken("!=")),
-//   oneOf(
-//     use(() => comp),
-//     use(() => cond),
-//     use(() => match),
-//     use(() => func),
-//     use(() => bind),
-//   ),
-// )((left, token, right) => ({
-//   kind: "BinaryExpression",
-//   op: {
-//     kind: token.symbol === "==" ? "Equal" : "NotEqual",
-//     token,
-//   },
-//   left,
-//   right,
-//   ...loc(left, token, right),
-// }));
-
 const comp: Parser<ExpressionNode> = leftAssociate(use(() => cons))(
   oneOf(
     symbolToken("<"),
