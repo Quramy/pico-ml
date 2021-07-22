@@ -28,7 +28,7 @@ export const unaryExpression: PrimaryTypeNode<"UnaryExpression"> = (expression, 
         ]).mapValue(unified =>
           result.ok(
             {
-              kind: "Int",
+              kind: "Float",
               referencedFrom: expression,
             },
             unified,

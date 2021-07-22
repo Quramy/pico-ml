@@ -4,8 +4,10 @@ import { createTypePrinter } from "./unparse";
 
 const fixture: Record<string, () => string> = {
   "1": () => "int",
-  "-1": () => "int",
+  "1.": () => "float",
   true: () => "bool",
+  "-1": () => "int",
+  "-.1.": () => "float",
   "0 + 0": () => "int",
   "0 - 0": () => "int",
   "0 * 0": () => "int",
