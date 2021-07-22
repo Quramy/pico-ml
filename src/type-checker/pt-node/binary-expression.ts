@@ -1,5 +1,11 @@
 import { mapValue } from "../../structure";
-import { BinaryOperation, BinaryExpressionNode } from "../../syntax";
+import {
+  BinaryOperation,
+  BinaryExpressionNode,
+  LogicalOperation,
+  ArithmericOperations,
+  FArithmericOperations,
+} from "../../syntax";
 import { PrimaryTypeNode, TypeEquation, PrimaryTypeValue } from "../types";
 import { result } from "./_result";
 import { unify } from "../unify";
@@ -12,14 +18,34 @@ const RESULT_TYPES_BY_OP: Record<BinaryOperation["kind"], "Bool" | "Int" | "Floa
   FSub: "Float",
   Multiply: "Int",
   FMultiply: "Float",
+  Div: "Int",
+  FDiv: "Float",
+  Or: "Bool",
+  And: "Bool",
   LessThan: "Bool",
   LessEqualThan: "Bool",
   GreaterThan: "Bool",
   GreaterEqualThan: "Bool",
-  Or: "Bool",
-  And: "Bool",
   Equal: "Bool",
   NotEqual: "Bool",
+  PEqual: "Bool",
+  PNotEqual: "Bool",
+};
+
+const OPERAND_TYPES_BY_OP: Record<
+  (LogicalOperation | ArithmericOperations | FArithmericOperations)["kind"],
+  "Bool" | "Int" | "Float"
+> = {
+  Add: "Int",
+  FAdd: "Float",
+  Sub: "Int",
+  FSub: "Float",
+  Multiply: "Int",
+  FMultiply: "Float",
+  Div: "Int",
+  FDiv: "Float",
+  Or: "Bool",
+  And: "Bool",
 };
 
 function getConstraints(
@@ -33,26 +59,21 @@ function getConstraints(
     expression.op.kind === "GreaterThan" ||
     expression.op.kind === "GreaterEqualThan" ||
     expression.op.kind === "Equal" ||
-    expression.op.kind === "NotEqual"
+    expression.op.kind === "NotEqual" ||
+    expression.op.kind === "PEqual" ||
+    expression.op.kind === "PNotEqual"
   ) {
     return [{ lhs: left.expressionType, rhs: right.expressionType }];
   }
 
-  const expectedNodeType =
-    expression.op.kind === "And" || expression.op.kind === "Or"
-      ? "Bool"
-      : expression.op.kind === "Add" || expression.op.kind === "Sub" || expression.op.kind === "Multiply"
-      ? "Int"
-      : "Float";
-
   return [
     {
       lhs: left.expressionType,
-      rhs: { kind: expectedNodeType, referencedFrom: expression.left },
+      rhs: { kind: OPERAND_TYPES_BY_OP[expression.op.kind], referencedFrom: expression.left },
     },
     {
       lhs: right.expressionType,
-      rhs: { kind: expectedNodeType, referencedFrom: expression.right },
+      rhs: { kind: OPERAND_TYPES_BY_OP[expression.op.kind], referencedFrom: expression.right },
     },
   ];
 }

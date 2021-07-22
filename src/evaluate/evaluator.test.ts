@@ -18,10 +18,12 @@ describe(evaluate, () => {
     expect(parseAndEval("1 + 1")).toBe(2);
     expect(parseAndEval("1 - 1")).toBe(0);
     expect(parseAndEval("2 * 3")).toBe(6);
+    expect(parseAndEval("4 / 2")).toBe(2);
 
     expect(parseAndEval("1.1 +. 1.1")).toBe(2.2);
     expect(parseAndEval("1.1 -. 1.1")).toBe(0.0);
     expect(parseAndEval("2.0 *. 3.1")).toBe(6.2);
+    expect(parseAndEval("4.0 /. 2.0")).toBe(2.0);
   });
 
   test("logical operation", () => {
@@ -38,26 +40,13 @@ describe(evaluate, () => {
 
   test("comparison", () => {
     expect(parseAndEval("0 < 1")).toBe(true);
-    expect(parseAndEval("0.0 < 1.0")).toBe(true);
-    expect(parseAndEval("false < true")).toBe(true);
-    expect(parseAndEval("[] < 1::[]")).toBe(true);
-
-    expect(parseAndEval("1 == 0")).toBe(false);
-    expect(parseAndEval("1 == 1")).toBe(true);
-
-    expect(parseAndEval("1 != 0")).toBe(true);
-    expect(parseAndEval("1 != 1")).toBe(false);
-
-    expect(parseAndEval("true == true")).toBe(true);
-    expect(parseAndEval("true == false")).toBe(false);
-    expect(parseAndEval("true != true")).toBe(false);
-    expect(parseAndEval("true != false")).toBe(true);
-
-    expect(parseAndEval("[] == []")).toBe(true);
-    expect(parseAndEval("[] != []")).toBe(false);
-    expect(parseAndEval("1::[] == 1::[]")).toBe(false);
-    expect(parseAndEval("1::[] != 1::[]")).toBe(true);
-    expect(parseAndEval("let list = 1::[] in list == list")).toBe(true);
+    expect(parseAndEval("0 <= 1")).toBe(true);
+    expect(parseAndEval("0 > 1")).toBe(false);
+    expect(parseAndEval("0 >= 1")).toBe(false);
+    expect(parseAndEval("0 = 1")).toBe(false);
+    expect(parseAndEval("0 <> 1")).toBe(true);
+    expect(parseAndEval("0 == 1")).toBe(false);
+    expect(parseAndEval("0 != 1")).toBe(true);
 
     expect(parseAndEval("(fun x -> x) == (fun x -> x)")).toBe(false);
     expect(parseAndEval("(fun x -> x) != (fun x -> x)")).toBe(true);

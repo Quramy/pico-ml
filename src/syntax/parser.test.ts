@@ -8,9 +8,11 @@ import {
   FMinusOperation,
   AddOperation,
   MultiplyOperation,
+  DivOperation,
   FAddOperation,
   FSubOperation,
   FMultiplyOperation,
+  FDivOperation,
   BoolLiteralNode,
   IdentifierNode,
   LTOperation,
@@ -21,6 +23,8 @@ import {
   OrOperation,
   EQOperation,
   NEOperation,
+  PEQOperation,
+  PNEOperation,
   SubOperation,
   EmptyListNode,
 } from "./types";
@@ -77,6 +81,14 @@ const multiply: MultiplyOperation = {
   },
 };
 
+const div: DivOperation = {
+  kind: "Div",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "/",
+  },
+};
+
 const fAdd: FAddOperation = {
   kind: "FAdd",
   token: {
@@ -98,6 +110,14 @@ const fMultiply: FMultiplyOperation = {
   token: {
     tokenKind: "Symbol",
     symbol: "*.",
+  },
+};
+
+const fDiv: FDivOperation = {
+  kind: "FDiv",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "/.",
   },
 };
 
@@ -148,17 +168,32 @@ const and: AndOperation = {
     symbol: "&&",
   },
 };
-
 const eq: EQOperation = {
   kind: "Equal",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "=",
+  },
+};
+
+const ne: NEOperation = {
+  kind: "NotEqual",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "<>",
+  },
+};
+
+const peq: PEQOperation = {
+  kind: "PEqual",
   token: {
     tokenKind: "Symbol",
     symbol: "==",
   },
 };
 
-const ne: NEOperation = {
-  kind: "NotEqual",
+const pne: PNEOperation = {
+  kind: "PNotEqual",
   token: {
     tokenKind: "Symbol",
     symbol: "!=",
@@ -222,6 +257,34 @@ const fixture = {
     expr({
       kind: "BinaryExpression",
       op: fSub,
+      left: float(1.0),
+      right: float(2.0),
+    }),
+  "1*2": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: multiply,
+      left: num(1),
+      right: num(2),
+    }),
+  "1.*.2.": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: fMultiply,
+      left: float(1.0),
+      right: float(2.0),
+    }),
+  "1/2": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: div,
+      left: num(1),
+      right: num(2),
+    }),
+  "1./.2.": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: fDiv,
       left: float(1.0),
       right: float(2.0),
     }),
@@ -306,26 +369,40 @@ const fixture = {
       left: num(1),
       right: num(2),
     }),
-  "1==2": () =>
+  "1=2": () =>
     expr({
       kind: "BinaryExpression",
       op: eq,
       left: num(1),
       right: num(2),
     }),
-  "1!=2": () =>
+  "1<>2": () =>
     expr({
       kind: "BinaryExpression",
       op: ne,
       left: num(1),
       right: num(2),
     }),
-  "1<2==1<2": () =>
+  "1==2": () =>
     expr({
       kind: "BinaryExpression",
-      op: eq,
+      op: peq,
+      left: num(1),
+      right: num(2),
+    }),
+  "1!=2": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: pne,
+      left: num(1),
+      right: num(2),
+    }),
+  "1<2==false": () =>
+    expr({
+      kind: "BinaryExpression",
+      op: peq,
       left: fixture["1<2"](),
-      right: fixture["1<2"](),
+      right: bool(false),
     }),
   "1<2::[]": () =>
     expr({

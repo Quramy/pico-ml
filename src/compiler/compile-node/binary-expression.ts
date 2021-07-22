@@ -61,6 +61,20 @@ export const binaryExpression: CompileNodeFn<"BinaryExpression"> = (node, ctx, n
           factory.int32NumericInstr("i32.add", []),
         ]);
       }
+      case "Div":
+        return ok([
+          ...left,
+          factory.int32NumericInstr("i32.const", [factory.int32(1)]),
+          factory.int32NumericInstr("i32.shr_s"),
+          ...right,
+          factory.int32NumericInstr("i32.const", [factory.int32(1)]),
+          factory.int32NumericInstr("i32.shr_s"),
+          factory.int32NumericInstr("i32.div_s"),
+          factory.int32NumericInstr("i32.const", [factory.int32(1)]),
+          factory.int32NumericInstr("i32.shl"),
+          factory.int32NumericInstr("i32.const", [factory.int32(1)]),
+          factory.int32NumericInstr("i32.or"),
+        ]);
       case "Or":
         return ok([...left, ...right, factory.int32NumericInstr("i32.or", [])]);
       case "And":
@@ -74,8 +88,12 @@ export const binaryExpression: CompileNodeFn<"BinaryExpression"> = (node, ctx, n
       case "GreaterEqualThan":
         return dispatchCompareInstr("ge");
       case "Equal":
-        return ok([...left, ...right, factory.int32NumericInstr("i32.eq", [])]);
+        return dispatchCompareInstr("eq");
       case "NotEqual":
+        return dispatchCompareInstr("ne");
+      case "PEqual":
+        return ok([...left, ...right, factory.int32NumericInstr("i32.eq", [])]);
+      case "PNotEqual":
         return ok([...left, ...right, factory.int32NumericInstr("i32.ne", [])]);
       case "FAdd": {
         ctx.useFloat();
@@ -110,9 +128,20 @@ export const binaryExpression: CompileNodeFn<"BinaryExpression"> = (node, ctx, n
           ...storeFloatValueInstr(),
         ]);
       }
+      case "FDiv": {
+        ctx.useFloat();
+        return ok([
+          ...left,
+          ...getFloatValueInstr(),
+          ...right,
+          ...getFloatValueInstr(),
+          factory.float64NumericInstr("f64.div", []),
+          ...storeFloatValueInstr(),
+        ]);
+      }
       default:
         // @ts-expect-error
-        return error({ message: `invalid kind: ${op.kind}` });
+        return error({ message: `invalid kind: ${node.op.kind}` });
     }
   }).error(err => ({ ...err, occurence: node }));
 };

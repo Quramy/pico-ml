@@ -23,7 +23,7 @@ export class Context implements CompilationContext<CompileNodeOptions> {
   private _enabledEnv = false;
   private _enabledMatcher = false;
   private _enableComparator = false;
-  private _includingComparisonOperators: ("lt" | "le" | "gt" | "ge")[] = [];
+  private _includingComparisonOperators: ("lt" | "le" | "gt" | "ge" | "eq" | "ne")[] = [];
   private _localsMainFn: LocalVarNode[] = [];
   private _dependencies: ModuleDefinition[] = [];
 
@@ -121,8 +121,7 @@ export class Context implements CompilationContext<CompileNodeOptions> {
     this._dependencies.push(getMatcherModuleDefinition());
   }
 
-  useComparator(op: "lt" | "le" | "gt" | "ge" | "eq") {
-    if (op === "eq") return;
+  useComparator(op: "lt" | "le" | "gt" | "ge" | "eq" | "ne") {
     this._enableComparator = true;
     this._includingComparisonOperators = [...new Set([...this._includingComparisonOperators, op])];
   }

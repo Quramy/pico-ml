@@ -1,6 +1,6 @@
 import { generateBinaryWithDefaultOptions as generateBinary } from "../../../wasm";
 import { ModuleBuilder } from "../../module-builder";
-import { getComparatorModuleDefinition } from "./comparator";
+import { getComparatorModuleDefinition, ComparisonOperators } from "./comparator";
 import { fromNumber2IntBase, toBoolean } from "../../js-bindings";
 
 describe(getComparatorModuleDefinition, () => {
@@ -28,6 +28,18 @@ describe(getComparatorModuleDefinition, () => {
       expect(await compInt(1, "ge", 0, true)).toBe(true);
       expect(await compInt(1, "ge", 2, true)).toBe(false);
     });
+
+    it("should calc eq correctly", async () => {
+      expect(await compInt(1, "eq", 1, true)).toBe(true);
+      expect(await compInt(1, "eq", 0, true)).toBe(false);
+      expect(await compInt(1, "eq", 2, true)).toBe(false);
+    });
+
+    it("should calc ne correctly", async () => {
+      expect(await compInt(1, "ne", 1, true)).toBe(false);
+      expect(await compInt(1, "ne", 0, true)).toBe(true);
+      expect(await compInt(1, "ne", 2, true)).toBe(true);
+    });
   });
 
   describe("with integer operand", () => {
@@ -54,9 +66,21 @@ describe(getComparatorModuleDefinition, () => {
       expect(await compInt(1, "ge", 0)).toBe(true);
       expect(await compInt(1, "ge", 2)).toBe(false);
     });
+
+    it("should calc eq correctly", async () => {
+      expect(await compInt(1, "eq", 1)).toBe(true);
+      expect(await compInt(1, "eq", 0)).toBe(false);
+      expect(await compInt(1, "eq", 2)).toBe(false);
+    });
+
+    it("should calc ne correctly", async () => {
+      expect(await compInt(1, "ne", 1)).toBe(false);
+      expect(await compInt(1, "ne", 0)).toBe(true);
+      expect(await compInt(1, "ne", 2)).toBe(true);
+    });
   });
 
-  describe("with boolean comparison", () => {
+  describe("with boolean operand", () => {
     it("should calc lt correctly", async () => {
       expect(await compBool(false, "lt", false)).toBe(false);
       expect(await compBool(true, "lt", true)).toBe(false);
@@ -83,6 +107,20 @@ describe(getComparatorModuleDefinition, () => {
       expect(await compBool(true, "ge", true)).toBe(true);
       expect(await compBool(true, "ge", false)).toBe(true);
       expect(await compBool(false, "ge", true)).toBe(false);
+    });
+
+    it("should calc eq correctly", async () => {
+      expect(await compBool(false, "eq", false)).toBe(true);
+      expect(await compBool(true, "eq", true)).toBe(true);
+      expect(await compBool(true, "eq", false)).toBe(false);
+      expect(await compBool(false, "eq", true)).toBe(false);
+    });
+
+    it("should calc ne correctly", async () => {
+      expect(await compBool(false, "ne", false)).toBe(false);
+      expect(await compBool(true, "ne", true)).toBe(false);
+      expect(await compBool(true, "ne", false)).toBe(true);
+      expect(await compBool(false, "ne", true)).toBe(true);
     });
   });
 
@@ -612,10 +650,160 @@ describe(getComparatorModuleDefinition, () => {
         ).toBe(true);
       });
     });
+
+    describe("eq", () => {
+      test("[] = [] = true", async () => {
+        expect(
+          await compWithModuleCode(
+            `
+              (module
+                (func $test (result i32)
+                  ;; L1
+                  call $__list_new__
+
+                  ;; L2
+                  call $__list_new__
+
+                  call $__comparator_poly_eq__
+                )
+                (export "test" (func $test))
+              )
+            `,
+          ),
+        ).toBe(true);
+      });
+
+      test("[] = true::[] = false", async () => {
+        expect(
+          await compWithModuleCode(
+            `
+              (module
+                (func $test (result i32)
+                  ;; L1
+                  call $__list_new__
+
+                  ;; L2
+                  call $__list_new__
+                  i32.const 1
+                  call $__list_push__
+
+                  call $__comparator_poly_eq__
+                )
+                (export "test" (func $test))
+              )
+            `,
+          ),
+        ).toBe(false);
+      });
+
+      test("true::true::[] = true::true::[] = true", async () => {
+        expect(
+          await compWithModuleCode(
+            `
+              (module
+                (func $test (result i32)
+                  ;; L1
+                  call $__list_new__
+                  i32.const 1
+                  call $__list_push__
+                  i32.const 1
+                  call $__list_push__
+
+                  ;; L2
+                  call $__list_new__
+                  i32.const 1
+                  call $__list_push__
+                  i32.const 1
+                  call $__list_push__
+
+                  call $__comparator_poly_eq__
+                )
+                (export "test" (func $test))
+              )
+            `,
+          ),
+        ).toBe(true);
+      });
+    });
+
+    describe("ne", () => {
+      test("[] <> [] = false", async () => {
+        expect(
+          await compWithModuleCode(
+            `
+              (module
+                (func $test (result i32)
+                  ;; L1
+                  call $__list_new__
+
+                  ;; L2
+                  call $__list_new__
+
+                  call $__comparator_poly_ne__
+                )
+                (export "test" (func $test))
+              )
+            `,
+          ),
+        ).toBe(false);
+      });
+
+      test("[] <> true::[] = true", async () => {
+        expect(
+          await compWithModuleCode(
+            `
+              (module
+                (func $test (result i32)
+                  ;; L1
+                  call $__list_new__
+
+                  ;; L2
+                  call $__list_new__
+                  i32.const 1
+                  call $__list_push__
+
+                  call $__comparator_poly_ne__
+                )
+                (export "test" (func $test))
+              )
+            `,
+          ),
+        ).toBe(true);
+      });
+
+      test("true::true::[] <> true::true::[] = true", async () => {
+        expect(
+          await compWithModuleCode(
+            `
+              (module
+                (func $test (result i32)
+                  ;; L1
+                  call $__list_new__
+                  i32.const 1
+                  call $__list_push__
+                  i32.const 1
+                  call $__list_push__
+
+                  ;; L2
+                  call $__list_new__
+                  i32.const 1
+                  call $__list_push__
+                  i32.const 1
+                  call $__list_push__
+
+                  call $__comparator_poly_ne__
+                )
+                (export "test" (func $test))
+              )
+            `,
+          ),
+        ).toBe(false);
+      });
+    });
   });
 });
 
-async function compInt(left: number, op: "lt" | "le" | "gt" | "ge", right: number, simple = false) {
+async function compInt(left: number, op: ComparisonOperators, right: number, simple = false) {
   const buf = new ModuleBuilder({
     name: "test",
     code: `
@@ -640,7 +828,7 @@ async function compInt(left: number, op: "lt" | "le" | "gt" | "ge", right: numbe
   );
 }
 
-async function compBool(left: boolean, op: "lt" | "le" | "gt" | "ge", right: boolean) {
+async function compBool(left: boolean, op: ComparisonOperators, right: boolean) {
   const buf = new ModuleBuilder({
     name: "test",
     code: `
@@ -662,7 +850,7 @@ async function compBool(left: boolean, op: "lt" | "le" | "gt" | "ge", right: boo
   return toBoolean(instance, (instance.exports["test"] as Function)(left ? 1 : 0, right ? 1 : 0));
 }
 
-async function compFloat(left: number, op: "lt" | "le" | "gt" | "ge", right: number) {
+async function compFloat(left: number, op: ComparisonOperators, right: number) {
   const buf = new ModuleBuilder({
     name: "test",
     code: `
@@ -691,7 +879,11 @@ async function compWithModuleCode(code: string) {
     name: "test",
     code,
     dependencies: [
-      getComparatorModuleDefinition({ includeOperators: ["lt", "le", "gt", "ge"], withFloat: true, withList: true }),
+      getComparatorModuleDefinition({
+        includeOperators: ["lt", "le", "gt", "ge", "eq", "ne"],
+        withFloat: true,
+        withList: true,
+      }),
     ],
   })
     .build()
