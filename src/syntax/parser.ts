@@ -35,12 +35,11 @@ import { symbolToken, integerToken, keywordToken, variableToken, decimalToken } 
  * func         ::= "fun" id "->" expr
  * bind         ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
  * or           ::= and("||" (and | cond | match | func | bind))*
- * and          ::= eq("&&" (eq | cond | match | func | bind))*
- * eq           ::= comp(("==" | "!=") (comp | cond | match | func | bind))*
- * comp         ::= cons(("<" | ">" | "<=" | ">=" | "==" | "!=") (cons | cond | match | func | bind))*
+ * and          ::= comp("&&" (comp | cond | match | func | bind))*
+ * comp         ::= cons(("<" | ">" | "<=" | ">=" | "==" | "!=" | "=" | "<>") (cons | cond | match | func | bind))*
  * cons         ::= add("::" (add | cond | match | func | bind))*
  * add          ::= mul(("+" | "-" | "+." | "-.") (mul | cond | match | func | bind))*
- * mul          ::= prfx(("*" | "*.") (prfx | cond | match | func | bind))*
+ * mul          ::= prfx(("*" | "/" | "*." | "/.") (prfx | cond | match | func | bind))*
  * prfx         ::= app | ("-" | "-.") app
  * app          ::= prim (prim)*
  * prim         ::= id | bool | int | decimal | empty | group
@@ -213,10 +212,10 @@ const or: Parser<ExpressionNode> = rightAssociate(use(() => and))(
   ...loc(left, token, right),
 }));
 
-const and: Parser<ExpressionNode> = rightAssociate(use(() => eq))(
+const and: Parser<ExpressionNode> = rightAssociate(use(() => comp))(
   symbolToken("&&"),
   oneOf(
-    use(() => eq),
+    use(() => comp),
     use(() => cond),
     use(() => match),
     use(() => func),
@@ -233,28 +232,37 @@ const and: Parser<ExpressionNode> = rightAssociate(use(() => eq))(
   ...loc(left, token, right),
 }));
 
-const eq: Parser<ExpressionNode> = leftAssociate(use(() => comp))(
-  oneOf(symbolToken("=="), symbolToken("!=")),
-  oneOf(
-    use(() => comp),
-    use(() => cond),
-    use(() => match),
-    use(() => func),
-    use(() => bind),
-  ),
-)((left, token, right) => ({
-  kind: "BinaryExpression",
-  op: {
-    kind: token.symbol === "==" ? "Equal" : "NotEqual",
-    token,
-  },
-  left,
-  right,
-  ...loc(left, token, right),
-}));
+// const eq: Parser<ExpressionNode> = leftAssociate(use(() => comp))(
+//   oneOf(symbolToken("=="), symbolToken("!=")),
+//   oneOf(
+//     use(() => comp),
+//     use(() => cond),
+//     use(() => match),
+//     use(() => func),
+//     use(() => bind),
+//   ),
+// )((left, token, right) => ({
+//   kind: "BinaryExpression",
+//   op: {
+//     kind: token.symbol === "==" ? "Equal" : "NotEqual",
+//     token,
+//   },
+//   left,
+//   right,
+//   ...loc(left, token, right),
+// }));
 
 const comp: Parser<ExpressionNode> = leftAssociate(use(() => cons))(
-  oneOf(symbolToken("<"), symbolToken(">"), symbolToken("<="), symbolToken(">=")),
+  oneOf(
+    symbolToken("<"),
+    symbolToken(">"),
+    symbolToken("<="),
+    symbolToken(">="),
+    symbolToken("="),
+    symbolToken("<>"),
+    symbolToken("=="),
+    symbolToken("!="),
+  ),
   oneOf(
     use(() => cons),
     use(() => cond),
@@ -272,7 +280,17 @@ const comp: Parser<ExpressionNode> = leftAssociate(use(() => cons))(
         ? "GreaterThan"
         : token.symbol === "<="
         ? "LessEqualThan"
-        : "GreaterEqualThan",
+        : token.symbol === ">="
+        ? "GreaterEqualThan"
+        : token.symbol === "="
+        ? "Equal"
+        : token.symbol === "<>"
+        ? "NotEqual"
+        : token.symbol === "=="
+        ? "PEqual"
+        : token.symbol === "!="
+        ? "PNotEqual"
+        : (undefined as never),
     token,
   },
   left,
@@ -323,7 +341,7 @@ const add: Parser<ExpressionNode> = leftAssociate(use(() => mul))(
 }));
 
 const mul: Parser<ExpressionNode> = leftAssociate(use(() => prfx))(
-  oneOf(symbolToken("*"), symbolToken("*.")),
+  oneOf(symbolToken("*"), symbolToken("*."), symbolToken("/"), symbolToken("/.")),
   oneOf(
     use(() => prfx),
     use(() => cond),
@@ -333,13 +351,19 @@ const mul: Parser<ExpressionNode> = leftAssociate(use(() => prfx))(
   ),
 )((left, token, right) => ({
   kind: "BinaryExpression",
-  op:
-    token.symbol === "*"
-      ? {
-          kind: "Multiply",
-          token,
-        }
-      : { kind: "FMultiply", token },
+  op: {
+    kind:
+      token.symbol === "*"
+        ? "Multiply"
+        : token.symbol === "*."
+        ? "FMultiply"
+        : token.symbol === "/"
+        ? "Div"
+        : token.symbol === "/."
+        ? "FDiv"
+        : (null as never),
+    token,
+  },
   left,
   right,
   ...loc(left, token, right),

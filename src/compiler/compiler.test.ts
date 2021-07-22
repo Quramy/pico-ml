@@ -40,12 +40,14 @@ describe(compile, () => {
       expect(await evaluateMain("1+1")).toBe(2);
       expect(await evaluateMain("1-2")).toBe(-1);
       expect(await evaluateMain("1*3")).toBe(3);
+      expect(await evaluateMain("4/2")).toBe(2);
     });
 
     it("should compile floating number arithmetic operations", async () => {
       expect(await evaluateMain("1.0 +. 1.0", toFloat)).toBe(2.0);
       expect(await evaluateMain("1.0 -. 2.0", toFloat)).toBe(-1.0);
       expect(await evaluateMain("1.0 *. 3.0", toFloat)).toBe(3.0);
+      expect(await evaluateMain("4.0 /. 2.0", toFloat)).toBe(2.0);
     });
 
     it("should compile compare operation without optimization", async () => {
@@ -73,7 +75,7 @@ describe(compile, () => {
       expect(await evaluateMain("false && false", toBoolean)).toBe(false);
     });
 
-    it("should compile equality", async () => {
+    it("should compile physical equality", async () => {
       expect(await evaluateMain("0==0", toBoolean)).toBe(true);
       expect(await evaluateMain("0==1", toBoolean)).toBe(false);
       expect(await evaluateMain("0!=0", toBoolean)).toBe(false);

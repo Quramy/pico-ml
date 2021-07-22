@@ -36,8 +36,10 @@ export function compare(left: EvaluationValue, right: EvaluationValue, op: Compa
       case "GreaterEqualThan":
         return ok(left >= right);
       case "Equal":
+      case "PEqual":
         return ok(left === right);
       case "NotEqual":
+      case "PNotEqual":
         return ok(left !== right);
       default:
         // @ts-expect-error
@@ -45,9 +47,9 @@ export function compare(left: EvaluationValue, right: EvaluationValue, op: Compa
     }
   }
   if (isClosure(left) || isClosure(right)) {
-    if (op.kind === "Equal") {
+    if (op.kind === "PEqual") {
       return ok(left === right);
-    } else if (op.kind === "NotEqual") {
+    } else if (op.kind === "PNotEqual") {
       return ok(left !== right);
     }
     return error({
@@ -55,9 +57,9 @@ export function compare(left: EvaluationValue, right: EvaluationValue, op: Compa
     });
   }
   if (isList(left) && isList(right)) {
-    if (op.kind === "Equal") {
+    if (op.kind === "PEqual") {
       return ok((left.length === 0 && right.length === 0) || left === right);
-    } else if (op.kind === "NotEqual") {
+    } else if (op.kind === "PNotEqual") {
       return ok((left.length !== 0 || right.length !== 0) && left !== right);
     } else {
       if (left.length === 0 || right.length === 0) {

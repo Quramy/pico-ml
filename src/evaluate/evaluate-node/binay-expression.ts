@@ -18,6 +18,9 @@ export const binaryExpression: EvaluateNodeFn<"BinaryExpression"> = (expression,
       case "Multiply":
       case "FMultiply":
         return map2num(left, right)((l, r) => l * r).error(err => ({ ...err, occurence: expression }));
+      case "Div":
+      case "FDiv":
+        return map2num(left, right)((l, r) => l / r).error(err => ({ ...err, occurence: expression }));
       case "Or":
         return map2bool(left, right)((l, r) => l || r).error(err => ({ ...err, occurence: expression }));
       case "And":
@@ -28,6 +31,8 @@ export const binaryExpression: EvaluateNodeFn<"BinaryExpression"> = (expression,
       case "GreaterEqualThan":
       case "Equal":
       case "NotEqual":
+      case "PEqual":
+      case "PNotEqual":
         return compare(left, right, expression.op).error(err => ({ ...err, occurence: expression }));
       default:
         // @ts-expect-error

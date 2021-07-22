@@ -3,7 +3,7 @@ import { ModuleDefinition } from "../../module-builder";
 import { getListModuleDefinition } from "./list";
 import { getFloatModuleDefinition } from "./float";
 
-export type ComparisonOperators = "eq" | "lt" | "le" | "gt" | "ge";
+export type ComparisonOperators = "eq" | "ne" | "lt" | "le" | "gt" | "ge";
 
 const polymorphicComparatorTemplate = (
   op: ComparisonOperators,
@@ -199,6 +199,16 @@ const polymorphicEqualityTemplate = ({
   `;
 };
 
+const polymorphicNotEqualityTemplate = () => `
+  (func $__comparator_poly_ne__ (param $left i32) (param $right i32) (result i32)
+    local.get $left
+    local.get $right
+    call $__comparator_poly_eq__
+    i32.const 1
+    i32.xor
+  )
+`;
+
 export function getComparatorModuleDefinition({
   includeOperators,
   withFloat,
@@ -208,6 +218,8 @@ export function getComparatorModuleDefinition({
   readonly withFloat: boolean;
   readonly withList: boolean;
 }): ModuleDefinition {
+  const hasEq = includeOperators.indexOf("eq") !== -1;
+  const hasNe = includeOperators.indexOf("ne") !== -1;
   const hasLt = includeOperators.indexOf("lt") !== -1;
   const hasLe = includeOperators.indexOf("le") !== -1;
   const hasGt = includeOperators.indexOf("gt") !== -1;
@@ -230,7 +242,9 @@ export function getComparatorModuleDefinition({
         ${hasGe && withList ? listComparatorTemplate("ge") : ""}
 
         ${withList ? listComparatorTemplate("eq") : ""}
-        ${withList ? polymorphicEqualityTemplate({ withList, withFloat }) : ""}
+        ${hasEq || hasNe || withList ? polymorphicEqualityTemplate({ withList, withFloat }) : ""}
+
+        ${hasNe ? polymorphicNotEqualityTemplate() : ""}
       )
     `,
     dependencies: [
@@ -245,10 +259,10 @@ export function compareInstr(op: ComparisonOperators) {
 }
 
 export function intCompareInstr(op: ComparisonOperators) {
-  if (op !== "eq") {
-    return [factory.int32NumericInstr(`i32.${op}_s`)];
+  if (op == "eq" || op == "ne") {
+    return [factory.int32NumericInstr(`i32.${op}`)];
   } else {
-    return [factory.int32NumericInstr("i32.eq")];
+    return [factory.int32NumericInstr(`i32.${op}_s`)];
   }
 }
 

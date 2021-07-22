@@ -7,18 +7,21 @@ export type Symbols = readonly [
   "+",
   "-",
   "*",
+  "/",
   "<",
   ">",
   "<=",
   ">=",
+  "=",
+  "<>",
+  "==",
+  "!=",
   "+.",
+  "/.",
   "-.",
   "*.",
   "||",
   "&&",
-  "==",
-  "!=",
-  "=",
   "->",
   "[",
   "]",
@@ -83,11 +86,15 @@ export interface SubOperation extends OperationBase<"Sub"> {}
 
 export interface MultiplyOperation extends OperationBase<"Multiply"> {}
 
+export interface DivOperation extends OperationBase<"Div"> {}
+
 export interface FAddOperation extends OperationBase<"FAdd"> {}
 
 export interface FSubOperation extends OperationBase<"FSub"> {}
 
 export interface FMultiplyOperation extends OperationBase<"FMultiply"> {}
+
+export interface FDivOperation extends OperationBase<"FDiv"> {}
 
 export interface OrOperation extends OperationBase<"Or"> {}
 
@@ -105,19 +112,26 @@ export interface EQOperation extends OperationBase<"Equal"> {}
 
 export interface NEOperation extends OperationBase<"NotEqual"> {}
 
-export type ComparisonOperations = LTOperation | LEOperation | GTOperation | GEOperation | EQOperation | NEOperation;
+export interface PEQOperation extends OperationBase<"PEqual"> {}
+
+export interface PNEOperation extends OperationBase<"PNotEqual"> {}
+
+export type ArithmericOperations = AddOperation | SubOperation | MultiplyOperation | DivOperation;
+export type FArithmericOperations = FAddOperation | FSubOperation | FMultiplyOperation | FDivOperation;
+export type ComparisonOperations =
+  | LTOperation
+  | LEOperation
+  | GTOperation
+  | GEOperation
+  | EQOperation
+  | NEOperation
+  | PEQOperation
+  | PNEOperation;
+
+export type LogicalOperation = OrOperation | AndOperation;
 
 export type UnaryOperation = MinusOperation | FMinusOperation;
-export type BinaryOperation =
-  | AddOperation
-  | SubOperation
-  | MultiplyOperation
-  | FAddOperation
-  | FSubOperation
-  | FMultiplyOperation
-  | OrOperation
-  | AndOperation
-  | ComparisonOperations;
+export type BinaryOperation = ArithmericOperations | FArithmericOperations | ComparisonOperations | LogicalOperation;
 
 export interface NodeBase<T extends string> extends Tree<T>, Position {}
 

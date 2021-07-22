@@ -1,5 +1,14 @@
 import { compare } from "./comparetor";
-import { LTOperation, LEOperation, GTOperation, GEOperation } from "../../syntax";
+import {
+  LTOperation,
+  LEOperation,
+  GTOperation,
+  GEOperation,
+  EQOperation,
+  PEQOperation,
+  NEOperation,
+  PNEOperation,
+} from "../../syntax";
 
 const lt: LTOperation = {
   kind: "LessThan",
@@ -33,6 +42,38 @@ const ge: GEOperation = {
   },
 };
 
+const eq: EQOperation = {
+  kind: "Equal",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "=",
+  },
+};
+
+const ne: NEOperation = {
+  kind: "NotEqual",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "<>",
+  },
+};
+
+const peq: PEQOperation = {
+  kind: "PEqual",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "==",
+  },
+};
+
+const pne: PNEOperation = {
+  kind: "PNotEqual",
+  token: {
+    tokenKind: "Symbol",
+    symbol: "!=",
+  },
+};
+
 describe(compare, () => {
   describe("with number operand", () => {
     it("should be calc lt correctlry", () => {
@@ -58,9 +99,33 @@ describe(compare, () => {
       expect(compare(1, 0, ge).unwrap()).toBe(true);
       expect(compare(0, 1, ge).unwrap()).toBe(false);
     });
+
+    it("should be calc eq correctlry", () => {
+      expect(compare(1, 1, eq).unwrap()).toBe(true);
+      expect(compare(1, 0, eq).unwrap()).toBe(false);
+      expect(compare(0, 1, eq).unwrap()).toBe(false);
+    });
+
+    it("should be calc ne correctlry", () => {
+      expect(compare(1, 1, ne).unwrap()).toBe(false);
+      expect(compare(1, 0, ne).unwrap()).toBe(true);
+      expect(compare(0, 1, ne).unwrap()).toBe(true);
+    });
+
+    it("should be calc physical eq correctlry", () => {
+      expect(compare(1, 1, peq).unwrap()).toBe(true);
+      expect(compare(1, 0, peq).unwrap()).toBe(false);
+      expect(compare(0, 1, peq).unwrap()).toBe(false);
+    });
+
+    it("should be calc physical ne correctlry", () => {
+      expect(compare(1, 1, pne).unwrap()).toBe(false);
+      expect(compare(1, 0, pne).unwrap()).toBe(true);
+      expect(compare(0, 1, pne).unwrap()).toBe(true);
+    });
   });
 
-  describe("with boolean comparison", () => {
+  describe("with boolean operand", () => {
     it("should be calc lt correctlry", () => {
       expect(compare(false, false, lt).unwrap()).toBe(false);
       expect(compare(true, true, lt).unwrap()).toBe(false);
@@ -88,9 +153,37 @@ describe(compare, () => {
       expect(compare(true, false, ge).unwrap()).toBe(true);
       expect(compare(false, true, ge).unwrap()).toBe(false);
     });
+
+    it("should be calc eq correctlry", () => {
+      expect(compare(false, false, eq).unwrap()).toBe(true);
+      expect(compare(true, true, eq).unwrap()).toBe(true);
+      expect(compare(true, false, eq).unwrap()).toBe(false);
+      expect(compare(false, true, eq).unwrap()).toBe(false);
+    });
+
+    it("should be calc ne correctlry", () => {
+      expect(compare(false, false, ne).unwrap()).toBe(false);
+      expect(compare(true, true, ne).unwrap()).toBe(false);
+      expect(compare(true, false, ne).unwrap()).toBe(true);
+      expect(compare(false, true, ne).unwrap()).toBe(true);
+    });
+
+    it("should be calc physical eq correctlry", () => {
+      expect(compare(false, false, peq).unwrap()).toBe(true);
+      expect(compare(true, true, peq).unwrap()).toBe(true);
+      expect(compare(true, false, peq).unwrap()).toBe(false);
+      expect(compare(false, true, peq).unwrap()).toBe(false);
+    });
+
+    it("should be calc physical ne correctlry", () => {
+      expect(compare(false, false, pne).unwrap()).toBe(false);
+      expect(compare(true, true, pne).unwrap()).toBe(false);
+      expect(compare(true, false, pne).unwrap()).toBe(true);
+      expect(compare(false, true, pne).unwrap()).toBe(true);
+    });
   });
 
-  describe("with list comparison", () => {
+  describe("with list operand", () => {
     it("should be calc lt correctlry", () => {
       expect(compare([false], [], lt).unwrap()).toBe(false);
       expect(compare([false], [false], lt).unwrap()).toBe(false);
@@ -121,6 +214,30 @@ describe(compare, () => {
       expect(compare([false], [true], ge).unwrap()).toBe(false);
       expect(compare([false], [], ge).unwrap()).toBe(true);
       expect(compare([true], [false, true], ge).unwrap()).toBe(true);
+    });
+
+    it("should be calc eq correctlry", () => {
+      expect(compare([], [], eq).unwrap()).toBe(true);
+      expect(compare([true], [], eq).unwrap()).toBe(false);
+      expect(compare([true], [true], eq).unwrap()).toBe(true);
+    });
+
+    it("should be calc ne correctlry", () => {
+      expect(compare([], [], ne).unwrap()).toBe(false);
+      expect(compare([true], [], ne).unwrap()).toBe(true);
+      expect(compare([true], [true], ne).unwrap()).toBe(false);
+    });
+
+    it("should be calc physical eq correctlry", () => {
+      expect(compare([], [], peq).unwrap()).toBe(true);
+      expect(compare([true], [], peq).unwrap()).toBe(false);
+      expect(compare([true], [true], peq).unwrap()).toBe(false);
+    });
+
+    it("should be calc physical ne correctlry", () => {
+      expect(compare([], [], pne).unwrap()).toBe(false);
+      expect(compare([true], [], pne).unwrap()).toBe(true);
+      expect(compare([true], [true], pne).unwrap()).toBe(true);
     });
   });
 });
