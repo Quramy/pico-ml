@@ -59,7 +59,7 @@ export function newListInstr() {
   return [factory.controlInstr("call", [factory.identifier("__list_new__")])];
 }
 
-export function pushLishInstr() {
+export function pushListInstr() {
   return [factory.controlInstr("call", [factory.identifier("__list_push__")])];
 }
 
