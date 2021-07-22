@@ -82,7 +82,7 @@ const fs = require("fs/promises");
 })();
 ```
 
-And `pico-mlc` can also outputs WAT file with `-t` option.
+And `pmlc` can also outputs WAT file with `-t` option.
 
 ```sh
 $ pmlc example.ml -t
