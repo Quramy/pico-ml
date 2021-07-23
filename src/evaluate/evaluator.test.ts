@@ -12,6 +12,7 @@ describe(evaluate, () => {
 
   test("unary operation", () => {
     expect(parseAndEval("-2")).toBe(-2);
+    expect(parseAndEval("-.2.")).toBe(-2.0);
   });
 
   test("arithmetic operation", () => {
