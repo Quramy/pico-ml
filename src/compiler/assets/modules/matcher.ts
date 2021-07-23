@@ -1,4 +1,4 @@
-import { factory } from "../../../wasm";
+import { wat } from "../../../wasm";
 import { ModuleDefinition } from "../../module-builder";
 import { getEnvModuleDefinition } from "./env";
 import { getListModuleDefinition } from "./list";
@@ -35,14 +35,14 @@ export function getMatcherModuleDefinition() {
   return definition;
 }
 
-export function isMatchedWildcardPatternInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__matcher_is_matched_wildcard_pattern__")])];
-}
+export const isMatchedWildcardPatternInstr = wat.instructions`
+  call $__matcher_is_matched_wildcard_pattern__
+`;
 
-export function isMatchedEmptyListPatternInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__matcher_is_matched_empty_list_pattern__")])];
-}
+export const isMatchedEmptyListPatternInstr = wat.instructions`
+  call $__matcher_is_matched_empty_list_pattern__
+`;
 
-export function isMatchedIdentifierPatternInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__matcher_is_matched_identifier_pattern__")])];
-}
+export const isMatchedIdentifierPatternInstr = wat.instructions`
+  call $__matcher_is_matched_identifier_pattern__
+`;

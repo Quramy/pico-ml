@@ -50,6 +50,7 @@ import {
   decimalToken,
   strToken,
   memArgToken,
+  syntacticPlaceholder,
 } from "./tokenizer";
 import {
   getInt32NumericInstructionKinds,
@@ -60,6 +61,8 @@ import {
   getVariableInstructionKinds,
   getMemoryInstructionKinds,
 } from "../instructions-map";
+
+const allowPlaceholder = <T extends Parser>(parser: T) => oneOf(parser, syntacticPlaceholder) as T;
 
 const identifier: Parser<IdentifierNode> = expect(identifierToken)(t => ({
   kind: "Identifier",
@@ -395,7 +398,9 @@ const numericInstr: Parser<NumericInstructionNode> = oneOf(
   f64NumericInstr,
 );
 
-const instr: Parser<InstructionNode> = oneOf(ifInstr, controlInstr, numericInstr, variableInstr, memoryInstr);
+const instr: Parser<InstructionNode> = allowPlaceholder(
+  oneOf(ifInstr, controlInstr, numericInstr, variableInstr, memoryInstr),
+);
 
 const func: Parser<FuncNode> = tryWith(
   expect(
@@ -608,7 +613,7 @@ const mod: Parser<ModuleNode> = expect(
   symbolToken("("),
   keywordToken("module"),
   option(identifierToken),
-  vec(moduleField),
+  vec(allowPlaceholder(moduleField)),
   symbolToken(")"),
 )(
   (tLp, tModule, maybeId, fields, tRp): ModuleNode => ({
@@ -625,6 +630,10 @@ export const parseControlInstr = controlInstr;
 export const parseVariableInstr = variableInstr;
 export const parseNumericInstr = numericInstr;
 export const parseMemoryInstr = memoryInstr;
+
+export const parseInstructionsVec = vec(instr);
+export const parseModuleFieldsVec = vec(allowPlaceholder(moduleField));
+export const parseLocal = local;
 
 export const parseType = typedef;
 export const parseFunc = func;

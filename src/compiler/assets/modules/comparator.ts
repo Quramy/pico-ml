@@ -1,4 +1,4 @@
-import { factory } from "../../../wasm";
+import { wat, factory } from "../../../wasm";
 import { ModuleDefinition } from "../../module-builder";
 import { getListModuleDefinition } from "./list";
 import { getFloatModuleDefinition } from "./float";
@@ -254,9 +254,10 @@ export function getComparatorModuleDefinition({
   };
 }
 
-export function compareInstr(op: ComparisonOperators) {
-  return [factory.controlInstr("call", [factory.identifier(`__comparator_poly_${op}__`)])];
-}
+export const compareInstr = (op: ComparisonOperators) =>
+  wat.instructions`
+    call $__comparator_poly_${op}__
+  `();
 
 export function intCompareInstr(op: ComparisonOperators) {
   if (op == "eq" || op == "ne") {
@@ -266,6 +267,7 @@ export function intCompareInstr(op: ComparisonOperators) {
   }
 }
 
-export function floatCompareInstr(op: ComparisonOperators) {
-  return [factory.float64NumericInstr(`f64.${op}`)];
-}
+export const floatCompareInstr = (op: ComparisonOperators) =>
+  wat.instructions`
+    f64.${op}
+  `();

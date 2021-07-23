@@ -1,5 +1,7 @@
 import { Position } from "../parser-util";
 import {
+  Node,
+  SyntacticPlaceholderNode,
   ModuleBodyNode,
   ModuleNode,
   Uint32LiteralNode,
@@ -57,6 +59,14 @@ import {
   ControlInstructionKind,
   MemoryInstructionKind,
 } from "./instructions-map";
+
+export function syntacticPlaceholder<T extends Node = SyntacticPlaceholderNode>(value: number, pos?: Position) {
+  return {
+    kind: "SyntacticPlaceholder",
+    index: value,
+    loc: pos?.loc,
+  } as any as T;
+}
 
 export function uint32(value: number, pos?: Position): Uint32LiteralNode {
   return {

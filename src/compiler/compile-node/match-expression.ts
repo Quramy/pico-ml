@@ -1,6 +1,6 @@
 import { createTreeTraverser, mapValue, ok } from "../../structure";
 import { MatchClauseNode, MatchPatternNode, PatternMatchClauseNode } from "../../syntax";
-import { factory, ExprNode } from "../../wasm";
+import { wat, factory, ExprNode } from "../../wasm";
 import { CompileNodeFn, CompilationResult, Environment } from "../types";
 import { createChildEnvironment } from "../environment";
 import { matchPattern } from "./match-pattern";
@@ -16,9 +16,9 @@ const createEnvForExpression = createTreeTraverser<MatchPatternNode, Environment
 export const matchExpression: CompileNodeFn<"MatchExpression"> = (node, ctx, next) => {
   ctx.useEnvironment();
   ctx.useMatcher();
-  ctx.useLocalVar(factory.localVar(factory.valueType("i32"), factory.identifier("value_for_matcher")));
-  ctx.useLocalVar(factory.localVar(factory.valueType("i32"), factory.identifier("matched_env_addr")));
-  ctx.useLocalVar(factory.localVar(factory.valueType("i32"), factory.identifier("prev_env_addr")));
+  ctx.useLocalVar(wat.localVar`(local $value_for_matcher i32)`());
+  ctx.useLocalVar(wat.localVar`(local $matched_env_addr i32)`());
+  ctx.useLocalVar(wat.localVar`(local $prev_env_addr i32)`());
   const parentEnv = ctx.getEnv();
   const compileTryNextPattern = (matchClause: MatchClauseNode): CompilationResult => {
     const compilePatternMatchClause = (
@@ -27,10 +27,9 @@ export const matchExpression: CompileNodeFn<"MatchExpression"> = (node, ctx, nex
     ): CompilationResult => {
       const createCallMatcherInstr = () => {
         ctx.matcherDefStack.enter();
-        return matchPattern(patternMatchClause.pattern, ctx).map(matcherInstr => {
-          const funcName = ctx.matcherDefStack.leave(matcherInstr);
-          return [factory.controlInstr("call", [funcName])];
-        });
+        return matchPattern(patternMatchClause.pattern, ctx).map(matcherInstr => [
+          factory.controlInstr("call", [ctx.matcherDefStack.leave(matcherInstr)]),
+        ]);
       };
       const createExpressionInstr = () => {
         const expressionEnv = createEnvForExpression(patternMatchClause.pattern, parentEnv);
@@ -41,30 +40,35 @@ export const matchExpression: CompileNodeFn<"MatchExpression"> = (node, ctx, nex
         createCallMatcherInstr(),
         createExpressionInstr(),
       )((callMatcherInstr, expressionInstr) => {
-        return ok([
-          ...getEnvAddrInstr(),
-          factory.variableInstr("local.get", [factory.identifier("value_for_matcher")]),
-          ...callMatcherInstr,
-          factory.variableInstr("local.tee", [factory.identifier("matched_env_addr")]),
-          factory.ifInstr(
-            factory.blockType([factory.valueType("i32")]),
-            [
-              ...getEnvAddrInstr(),
-              factory.variableInstr("local.set", [factory.identifier("prev_env_addr")]),
-              factory.variableInstr("local.get", [factory.identifier("matched_env_addr")]),
-              ...setEnvAddrInstr(),
-              ...expressionInstr,
-              factory.variableInstr("local.get", [factory.identifier("prev_env_addr")]),
-              ...setEnvAddrInstr(),
-            ],
-            fallbackInstr,
-          ),
-        ]);
+        return ok(
+          wat.instructions`
+            ${getEnvAddrInstr}
+            local.get $value_for_matcher
+            ${() => callMatcherInstr}
+            local.tee $matched_env_addr
+            if (result i32)
+              ${getEnvAddrInstr}
+              local.set $prev_env_addr
+              local.get $matched_env_addr
+              ${setEnvAddrInstr}
+              ${() => expressionInstr}
+              local.get $prev_env_addr
+              ${setEnvAddrInstr}
+            else
+              ${() => fallbackInstr}
+            end
+          `(),
+        );
       });
     };
 
     if (matchClause.kind === "PatternMatchClause") {
-      return compilePatternMatchClause(matchClause, [factory.controlInstr("unreachable", [])]);
+      return compilePatternMatchClause(
+        matchClause,
+        wat.instructions`
+          unreachable
+        `(),
+      );
     } else {
       return compileTryNextPattern(matchClause.or).mapValue(fallbackInstr =>
         compilePatternMatchClause(matchClause.patternMatch, fallbackInstr),
@@ -76,6 +80,12 @@ export const matchExpression: CompileNodeFn<"MatchExpression"> = (node, ctx, nex
     next(node.exp, ctx),
     compileTryNextPattern(node.matchClause),
   )((expInstr, matchingInstr) =>
-    ok([...expInstr, factory.variableInstr("local.set", [factory.identifier("value_for_matcher")]), ...matchingInstr]),
+    ok(
+      wat.instructions`
+          ${() => expInstr}
+          local.set $value_for_matcher
+          ${() => matchingInstr}
+        `(),
+    ),
   );
 };

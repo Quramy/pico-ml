@@ -1,4 +1,4 @@
-import { factory } from "../../../wasm";
+import { wat } from "../../../wasm";
 import { ModuleDefinition } from "../../module-builder";
 import { getAllocatorModuleDefinition } from "./alloc";
 
@@ -38,10 +38,11 @@ export function getTupleModuleDefinition() {
   return definition;
 }
 
-export function newTupleInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__tuple_new__")])];
-}
+export const newTupleInstr = wat.instructions`
+  call $__tuple_new__
+`;
 
-export function getTupleValueInstr(index: 0 | 1) {
-  return [factory.controlInstr("call", [factory.identifier(`__tuple_get_v${index}__`)])];
-}
+export const getTupleValueInstr = (index: 0 | 1) =>
+  wat.instructions`
+    call $__tuple_get_v${index}__
+  `();

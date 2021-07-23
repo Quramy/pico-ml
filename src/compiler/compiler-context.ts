@@ -11,7 +11,7 @@ import { getMatcherModuleDefinition } from "./assets/modules/matcher";
 import { createRootEnvironment } from "./environment";
 import { FunctionDefinitionStack } from "./function-definition-stack";
 import { MatcherDefinitionStack } from "./matcher-definition-stack";
-import { getComparatorModuleDefinition } from "./assets/modules/comparator";
+import { getComparatorModuleDefinition, ComparisonOperators } from "./assets/modules/comparator";
 
 export class Context implements CompilationContext<CompileNodeOptions> {
   private _env: Environment = createRootEnvironment();
@@ -23,7 +23,7 @@ export class Context implements CompilationContext<CompileNodeOptions> {
   private _enabledEnv = false;
   private _enabledMatcher = false;
   private _enableComparator = false;
-  private _includingComparisonOperators: ("lt" | "le" | "gt" | "ge" | "eq" | "ne")[] = [];
+  private _includingComparisonOperators: ComparisonOperators[] = [];
   private _localsMainFn: LocalVarNode[] = [];
   private _dependencies: ModuleDefinition[] = [];
 
