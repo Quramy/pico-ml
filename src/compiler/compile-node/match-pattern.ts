@@ -1,6 +1,6 @@
 import { ok, createTreeTraverser, mapValue } from "../../structure";
 import { MatchPatternNode } from "../../syntax";
-import { factory } from "../../wasm";
+import { wat } from "../../wasm";
 
 import { CompilationContext, CompilationResult } from "../types";
 import { getEnvAddrInstr, setEnvAddrInstr } from "../assets/modules/env";
@@ -13,49 +13,55 @@ import {
 
 export const matchPattern = createTreeTraverser<MatchPatternNode, CompilationContext, CompilationResult>({
   wildcardPattern: () => {
-    return ok([
-      ...getEnvAddrInstr(),
-      factory.variableInstr("local.get", [factory.identifier("value")]),
-      ...isMatchedWildcardPatternInstr(),
-    ]);
+    return ok(
+      wat.instructions`
+        ${getEnvAddrInstr}
+        local.get $value
+        ${isMatchedWildcardPatternInstr}
+      `(),
+    );
   },
   idPattern: () => {
-    return ok([
-      ...getEnvAddrInstr(),
-      factory.variableInstr("local.get", [factory.identifier("value")]),
-      ...isMatchedIdentifierPatternInstr(),
-    ]);
+    return ok(
+      wat.instructions`
+        ${getEnvAddrInstr}
+        local.get $value
+        ${isMatchedIdentifierPatternInstr}
+      `(),
+    );
   },
   emptyListPattern: () => {
-    return ok([
-      ...getEnvAddrInstr(),
-      factory.variableInstr("local.get", [factory.identifier("value")]),
-      ...isMatchedEmptyListPatternInstr(),
-    ]);
+    return ok(
+      wat.instructions`
+        ${getEnvAddrInstr}
+        local.get $value
+        ${isMatchedEmptyListPatternInstr}
+      `(),
+    );
   },
   listConsPattern: (node, ctx, next) => {
     return mapValue(
       next(node.head, ctx),
       next(node.tail, ctx),
     )((headInstr, tailInstr) => {
-      return ok([
-        factory.variableInstr("local.get", [factory.identifier("value")]),
-        factory.ifInstr(
-          factory.blockType([factory.valueType("i32")]),
-          [
-            factory.variableInstr("local.get", [factory.identifier("value")]),
-            factory.variableInstr("local.get", [factory.identifier("value")]),
-            ...getHeadValueInstr(),
-            factory.variableInstr("local.set", [factory.identifier("value")]),
-            ...headInstr,
-            ...setEnvAddrInstr(),
-            ...getTailAddrInstr(),
-            factory.variableInstr("local.set", [factory.identifier("value")]),
-            ...tailInstr,
-          ],
-          [factory.int32NumericInstr("i32.const", [factory.int32(0)])],
-        ),
-      ]);
+      return ok(
+        wat.instructions`
+          local.get $value
+          if (result i32)
+            local.get $value
+            local.get $value
+            ${getHeadValueInstr}
+            local.set $value
+            ${() => headInstr}
+            ${setEnvAddrInstr}
+            ${getTailAddrInstr}
+            local.set $value
+            ${() => tailInstr}
+          else
+            i32.const 0
+          end
+        `(),
+      );
     });
   },
 });

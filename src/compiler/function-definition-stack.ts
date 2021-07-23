@@ -1,4 +1,4 @@
-import { factory, FuncNode, LocalVarNode, ExprNode, ModuleBodyNode, TableNode } from "../wasm";
+import { wat, factory, FuncNode, LocalVarNode, ExprNode, ModuleBodyNode, TableNode } from "../wasm";
 import { DefinitionStack } from "./types";
 import { paramTypeForEnv } from "./assets/modules/env";
 
@@ -61,12 +61,7 @@ export class FunctionDefinitionStack implements DefinitionStack<ExprNode> {
     return [table];
   }
 
-  callInstr(): ExprNode {
-    return [
-      factory.controlInstr("call_indirect", [
-        factory.identifier("__func_table__"),
-        factory.funcTypeRef(factory.identifier("__fn_type__")),
-      ]),
-    ];
-  }
+  callInstr = wat.instructions`
+    call_indirect $__func_table__ $__fn_type__
+  `;
 }

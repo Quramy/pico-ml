@@ -1,5 +1,5 @@
 import { ok, mapValue } from "../../structure";
-import { factory } from "../../wasm";
+import { wat } from "../../wasm";
 import { CompileNodeFn } from "../types";
 
 export const ifExpression: CompileNodeFn<"IfExpression"> = (node, ctx, next) =>
@@ -8,5 +8,14 @@ export const ifExpression: CompileNodeFn<"IfExpression"> = (node, ctx, next) =>
     next(node.then, ctx),
     next(node.else, ctx),
   )((condInstr, thenInstr, elseInstr) =>
-    ok([...condInstr, factory.ifInstr(factory.blockType([factory.valueType("i32")]), thenInstr, elseInstr)]),
+    ok(
+      wat.instructions`
+        ${() => condInstr}
+        if (result i32)
+          ${() => thenInstr}
+        else
+          ${() => elseInstr}
+        end
+      `(),
+    ),
   );

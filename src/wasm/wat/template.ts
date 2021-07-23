@@ -1,8 +1,8 @@
-import { Node, InstructionNode, ModuleBodyNode } from "../ast-types";
+import { Node, InstructionNode, ModuleBodyNode, LocalVarNode } from "../ast-types";
 import { visitorKeys } from "./visitor-keys";
 import { LRUCache, createVisitorFunctions } from "../../structure";
 import { Scanner } from "./scanner";
-import { parseInstructionsVec, parseModuleFieldsVec } from "./parser";
+import { parseInstructionsVec, parseModuleFieldsVec, parseLocal } from "./parser";
 
 export type TemplateSyntacticPlaceHolderValue = () => Node | readonly Node[];
 export type TemplatePlaceHolderValue = string | number | TemplateSyntacticPlaceHolderValue;
@@ -37,6 +37,20 @@ function withCachedValue<T, S>(prefix: string, key: string, setter: (k: string) 
 }
 
 const { visitEachChild } = createVisitorFunctions(visitorKeys);
+
+function createNodeGeneratorFunction<T extends Node>(node: T, nodeFn: readonly TemplateSyntacticPlaceHolderValue[]) {
+  const generateFunction = () => {
+    const visitor = (node: Node): Node | readonly Node[] => {
+      if (node.kind !== "SyntacticPlaceholder") {
+        const { _nodeId, loc, ...rest } = visitEachChild(node, visitor);
+        return { ...rest, loc: undefined };
+      }
+      return nodeFn[node.index]();
+    };
+    return visitor(node) as T;
+  };
+  return generateFunction;
+}
 
 function createVectorGeneratorFunction<T extends Node>(
   vecValues: readonly T[],
@@ -81,7 +95,21 @@ function moduleFields<T extends ModuleBodyNode = ModuleBodyNode>(
   );
 }
 
+function localVar<T extends LocalVarNode = LocalVarNode>(
+  spans: TemplateStringsArray,
+  ...placeholders: TemplatePlaceHolderValue[]
+) {
+  const { srcString, nodeFn } = tagBase(spans, ...placeholders);
+  return withCachedValue(
+    "localVar",
+    srcString,
+    () => parseLocal(new Scanner(srcString)).unwrap() as T,
+    node => createNodeGeneratorFunction(node, nodeFn),
+  );
+}
+
 export const template = {
   instructions,
   moduleFields,
+  localVar,
 };

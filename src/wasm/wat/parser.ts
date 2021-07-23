@@ -633,6 +633,7 @@ export const parseMemoryInstr = memoryInstr;
 
 export const parseInstructionsVec = vec(instr);
 export const parseModuleFieldsVec = vec(allowPlaceholder(moduleField));
+export const parseLocal = local;
 
 export const parseType = typedef;
 export const parseFunc = func;
