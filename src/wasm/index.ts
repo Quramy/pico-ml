@@ -6,7 +6,7 @@ import * as f from "./ast-factory";
 import { BinaryOutputOptions } from "./types";
 
 export * from "./types";
-export { parse, unparse as printAST, template, TemplatePlaceHolderValue } from "./wat";
+export { parse, unparse as printAST, template as wat, TemplatePlaceHolderValue } from "./wat";
 export * from "./ast-types";
 
 export const factory = f;

@@ -1,4 +1,4 @@
-import { factory } from "../../../wasm";
+import { wat } from "../../../wasm";
 import { ModuleDefinition } from "../../module-builder";
 import { getTupleModuleDefinition } from "./tuple";
 
@@ -55,22 +55,22 @@ export function getListModuleDefinition() {
   return definition;
 }
 
-export function newListInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__list_new__")])];
-}
+export const newListInstr = wat.instructions`
+  call $__list_new__
+`;
 
-export function pushListInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__list_push__")])];
-}
+export const pushListInstr = wat.instructions`
+  call $__list_push__
+`;
 
-export function isEmptyListInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__list_is_empty__")])];
-}
+export const isEmptyListInstr = wat.instructions`
+  call $__list_is_empty__
+`;
 
-export function getHeadValueInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__list_head__")])];
-}
+export const getHeadValueInstr = wat.instructions`
+  call $__list_head__
+`;
 
-export function getTailAddrInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__list_tail__")])];
-}
+export const getTailAddrInstr = wat.instructions`
+  call $__list_tail__
+`;

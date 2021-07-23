@@ -4,17 +4,18 @@ import { LRUCache, createVisitorFunctions } from "../../structure";
 import { Scanner } from "./scanner";
 import { parseInstructionsVec, parseModuleFieldsVec } from "./parser";
 
-export type TemplatePlaceHolderValue = () => Node | readonly Node[];
+export type TemplateSyntacticPlaceHolderValue = () => Node | readonly Node[];
+export type TemplatePlaceHolderValue = string | number | TemplateSyntacticPlaceHolderValue;
 
-function tagBase(spans: TemplateStringsArray, ...placeholders: (string | TemplatePlaceHolderValue)[]) {
+function tagBase(spans: TemplateStringsArray, ...placeholders: TemplatePlaceHolderValue[]) {
   let srcString = spans[0];
   let j = 0;
-  const nodeFn: TemplatePlaceHolderValue[] = [];
+  const nodeFn: TemplateSyntacticPlaceHolderValue[] = [];
   for (let i = 1; i < spans.length; i++) {
-    if (typeof placeholders[i - 1] === "string") {
-      srcString += placeholders[i - 1] + spans[i];
+    if (typeof placeholders[i - 1] === "string" || typeof placeholders[i - 1] === "number") {
+      srcString += `${placeholders[i - 1]}` + spans[i];
     } else {
-      nodeFn.push(placeholders[i - 1] as TemplatePlaceHolderValue);
+      nodeFn.push(placeholders[i - 1] as TemplateSyntacticPlaceHolderValue);
       const p = ` %%PLACEHOLDER_${j++}%% `;
       srcString += p;
       srcString += spans[i];
@@ -39,7 +40,7 @@ const { visitEachChild } = createVisitorFunctions(visitorKeys);
 
 function createVectorGeneratorFunction<T extends Node>(
   vecValues: readonly T[],
-  nodeFn: readonly TemplatePlaceHolderValue[],
+  nodeFn: readonly TemplateSyntacticPlaceHolderValue[],
 ) {
   const generateFunction = () => {
     const visitor = (node: Node): Node | readonly Node[] => {

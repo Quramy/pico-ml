@@ -1,4 +1,4 @@
-import { factory } from "../../../wasm";
+import { wat, factory } from "../../../wasm";
 import { ModuleDefinition } from "../../module-builder";
 import { getAllocatorModuleDefinition } from "./alloc";
 
@@ -39,17 +39,16 @@ export function getFloatModuleDefinition() {
   return definition;
 }
 
-export function newFloatInstr(value: number) {
-  return [
-    factory.float64NumericInstr("f64.const", [factory.float64(value)]),
-    factory.controlInstr("call", [factory.identifier("__float_new__")]),
-  ];
-}
+export const newFloatInstr = (value: number) =>
+  wat.instructions`
+    ${() => factory.float64NumericInstr("f64.const", [factory.float64(value)])}
+    call $__float_new__
+  `();
 
-export function storeFloatValueInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__float_new__")])];
-}
+export const storeFloatValueInstr = wat.instructions`
+  call $__float_new__
+`;
 
-export function getFloatValueInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__float_get__")])];
-}
+export const getFloatValueInstr = wat.instructions`
+  call $__float_get__
+`;

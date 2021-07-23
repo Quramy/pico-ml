@@ -1,4 +1,4 @@
-import { factory } from "../../../wasm";
+import { wat, factory } from "../../../wasm";
 import { ModuleDefinition } from "../../module-builder";
 import { getTupleModuleDefinition } from "./tuple";
 
@@ -48,41 +48,37 @@ export function paramTypeForEnv() {
   return factory.paramType(factory.valueType("i32"), factory.identifier("current_env_addr"));
 }
 
-export function initEnvInstr() {
-  return [
-    factory.int32NumericInstr("i32.const", [factory.int32(-1)]),
-    factory.variableInstr("local.set", [factory.identifier("current_env_addr")]),
-  ];
-}
+export const initEnvInstr = wat.instructions`
+  i32.const -1
+  local.set $current_env_addr
+`;
 
-export function newEnvInstr() {
-  return [factory.controlInstr("call", [factory.identifier("__env_new__")])];
-}
+export const newEnvInstr = wat.instructions`
+  call $__env_new__
+`;
 
-export function newEnvInstrForLet() {
-  return [...newEnvInstr(), factory.variableInstr("local.set", [factory.identifier("current_env_addr")])];
-}
+export const newEnvInstrForLet = wat.instructions`
+  ${newEnvInstr}
+  local.set $current_env_addr
+`;
 
-export function getEnvAddrInstr() {
-  return [factory.variableInstr("local.get", [factory.identifier("current_env_addr")])];
-}
+export const getEnvAddrInstr = wat.instructions`
+  local.get $current_env_addr
+`;
 
-export function setEnvAddrInstr() {
-  return [factory.variableInstr("local.set", [factory.identifier("current_env_addr")])];
-}
+export const setEnvAddrInstr = wat.instructions`
+  local.set $current_env_addr
+`;
 
-export function popEnvInstr() {
-  return [
-    factory.variableInstr("local.get", [factory.identifier("current_env_addr")]),
-    factory.controlInstr("call", [factory.identifier("__env_parent__")]),
-    factory.variableInstr("local.set", [factory.identifier("current_env_addr")]),
-  ];
-}
+export const popEnvInstr = wat.instructions`
+  local.get $current_env_addr
+  call $__env_parent__
+  local.set $current_env_addr
+`;
 
-export function getEnvValueInstr(index: number) {
-  return [
-    factory.variableInstr("local.get", [factory.identifier("current_env_addr")]),
-    factory.int32NumericInstr("i32.const", [factory.int32(index)]),
-    factory.controlInstr("call", [factory.identifier("__env_get__")]),
-  ];
-}
+export const getEnvValueInstr = (index: number) =>
+  wat.instructions`
+    local.get $current_env_addr
+    i32.const ${index}
+    call $__env_get__
+  `();
