@@ -16,6 +16,7 @@ import {
   parseGlobal,
 } from "./parser";
 import * as f from "../ast-factory";
+import { InstructionNode } from "../ast-types";
 
 describe(parseFuncSig, () => {
   test("success", () => {
@@ -154,6 +155,9 @@ describe(parseFunc, () => {
         ],
         f.identifier("add"),
       ),
+    );
+    expect(use(parseFunc)("(func %%PLACEHOLDER_0%%)")).toMatchObject(
+      f.func(f.funcSig([], []), [], [f.syntacticPlaceholder<InstructionNode>(0)]),
     );
   });
 });

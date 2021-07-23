@@ -68,5 +68,8 @@
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
   },
-  "exclude": ["lib", "lib-esm", "playground"]
+  "exclude": ["lib", "lib-esm", "playground"],
+  "ts-node": {
+    "transpileOnly": true
+  }
 }

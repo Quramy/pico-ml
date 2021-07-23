@@ -9,6 +9,7 @@ import {
   IntToken,
   StringToken,
   DecimalToken,
+  SyntacticPlaceholderNode,
 } from "../ast-types";
 
 export const symbolToken: (sym: SymbolKind) => Parser<SymbolToken> = sym => {
@@ -145,4 +146,21 @@ export const strToken: Parser<StringToken> = scanner => {
     value,
     loc: scanner.consume(offset + 1),
   });
+};
+
+export const syntacticPlaceholder: Parser<any> = scanner => {
+  const hit = scanner.match(/^%%PLACEHOLDER_(\d+)%%/);
+  if (!hit) {
+    return error({
+      message: "placeholder expected",
+      confirmed: false,
+      occurence: { loc: { pos: scanner.pos, end: scanner.pos + 1 } },
+    });
+  }
+  const value = parseInt(hit[1], 10);
+  return ok({
+    kind: "SyntacticPlaceholder",
+    index: value,
+    loc: scanner.consume(hit[0].length),
+  } as SyntacticPlaceholderNode);
 };

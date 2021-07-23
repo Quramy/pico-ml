@@ -1,6 +1,6 @@
 import { Scanner } from "../../parser-util";
-import { decimalToken, strToken } from "./tokenizer";
-import { StringToken, DecimalToken } from "../ast-types";
+import { decimalToken, strToken, syntacticPlaceholder } from "./tokenizer";
+import { StringToken, DecimalToken, SyntacticPlaceholderNode } from "../ast-types";
 
 test(decimalToken.name, () => {
   expect(decimalToken(new Scanner("0")).unwrap()).toMatchObject<DecimalToken>({
@@ -41,5 +41,12 @@ test(strToken.name, () => {
   expect(strToken(new Scanner(`"ho\\\\ge"`)).unwrap()).toMatchObject<StringToken>({
     tokenKind: "String",
     value: "ho\\ge",
+  });
+});
+
+test(syntacticPlaceholder.name, () => {
+  expect(syntacticPlaceholder(new Scanner("%%PLACEHOLDER_10%%")).unwrap()).toMatchObject<SyntacticPlaceholderNode>({
+    kind: "SyntacticPlaceholder",
+    index: 10,
   });
 });

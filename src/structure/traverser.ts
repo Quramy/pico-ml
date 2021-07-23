@@ -47,21 +47,20 @@ export function createVisitorFunctions(visitorKeys: readonly string[]) {
     }
   };
 
-  const visitEachChild = <T extends Tree>(root: T, cb: (node: T) => T | void | null) => {
+  const visitEachChild = <T extends Tree>(root: T, cb: (node: T) => T | readonly T[] | void | null) => {
     const ret = { ...root } as any;
     for (const key of visitorKeys) {
       const childOrChildren = (root as any)[key];
       if (!childOrChildren) continue;
       if (Array.isArray(childOrChildren)) {
-        const newChildren = childOrChildren
-          .map(x => {
-            if (!isTree(x)) return x;
-            const newChild = cb(x as T);
-            if (newChild === null) return null as any;
-            if (!newChild) return x;
-            return newChild;
-          })
-          .filter(x => !!x);
+        const newChildren = childOrChildren.reduce((acc, x) => {
+          if (!isTree(x)) return [...acc, x];
+          const newChild = cb(x as T);
+          if (newChild === null) return acc;
+          if (!newChild) return [...acc, x];
+          if (!Array.isArray(newChild)) return [...acc, newChild];
+          return [...acc, ...newChild];
+        }, [] as T[]);
         ret[key] = newChildren;
       } else if (isTree(childOrChildren)) {
         const newChild = cb(childOrChildren as T);
