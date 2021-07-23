@@ -1,6 +1,6 @@
 import { generateBinaryWithDefaultOptions as generateBinary } from "../../../wasm";
 import { ModuleBuilder } from "../../module-builder";
-import { getFloatModuleDefinition } from "./float";
+import { storeFloatValueInstr, getFloatValueInstr, getFloatModuleDefinition, reduceInstructions } from "./float";
 
 describe(getFloatModuleDefinition, () => {
   it("should store floating point value", async () => {
@@ -23,5 +23,11 @@ describe(getFloatModuleDefinition, () => {
       .unwrap();
     const { instance } = await WebAssembly.instantiate(buf, {});
     expect((instance.exports["test"] as Function)()).toBe(3.14);
+  });
+});
+
+describe(reduceInstructions, () => {
+  it("reduce redundant instructions", () => {
+    expect(reduceInstructions([...storeFloatValueInstr(), ...getFloatValueInstr()])).toEqual([]);
   });
 });

@@ -9,6 +9,7 @@ type Props = {
 
 export function AppHeader({ className }: Props) {
   const [dispatchUsingInferredType, setDispatchUsingInferredType] = useSettingsValue("dispatchUsingInferredType");
+  const [reduceFloatInstructions, setReduceFloatInstructions] = useSettingsValue("reduceFloatInstructions");
   const [enableNameSection, setenableNameSection] = useSettingsValue("enableNameSection");
   const [settingsIsOpening, setSettingsIsOpening] = useState(false);
   const closeCb = useCallback(() => setSettingsIsOpening(false), []);
@@ -43,6 +44,19 @@ export function AppHeader({ className }: Props) {
                   statically.
                 </p>
               </div>
+
+              <div className={styles.settingItem}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={reduceFloatInstructions}
+                    onChange={() => setReduceFloatInstructions(!reduceFloatInstructions)}
+                  />
+                  <span>Reduce Float Instructions</span>
+                </label>
+                <p>If enabled, redundant instructions about floating-point number will be removed.</p>
+              </div>
+
               <div className={styles.settingItem}>
                 <label>
                   <input

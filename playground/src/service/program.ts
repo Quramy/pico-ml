@@ -191,11 +191,13 @@ export function createProgram({ code$, settingsService }: CreateProgramOptions) 
     share(),
   );
   const compileResult$ = combineLatest(parseResult$, typeValueMap$, settingsService.settings$).pipe(
-    map(([pr, tvmr, { dispatchUsingInferredType }]) =>
+    map(([pr, tvmr, { dispatchUsingInferredType, reduceFloatInstructions }]) =>
       mapValue(
         pr,
         tvmr,
-      )((expression, typeValueMap) => compile(expression, { typeValueMap, dispatchUsingInferredType })),
+      )((expression, typeValueMap) =>
+        compile(expression, { typeValueMap, dispatchUsingInferredType, reduceFloatInstructions }),
+      ),
     ),
     share(),
   );

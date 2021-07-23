@@ -13,6 +13,7 @@ export type CompilationValue = readonly InstructionNode[];
 export interface CompileNodeOptions {
   readonly typeValueMap: Map<string, TypeValue>;
   readonly dispatchUsingInferredType?: boolean;
+  readonly reduceFloatInstructions?: boolean;
 }
 
 export type CompiledModuleResult = Result<ModuleNode, CompilationError>;
@@ -52,3 +53,11 @@ export type CompileNodeFn<K extends ExpressionNode["kind"]> = TraverserCallbackF
   CompilationResult,
   K
 >;
+
+export interface ModuleOptimizer {
+  (moduleNode: ModuleNode): ModuleNode;
+}
+
+export interface ModuleOptimizerFactory {
+  (): ModuleOptimizer;
+}

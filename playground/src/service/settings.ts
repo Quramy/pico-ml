@@ -13,6 +13,7 @@ export interface SettingsService {
 export const defaultSettingOptions: SettingsOptions = {
   enableNameSection: true,
   dispatchUsingInferredType: true,
+  reduceFloatInstructions: true,
 };
 
 export function createSettingsService(): SettingsService {
