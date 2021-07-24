@@ -14,7 +14,7 @@ function chain(...factories: readonly ModuleOptimizerFactory[]) {
 }
 
 export function createModuleOptimizer(options: CompileNodeOptions): ModuleOptimizer {
-  if (!options.reduceFloatInstructions) {
+  if (!options.reduceInstructions) {
     return id;
   }
   return chain(reduceFloatInstructionsFactory, reduceFunctionTailInstructionsFactory);

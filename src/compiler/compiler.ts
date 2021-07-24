@@ -44,7 +44,7 @@ export function compile(
   node: ExpressionNode,
   options: CompileNodeOptions = {
     dispatchUsingInferredType: false,
-    reduceFloatInstructions: false,
+    reduceInstructions: false,
     typeValueMap: new Map(),
   },
 ): CompiledModuleResult {

@@ -12,7 +12,7 @@ type Props = {
 export function AppHeader({ className }: Props) {
   const program = useContext(programContext);
   const [dispatchUsingInferredType, setDispatchUsingInferredType] = useSettingsValue("dispatchUsingInferredType");
-  const [reduceFloatInstructions, setReduceFloatInstructions] = useSettingsValue("reduceFloatInstructions");
+  const [reduceInstructions, setReduceInstructions] = useSettingsValue("reduceInstructions");
   const [enableNameSection, setenableNameSection] = useSettingsValue("enableNameSection");
   const [settingsIsOpening, setSettingsIsOpening] = useState(false);
   const [examplesIsOpening, setExamplesIsOpening] = useState(false);
@@ -79,12 +79,14 @@ export function AppHeader({ className }: Props) {
                 <label>
                   <input
                     type="checkbox"
-                    checked={reduceFloatInstructions}
-                    onChange={() => setReduceFloatInstructions(!reduceFloatInstructions)}
+                    checked={reduceInstructions}
+                    onChange={() => setReduceInstructions(!reduceInstructions)}
                   />
-                  <span>Reduce Float Instructions</span>
+                  <span>Reduce Instructions</span>
                 </label>
-                <p>If enabled, redundant instructions about floating-point number will be removed.</p>
+                <p>
+                  If enabled, redundant WASM instructions(e.g. unneeded get/set floating-point values) will be removed.
+                </p>
               </div>
 
               <div className={styles.settingItem}>

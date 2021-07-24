@@ -13,7 +13,7 @@ export type CompilationValue = readonly InstructionNode[];
 export interface CompileNodeOptions {
   readonly typeValueMap: Map<string, TypeValue>;
   readonly dispatchUsingInferredType?: boolean;
-  readonly reduceFloatInstructions?: boolean;
+  readonly reduceInstructions?: boolean;
 }
 
 export type CompiledModuleResult = Result<ModuleNode, CompilationError>;

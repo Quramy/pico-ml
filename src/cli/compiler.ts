@@ -120,6 +120,6 @@ if (!inputFilename) {
 const target = options.text ? "wat" : "binary";
 const enableNameSection = options.enableNameSection;
 const dispatchUsingInferredType = !options.noOptimize;
-const reduceFloatInstructions = !options.noOptimize;
+const reduceInstructions = !options.noOptimize;
 
-main({ inputFilename, target, enableNameSection, dispatchUsingInferredType, reduceFloatInstructions });
+main({ inputFilename, target, enableNameSection, dispatchUsingInferredType, reduceInstructions });

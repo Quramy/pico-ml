@@ -52,7 +52,7 @@ describe(compile, () => {
     });
 
     it("should compile floating number arithmetic operations with optimization", async () => {
-      expect(await evaluateMain("1.0 +. 1.0 +. 2.0", toFloat, { reduceFloatInstructions: true })).toBe(4.0);
+      expect(await evaluateMain("1.0 +. 1.0 +. 2.0", toFloat, { reduceInstructions: true })).toBe(4.0);
     });
 
     it("should compile compare operation without optimization", async () => {
@@ -198,7 +198,7 @@ const evaluateMain = async (
   converter: (instance: WebAssembly.Instance, value: number) => any = toNumber,
   options: Omit<CompileNodeOptions, "typeValueMap"> = {
     dispatchUsingInferredType: false,
-    reduceFloatInstructions: false,
+    reduceInstructions: false,
   },
 ) => {
   const source = compile2wasm(code, options);
