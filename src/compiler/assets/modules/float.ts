@@ -1,7 +1,7 @@
 import { wat, factory, InstructionNode } from "../../../wasm";
 import { ModuleDefinition } from "../../module-builder";
 import { getAllocatorModuleDefinition } from "./alloc";
-import { isCalling } from "../../analysis-util/is-calling";
+import { isCalling } from "../../analysis-util/node-detector";
 
 const definition: ModuleDefinition = {
   name: "lib/float",

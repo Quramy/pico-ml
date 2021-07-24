@@ -27,7 +27,7 @@ describe(getFloatModuleDefinition, () => {
 });
 
 describe(reduceInstructions, () => {
-  it("reduce redundant instructions", () => {
+  it("should reduce redundant instructions", () => {
     expect(reduceInstructions([...storeFloatValueInstr(), ...getFloatValueInstr()])).toEqual([]);
   });
 });

@@ -21,7 +21,7 @@ import { functionApplication } from "./compile-node/function-application";
 import { letExpression } from "./compile-node/let-expression";
 import { letRecExpression } from "./compile-node/let-rec-expression";
 
-import { reduceFloatInstructionsFactory } from "./module-optimizer/reduce-float-instructions";
+import { createModuleOptimizer } from "./module-optimizer";
 
 const traverse = createTreeTraverser<ExpressionNode, CompilationContext<CompileNodeOptions>, CompilationResult>({
   boolLiteral,
@@ -69,7 +69,7 @@ export function compile(
       .addField(mainExport);
     return builder
       .build()
-      .map(moduleNode => (options.reduceFloatInstructions ? reduceFloatInstructionsFactory()(moduleNode) : moduleNode))
+      .map(createModuleOptimizer(options))
       .error(err => ({ ...err, occurence: undefined }));
   });
 }
