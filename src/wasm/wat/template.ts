@@ -1,6 +1,7 @@
 import { Node, InstructionNode, ModuleBodyNode, LocalVarNode } from "../ast-types";
-import { visitorKeys } from "./visitor-keys";
-import { LRUCache, createVisitorFunctions } from "../../structure";
+import { LRUCache } from "../../structure";
+
+import { visitEachChild } from "./";
 import { Scanner } from "./scanner";
 import { parseInstructionsVec, parseModuleFieldsVec, parseLocal } from "./parser";
 
@@ -35,8 +36,6 @@ function withCachedValue<T, S>(prefix: string, key: string, setter: (k: string) 
   cache.set(key, val);
   return cb(val);
 }
-
-const { visitEachChild } = createVisitorFunctions(visitorKeys);
 
 function createNodeGeneratorFunction<T extends Node>(node: T, nodeFn: readonly TemplateSyntacticPlaceHolderValue[]) {
   const generateFunction = () => {

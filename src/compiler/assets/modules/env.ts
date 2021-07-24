@@ -1,6 +1,7 @@
-import { wat, factory } from "../../../wasm";
+import { wat, factory, InstructionNode } from "../../../wasm";
 import { ModuleDefinition } from "../../module-builder";
 import { getTupleModuleDefinition } from "./tuple";
+import { isLocalGet, isLocalSet, isCalling } from "../../analysis-util/node-detector";
 
 const definition: ModuleDefinition = {
   name: "lib/environment",
@@ -82,3 +83,13 @@ export const getEnvValueInstr = (index: number) =>
     i32.const ${index}
     call $__env_get__
   `();
+
+export function reducePopEnvInstructions(instructions: readonly InstructionNode[]) {
+  if (instructions.length < 3) return instructions;
+  const [l1, l2, l3] = instructions.slice(-3);
+  if (isLocalGet(l1, "current_env_addr") && isCalling(l2, "__env_parent__") && isLocalSet(l3, "current_env_addr")) {
+    return instructions.slice(0, instructions.length - 3);
+  } else {
+    return instructions;
+  }
+}

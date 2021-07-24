@@ -1,6 +1,7 @@
-import { wat, factory } from "../../../wasm";
+import { wat, factory, InstructionNode } from "../../../wasm";
 import { ModuleDefinition } from "../../module-builder";
 import { getAllocatorModuleDefinition } from "./alloc";
+import { isCalling } from "../../analysis-util/node-detector";
 
 const definition: ModuleDefinition = {
   name: "lib/float",
@@ -52,3 +53,11 @@ export const storeFloatValueInstr = wat.instructions`
 export const getFloatValueInstr = wat.instructions`
   call $__float_get__
 `;
+
+export const reduceInstructions = (instructions: readonly InstructionNode[]) =>
+  instructions.reduce((acc, node) => {
+    if (!isCalling(node, "__float_get__")) return [...acc, node];
+    const last = acc.slice(-1);
+    if (!last.length || !isCalling(last[0], "__float_new__")) return [...acc, node];
+    return acc.slice(0, acc.length - 1);
+  }, [] as readonly InstructionNode[]);

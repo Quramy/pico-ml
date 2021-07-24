@@ -12,6 +12,7 @@ type Props = {
 export function AppHeader({ className }: Props) {
   const program = useContext(programContext);
   const [dispatchUsingInferredType, setDispatchUsingInferredType] = useSettingsValue("dispatchUsingInferredType");
+  const [reduceInstructions, setReduceInstructions] = useSettingsValue("reduceInstructions");
   const [enableNameSection, setenableNameSection] = useSettingsValue("enableNameSection");
   const [settingsIsOpening, setSettingsIsOpening] = useState(false);
   const [examplesIsOpening, setExamplesIsOpening] = useState(false);
@@ -73,6 +74,21 @@ export function AppHeader({ className }: Props) {
                   statically.
                 </p>
               </div>
+
+              <div className={styles.settingItem}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={reduceInstructions}
+                    onChange={() => setReduceInstructions(!reduceInstructions)}
+                  />
+                  <span>Reduce Instructions</span>
+                </label>
+                <p>
+                  If enabled, redundant WASM instructions(e.g. unneeded get/set floating-point values) will be removed.
+                </p>
+              </div>
+
               <div className={styles.settingItem}>
                 <label>
                   <input

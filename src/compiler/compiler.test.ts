@@ -4,6 +4,7 @@ import { TypeValue, getPrimaryType } from "../type-checker";
 import { generateBinary } from "../wasm";
 import { compile } from "./compiler";
 import { toNumber, toFloat, toBoolean, toListAnd, toList } from "./js-bindings";
+import { CompileNodeOptions } from "./types";
 
 describe(compile, () => {
   describe("literal", () => {
@@ -48,6 +49,10 @@ describe(compile, () => {
       expect(await evaluateMain("1.0 -. 2.0", toFloat)).toBe(-1.0);
       expect(await evaluateMain("1.0 *. 3.0", toFloat)).toBe(3.0);
       expect(await evaluateMain("4.0 /. 2.0", toFloat)).toBe(2.0);
+    });
+
+    it("should compile floating number arithmetic operations with optimization", async () => {
+      expect(await evaluateMain("1.0 +. 1.0 +. 2.0", toFloat, { reduceInstructions: true })).toBe(4.0);
     });
 
     it("should compile compare operation without optimization", async () => {
@@ -175,7 +180,7 @@ describe(compile, () => {
   });
 });
 
-const compile2wasm = (code: string, { dispatchUsingInferredType }: { readonly dispatchUsingInferredType: boolean }) =>
+const compile2wasm = (code: string, { dispatchUsingInferredType }: Omit<CompileNodeOptions, "typeValueMap">) =>
   parse(code)
     .mapValue(ast => {
       if (!dispatchUsingInferredType) {
@@ -191,7 +196,10 @@ const compile2wasm = (code: string, { dispatchUsingInferredType }: { readonly di
 const evaluateMain = async (
   code: string,
   converter: (instance: WebAssembly.Instance, value: number) => any = toNumber,
-  options: { readonly dispatchUsingInferredType: boolean } = { dispatchUsingInferredType: false },
+  options: Omit<CompileNodeOptions, "typeValueMap"> = {
+    dispatchUsingInferredType: false,
+    reduceInstructions: false,
+  },
 ) => {
   const source = compile2wasm(code, options);
   const { instance } = await WebAssembly.instantiate(source, {});

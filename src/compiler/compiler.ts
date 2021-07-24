@@ -21,6 +21,8 @@ import { functionApplication } from "./compile-node/function-application";
 import { letExpression } from "./compile-node/let-expression";
 import { letRecExpression } from "./compile-node/let-rec-expression";
 
+import { createModuleOptimizer } from "./module-optimizer";
+
 const traverse = createTreeTraverser<ExpressionNode, CompilationContext<CompileNodeOptions>, CompilationResult>({
   boolLiteral,
   emptyList,
@@ -40,7 +42,11 @@ const traverse = createTreeTraverser<ExpressionNode, CompilationContext<CompileN
 
 export function compile(
   node: ExpressionNode,
-  options: CompileNodeOptions = { dispatchUsingInferredType: true, typeValueMap: new Map() },
+  options: CompileNodeOptions = {
+    dispatchUsingInferredType: false,
+    reduceInstructions: false,
+    typeValueMap: new Map(),
+  },
 ): CompiledModuleResult {
   const ctx = new Context(options);
   return traverse(node, ctx).mapValue(instructions => {
@@ -61,6 +67,9 @@ export function compile(
       .addField(mainFunc)
       .addFields(ctx.funcDefStack.buildTables())
       .addField(mainExport);
-    return builder.build().error(err => ({ ...err, occurence: undefined }));
+    return builder
+      .build()
+      .map(createModuleOptimizer(options))
+      .error(err => ({ ...err, occurence: undefined }));
   });
 }

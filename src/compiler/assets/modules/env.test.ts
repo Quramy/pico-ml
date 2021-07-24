@@ -1,7 +1,7 @@
 import { generateBinaryWithDefaultOptions as generateBinary } from "../../../wasm";
 import { ModuleBuilder } from "../../module-builder";
 
-import { getEnvModuleDefinition } from "./env";
+import { getEnvModuleDefinition, reducePopEnvInstructions, popEnvInstr } from "./env";
 
 describe(getEnvModuleDefinition, () => {
   describe("$__env_new__", () => {
@@ -101,5 +101,11 @@ describe(getEnvModuleDefinition, () => {
       const { instance } = await WebAssembly.instantiate(buf, {});
       expect((instance.exports["test"] as Function)()).toBe(4);
     });
+  });
+});
+
+describe(reducePopEnvInstructions, () => {
+  it("should reduce redundant instructions", () => {
+    expect(reducePopEnvInstructions(popEnvInstr())).toEqual([]);
   });
 });
