@@ -7,13 +7,21 @@ import { ModuleOptimizerFactory } from "../types";
 export const reduceFloatInstructionsFactory: ModuleOptimizerFactory = () => {
   return (moduleNode: ModuleNode) => {
     const visitor = <T extends Node>(node: T): T => {
-      if (node.kind !== "Func") {
-        return visitEachChild(node, visitor);
+      const ret = visitEachChild(node, visitor);
+      if (ret.kind === "Func") {
+        return {
+          ...ret,
+          instructions: reduceInstructions(ret.instructions),
+        };
+      } else if (ret.kind === "IfInstruction") {
+        return {
+          ...ret,
+          thenExpr: reduceInstructions(ret.thenExpr),
+          elseExpr: reduceInstructions(ret.elseExpr),
+        };
+      } else {
+        return ret;
       }
-      return {
-        ...node,
-        instructions: reduceInstructions(node.instructions),
-      };
     };
     return visitor(moduleNode);
   };
