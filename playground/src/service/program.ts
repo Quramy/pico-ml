@@ -132,6 +132,7 @@ export interface Location {
 
 export interface Program {
   readonly initialContent: string;
+  readonly rawCode$: Subject<string>;
   readonly code$: Subject<string>;
   readonly selection$: Subject<{ readonly start: Location; readonly end: Location }>;
   readonly execute$: Subject<boolean | null>;
@@ -154,6 +155,7 @@ export type CreateProgramOptions = {
 };
 
 export function createProgram({ code$, settingsService }: CreateProgramOptions) {
+  const rawCode$ = new Subject<string>();
   const execute$ = new Subject<null | boolean>();
   const parseResult$ = code$.asObservable().pipe(debounceTime(100), map(parse), share());
   const selection$ = new Subject<{ readonly start: Location; readonly end: Location }>();
@@ -245,6 +247,7 @@ export function createProgram({ code$, settingsService }: CreateProgramOptions) 
   );
   const program: Program = {
     initialContent: code$.getValue(),
+    rawCode$,
     code$,
     execute$,
     selection$,
