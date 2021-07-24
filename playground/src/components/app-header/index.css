@@ -4,17 +4,23 @@
   display: flex;
 }
 
+.main {
+  flex: auto;
+}
+
 .heading {
+  display: inline-block;
   font-size: 1rem;
   line-height: 32px;
   margin-left: 14px;
-  flex: auto;
+  margin-right: 14px;
 }
 
 .subActions {
 }
 
 .buttonWrap {
+  display: inline-block;
   position: relative;
 }
 
@@ -39,12 +45,19 @@
 
 .panel {
   z-index: 1;
-  right: 0;
   top: 26px;
   padding: 14px;
   position: absolute;
   background: #1e2132;
   min-width: 360px;
+}
+
+.panel.left {
+  left: -40px;
+}
+
+.panel.right {
+  right: 0;
 }
 
 .settingItem {
@@ -54,6 +67,10 @@
   font-size: 12px;
 }
 
+.settingItem > label {
+  cursor: pointer;
+}
+
 .settingItem > label > span {
   font-size: 14px;
   margin-left: 12px;
@@ -61,4 +78,28 @@
 
 .settingItem + .settingItem {
   margin-top: 12px;
+}
+
+.exampleList {
+}
+
+.exampleItem {
+  line-height: 1.5;
+}
+.exampleItem:not(:first-child) {
+  margin-top: 8px;
+}
+
+.exampleItem > button {
+  font-size: medium;
+  cursor: pointer;
+  background: none;
+  color: #c6c8d1;
+  font-family: inherit;
+  font-weight: 14px;
+  text-decoration: underline;
+}
+
+.exampleItem > button:hover {
+  opacity: 0.8;
 }

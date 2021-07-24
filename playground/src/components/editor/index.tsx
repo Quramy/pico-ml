@@ -1,4 +1,5 @@
 import { useRef, useEffect, useContext } from "react";
+import { Subscription } from "rxjs";
 import ace from "ace-builds";
 import cx from "classnames";
 
@@ -25,7 +26,9 @@ function setupEditor(element: HTMLElement | null, program: Program) {
   editSession.setValue(program.initialContent);
 
   editor.on("change", () => program.code$.next(editSession.getValue()));
-  const subscription = program.diagnostics$.subscribe(diagnostics => editSession.setAnnotations([...diagnostics]));
+  const subscription = new Subscription();
+  subscription.add(program.rawCode$.subscribe(rawCode => editSession.setValue(rawCode)));
+  subscription.add(program.diagnostics$.subscribe(diagnostics => editSession.setAnnotations([...diagnostics])));
 
   editSession.selection.on("changeSelection", () => {
     const range = editSession.selection.getRange();
@@ -55,6 +58,6 @@ export function Editor() {
   useEffect(() => {
     if (!ref.current) return;
     return setupEditor(ref.current, program);
-  }, [ref.current]);
+  }, [ref.current, program]);
   return <div className={cx(styles.root)} ref={ref} />;
 }
