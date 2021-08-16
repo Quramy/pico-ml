@@ -11,6 +11,10 @@
     "ipml": "./bin/repl.js",
     "pmlc": "./bin/compiler.js"
   },
+  "files": [
+    "lib",
+    "lib-esm"
+  ],
   "exports": {
     ".": {
       "require": "./lib/index.js",
