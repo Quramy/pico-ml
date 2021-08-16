@@ -1,4 +1,4 @@
-import * as f from "../ast-factory";
+import * as f from "./ast-factory";
 import { template } from "./template";
 import { InstructionNode } from "../ast-types";
 

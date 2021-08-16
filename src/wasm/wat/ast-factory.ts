@@ -1,4 +1,4 @@
-import { Position } from "../parser-util";
+import { Position } from "../../parser-util";
 import {
   Node,
   SyntacticPlaceholderNode,
@@ -49,7 +49,7 @@ import {
   GlobalTypeNode,
   GlobalNode,
   ExportedGlobalNode,
-} from "./ast-types";
+} from "../ast-types";
 import {
   Int32NumericInstructionKind,
   Int64NumericInstructionKind,
@@ -58,7 +58,7 @@ import {
   VariableInstructionKind,
   ControlInstructionKind,
   MemoryInstructionKind,
-} from "./instructions-map";
+} from "../instructions-map";
 
 export function syntacticPlaceholder<T extends Node = SyntacticPlaceholderNode>(value: number, pos?: Position) {
   return {

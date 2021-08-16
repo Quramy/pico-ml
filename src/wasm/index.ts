@@ -2,7 +2,7 @@ import { Result } from "../structure";
 import { ModuleNode } from "./ast-types";
 import { convertModule } from "./converter";
 import { unparse } from "./binary";
-import * as f from "./ast-factory";
+import * as f from "./wat/ast-factory";
 import { BinaryOutputOptions } from "./types";
 
 export * from "./types";

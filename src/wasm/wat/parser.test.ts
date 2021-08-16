@@ -15,7 +15,7 @@ import {
   parseTable,
   parseGlobal,
 } from "./parser";
-import * as f from "../ast-factory";
+import * as f from "./ast-factory";
 import { InstructionNode } from "../ast-types";
 
 describe(parseFuncSig, () => {
