@@ -2,12 +2,14 @@
 .github/
 .vscode/
 .husky/
+.prettierignore
 .prettierrc.yml
 coverage/
 src/
 tsconfig.*
 *.test.js
 *.test.d.ts
+.jest/
 jest.config.js
 renovate.json
 playground/
