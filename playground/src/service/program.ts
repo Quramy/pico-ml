@@ -240,6 +240,7 @@ export function createProgram({ code$, settingsService }: CreateProgramOptions) 
         const value = (instance.exports["main"] as Function)() as number;
         return { type: "success", value: formatter(value) } as const;
       } catch (e) {
+        if (!(e instanceof Error)) throw e;
         return { type: "error", message: e.message || "unknown error" } as const;
       }
     }),
