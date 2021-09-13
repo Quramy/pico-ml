@@ -52,7 +52,7 @@
     "@types/jest": "27.0.1",
     "@types/node": "14.17.15",
     "husky": "7.0.2",
-    "jest": "27.1.1",
+    "jest": "27.2.0",
     "pinst": "2.1.6",
     "prettier": "2.4.0",
     "pretty-quick": "3.1.1",
