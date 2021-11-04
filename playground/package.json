@@ -19,7 +19,7 @@
     "@types/prismjs": "1.16.6",
     "@types/react": "17.0.31",
     "@types/react-dom": "17.0.10",
-    "css-loader": "6.5.0",
+    "css-loader": "6.5.1",
     "cssnano": "5.0.9",
     "file-loader": "6.2.0",
     "html-webpack-plugin": "5.4.0",
