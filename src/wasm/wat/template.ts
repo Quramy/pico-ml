@@ -1,7 +1,7 @@
 import { Node, InstructionNode, ModuleBodyNode, LocalVarNode } from "../ast-types";
 import { LRUCache } from "../../structure";
 
-import { visitEachChild } from "./";
+import { visitEachChild } from "./visitor";
 import { Scanner } from "./scanner";
 import { parseInstructionsVec, parseModuleFieldsVec, parseLocal } from "./parser";
 

@@ -1,4 +1,5 @@
-import { Node, NodeBase } from "../ast-types";
+import { createVisitorFunctions } from "../../structure";
+import type { Node, NodeBase } from "../ast-types";
 
 type NodePropertyNames<T> = T extends NodeBase<string> ? keyof T : never;
 
@@ -35,3 +36,5 @@ export const visitorKeys: readonly NodePropertyNames<Node>[] = [
   "type",
   "valueType",
 ];
+
+export const { visitEachChild } = createVisitorFunctions(visitorKeys);
