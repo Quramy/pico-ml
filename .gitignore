@@ -120,3 +120,4 @@ dist
 #
 lib/
 lib-esm/
+depgraph.*

@@ -27,6 +27,7 @@
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc -p .",
     "build:esm": "tsc -p tsconfig.esm.json",
+    "depgraph": "dependency-cruise --config .depcruise.config.js -T dot lib/cli/repl.js lib/cli/compiler.js | dot -T svg > depgraph.svg",
     "test": "jest",
     "start": "ts-node src/cli/index.ts",
     "prettier": "prettier \"src/**/*.ts\" \"playground/**/*\" \"*.{js,json,md}\"",
@@ -51,6 +52,7 @@
   "devDependencies": {
     "@types/jest": "27.0.3",
     "@types/node": "16.11.10",
+    "dependency-cruiser": "10.7.0",
     "husky": "7.0.4",
     "jest": "27.3.1",
     "pinst": "2.1.6",
