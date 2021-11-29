@@ -28,7 +28,7 @@ import { vec } from "../parser-util/combinator/vec";
  *
  * expr         ::= or | cond | match | func | bind
  * cond         ::= "if" expr "then" expr "else" expr
- * match        ::= "match" expr "wich" pat_clauses
+ * match        ::= "match" expr "with" pat_clauses
  * pat_clauses  ::= pat_match("|" pat_match)*
  * pat_match    ::= pattern "->" expr
  * pattern      ::= p_prim("::" p_prim)*
