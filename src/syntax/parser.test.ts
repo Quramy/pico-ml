@@ -481,11 +481,31 @@ const fixture = {
       binding: fixture["1+2"](),
       exp: id("x"),
     }),
+  "let f x = 1 in 1": () =>
+    expr({
+      kind: "LetExpression",
+      identifier: id("f"),
+      binding: fixture["fun x -> 1"](),
+      exp: num(1),
+    }),
+  "let f y x = 1 in 1": () =>
+    expr({
+      kind: "LetExpression",
+      identifier: id("f"),
+      binding: fixture["fun y -> fun x -> 1"](),
+      exp: num(1),
+    }),
   "fun x -> 1": () =>
     expr({
       kind: "FunctionDefinition",
       param: id("x"),
       body: num(1),
+    }),
+  "fun y -> fun x -> 1": () =>
+    expr({
+      kind: "FunctionDefinition",
+      param: id("y"),
+      body: fixture["fun x -> 1"](),
     }),
   "fun x -> if true then 0 else 1": () =>
     expr({
@@ -538,6 +558,20 @@ const fixture = {
       kind: "LetRecExpression",
       identifier: id("f"),
       binding: fixture["fun x -> 1"](),
+      exp: id("f"),
+    }),
+  "let rec f x = 1 in f": () =>
+    expr({
+      kind: "LetRecExpression",
+      identifier: id("f"),
+      binding: fixture["fun x -> 1"](),
+      exp: id("f"),
+    }),
+  "let rec f y x = 1 in f": () =>
+    expr({
+      kind: "LetRecExpression",
+      identifier: id("f"),
+      binding: fixture["fun y -> fun x -> 1"](),
       exp: id("f"),
     }),
   "let rec fib = fun n -> if n < 2 then n else fib (n - 1) + fib (n -2) in fib 10": () =>

@@ -26,14 +26,15 @@ function createCommands(rl: readline.Interface) {
     ["true != false ;;"],
     ["if 2 * 2 < 3 then true else false ;;"],
     ["fun x -> x ;;"],
-    ["let fn = fun x -> x * 2 in", "fn 2;;"],
+    ["let fn = fun x -> x * 2 in fn 2;;"],
+    ["let fn x = x * 2 in fn 2;;"],
     ["let rec fact = fun n -> if n < 2 then 1 else n * fact(n - 1) in fact 7 ;;"],
     ["let rec array = fun n -> if n < 1 then [] else (n - 1)::(array(n - 1)) in"],
     [
-      "let rec fact = fun n -> if n < 2 then 1 else n * fact(n - 1) in",
-      "let rec range = fun s -> fun e -> if s >= e then [] else s::(range (s + 1) e) in",
-      "let rec map = fun f -> fun list -> match list with [] -> [] | x::y -> (f x)::(map f y) in",
-      "map fact (range 1 7) ;;",
+      "let rec fact n = if n < 2 then 1 else n * fact(n - 1) in",
+      "let rec range s e = if s >= e then [] else s::(range (s + 1) e) in",
+      "let rec map f list = match list with [] -> [] | x::y -> (f x)::(map f y) in",
+      "map fact (range 1 7);;",
     ],
   ];
 

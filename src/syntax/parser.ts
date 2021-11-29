@@ -22,6 +22,7 @@ import {
   MatchPatternElementNode,
 } from "./types";
 import { symbolToken, integerToken, keywordToken, variableToken, decimalToken } from "./tokenizer";
+import { vec } from "../parser-util/combinator/vec";
 
 /**
  *
@@ -33,7 +34,7 @@ import { symbolToken, integerToken, keywordToken, variableToken, decimalToken } 
  * pattern      ::= p_prim("::" p_prim)*
  * p_prim       ::= id | "[" "]" | "_"
  * func         ::= "fun" id "->" expr
- * bind         ::= "let"(id "=" expr "in" expr | "rec" id "=" func "in" expr")
+ * bind         ::= "let"(id id* "=" expr "in" expr | "rec" id (id id* "=" expr | "=" func) "in" expr")
  * or           ::= and("||" (and | cond | match | func | bind))*
  * and          ::= comp("&&" (comp | cond | match | func | bind))*
  * comp         ::= cons(("<" | ">" | "<=" | ">=" | "==" | "!=" | "=" | "<>") (cons | cond | match | func | bind))*
@@ -65,33 +66,73 @@ const bind: Parser<LetExpressionNode | LetRecExpressionNode> = expect(
   oneOf(
     expect(
       use(() => id),
+      vec(use(() => id)),
       symbolToken("="),
       use(() => expr),
       keywordToken("in"),
       use(() => expr),
     )(
-      (id, tEqual, binding, tIn, exp): LetExpressionNode => ({
+      (id, parameters, tEqual, binding, tIn, exp): LetExpressionNode => ({
         kind: "LetExpression",
         identifier: id,
-        binding,
+        binding: parameters.values
+          .slice()
+          .reverse()
+          .reduce(
+            (acc, parameter): ExpressionNode => ({
+              kind: "FunctionDefinition",
+              param: parameter,
+              body: acc,
+              ...loc(binding),
+            }),
+            binding,
+          ),
         exp,
-        ...loc(id, tEqual, binding, tIn, exp),
+        ...loc(id, parameters, tEqual, binding, tIn, exp),
       }),
     ),
     expect(
       keywordToken("rec"),
       use(() => id),
-      symbolToken("="),
-      use(() => func),
+      oneOf(
+        expect(
+          symbolToken("="),
+          use(() => func),
+        )((_, binding) => binding),
+        expect(
+          use(() => id),
+          vec(use(() => id)),
+          symbolToken("="),
+          use(() => expr),
+        )(
+          (firstParam, restParameters, tEqual, binding): FunctionDefinitionNode => ({
+            kind: "FunctionDefinition",
+            param: firstParam,
+            body: restParameters.values
+              .slice()
+              .reverse()
+              .reduce(
+                (acc, parameter): ExpressionNode => ({
+                  kind: "FunctionDefinition",
+                  param: parameter,
+                  body: acc,
+                  ...loc(binding),
+                }),
+                binding,
+              ),
+            ...loc(firstParam, restParameters, tEqual, binding),
+          }),
+        ),
+      ),
       keywordToken("in"),
       use(() => expr),
     )(
-      (tRec, id, tEqual, binding, tIn, exp): LetRecExpressionNode => ({
+      (tRec, id, binding, tIn, exp): LetRecExpressionNode => ({
         kind: "LetRecExpression",
         identifier: id,
         binding,
         exp,
-        ...loc(tRec, id, tEqual, binding, tIn, exp),
+        ...loc(tRec, id, binding, tIn, exp),
       }),
     ),
   ),

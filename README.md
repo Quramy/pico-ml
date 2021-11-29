@@ -6,9 +6,9 @@
 A toy programming language which is a subset of OCaml.
 
 ```ocaml
-let rec fact = fun n -> if n < 2 then 1 else n * fact(n - 1) in
-let rec range = fun s -> fun e -> if s >= e then [] else s::(range (s + 1) e) in
-let rec map = fun f -> fun list -> match list with [] -> [] | x::y -> (f x)::(map f y) in
+let rec fact n = if n < 2 then 1 else n * fact(n - 1) in
+let rec range s e = if s >= e then [] else s::(range (s + 1) e) in
+let rec map f list = match list with [] -> [] | x::y -> (f x)::(map f y) in
 map fact (range 1 7) (* ==> int list: [ 1, 2, 6, 24, 120, 720 ] *)
 ```
 
@@ -105,8 +105,9 @@ expr    ::= id |
             "if" expr "then" expr "else" expr |
             "match" expr "with" clause |
             "fun" id "->" expr |
-            "let" id "=" expr "in" expr |
-            "let" "rec" id "=" "fun" id "->" expr "in" expr
+            "let" id id* "=" expr "in" expr |
+            "let" "rec" id "=" "fun" id "->" expr "in" expr |
+            "let" "rec" id id+ "=" expr "in" expr
 
 clause  ::= pat "->" expr | pat "->" expr "|" clause
 
