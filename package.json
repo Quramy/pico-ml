@@ -54,7 +54,7 @@
     "@types/node": "16.11.11",
     "dependency-cruiser": "11.0.0",
     "husky": "7.0.4",
-    "jest": "27.3.1",
+    "jest": "27.4.3",
     "pinst": "2.1.6",
     "prettier": "2.5.1",
     "pretty-quick": "3.1.2",
