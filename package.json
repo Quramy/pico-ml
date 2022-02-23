@@ -50,7 +50,7 @@
     "url": "https://github.com/Quramy/pico-ml.git"
   },
   "devDependencies": {
-    "@types/jest": "27.4.0",
+    "@types/jest": "27.4.1",
     "@types/node": "16.11.25",
     "dependency-cruiser": "11.3.1",
     "husky": "7.0.4",
