@@ -1,4 +1,5 @@
-import SplitPane from "react-split-pane";
+import type { ReactNode } from "react";
+import OriginalSplitPane, { SplitPaneProps } from "react-split-pane";
 
 import { useCodeStream } from "../../hooks/use-code-stream";
 import { ProgramProvider } from "../../context/program-context";
@@ -58,4 +59,9 @@ export function App() {
       </footer>
     </ProgramProvider>
   );
+}
+
+// Workaround for react-split-pane type mismatching
+function SplitPane(props: SplitPaneProps & { readonly children: ReactNode }) {
+  return <OriginalSplitPane {...props} />;
 }

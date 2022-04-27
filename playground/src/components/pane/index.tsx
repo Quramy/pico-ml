@@ -9,9 +9,9 @@ type Props = {
 
 export function Pane({ children, sectionName }: Props) {
   return (
-    <div className={styles.root}>
+    <section className={styles.root}>
       {sectionName && <h2 className={styles.sectionName}>{sectionName}</h2>}
       <div className={styles.inner}>{children}</div>
-    </div>
+    </section>
   );
 }
