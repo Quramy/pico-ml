@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "incremental": true,
+    "target": "es2022",
+    "module": "commonjs",
+    "declaration": true,
+    "outDir": "./lib",
+    "rootDir": "./src",
+    "noEmit": false,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "exclude": ["lib", "lib-esm"],
+  "ts-node": {
+    "transpileOnly": true
+  }
+}

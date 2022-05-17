@@ -6,5 +6,5 @@
     "declaration": false,
     "outDir": "./lib-esm"
   },
-  "exclude": ["lib", "lib-esm", "src/cli", "playground"]
+  "exclude": ["lib", "lib-esm", "src/cli"]
 }

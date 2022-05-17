@@ -23,10 +23,9 @@ jobs:
           git config --global user.email "yosuke.kurami@gmai.com"
           git config --global user.name "Quramy"
           npm ci
-          npm run build
-        working-directory: playground
+          npm run build --workspace packages/playground
       - name: Publish gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./playground/dist
+          publish_dir: ./packages/playground/dist
