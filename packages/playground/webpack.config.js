@@ -52,6 +52,11 @@ module.exports = {
     ],
   },
   plugins: [new MiniCssExtractPlugin(), new HtmlWebpackPlugin({ template: "index.html" })],
+  optimization: {
+    splitChunks: {
+      chunks: "all",
+    },
+  },
   devServer: {
     port: 4001,
   },
