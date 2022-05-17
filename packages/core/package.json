@@ -30,7 +30,7 @@
     "build:cjs": "tsc -p .",
     "build:esm": "tsc -p tsconfig.esm.json",
     "test": "jest",
-    "start": "ts-node src/cli/index.ts",
+    "start": "ts-node src/cli/repl.ts",
     "prepare": "cp ../../README.md .",
     "depgraph": "dependency-cruise --config .depcruise.config.js -T dot lib/cli/repl.js lib/cli/compiler.js | dot -T svg > depgraph.svg"
   },
