@@ -4,7 +4,7 @@
   "description": "A toy programming language witch is a subset of OCaml",
   "scripts": {
     "clean": "npm run clean --workspaces",
-    "compile": "npm run compile --workspaces",
+    "compile": "tsc -b tsconfig.check.json",
     "build": "npm run build --workspaces",
     "test": "jest",
     "test:ci": "jest --coverage",
