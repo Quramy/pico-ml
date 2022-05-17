@@ -18,7 +18,7 @@ import {
 import * as f from "./ast-factory";
 import { InstructionNode } from "../ast-types";
 
-describe(parseFuncSig, () => {
+describe(parseFuncSig.name, () => {
   test("success", () => {
     expect(use(parseFuncSig)("(type 1)")).toMatchObject(f.funcSig([], [], f.uint32(1)));
     expect(use(parseFuncSig)("(type $fn)")).toMatchObject(f.funcSig([], [], f.identifier("fn")));
@@ -27,7 +27,7 @@ describe(parseFuncSig, () => {
   });
 });
 
-describe(parseIfInstr, () => {
+describe(parseIfInstr.name, () => {
   const instr = f.int32NumericInstr("i32.const", [f.int32(0)]);
   test("success", () => {
     expect(use(parseIfInstr)("if (result i32) i32.const 0 else i32.const 0 end")).toMatchObject(
@@ -51,7 +51,7 @@ describe(parseIfInstr, () => {
   });
 });
 
-describe(parseControlInstr, () => {
+describe(parseControlInstr.name, () => {
   test("success", () => {
     expect(use(parseControlInstr)("call 0")).toMatchObject(f.controlInstr("call", [f.uint32(0)]));
     expect(use(parseControlInstr)("call_indirect 0 (type 1)")).toMatchObject(
@@ -60,7 +60,7 @@ describe(parseControlInstr, () => {
   });
 });
 
-describe(parseVariableInstr, () => {
+describe(parseVariableInstr.name, () => {
   test("success", () => {
     expect(use(parseVariableInstr)("local.get 0")).toMatchObject(f.variableInstr("local.get", [f.uint32(0)]));
     expect(use(parseVariableInstr)("local.set $var")).toMatchObject(
@@ -69,7 +69,7 @@ describe(parseVariableInstr, () => {
   });
 });
 
-describe(parseNumericInstr, () => {
+describe(parseNumericInstr.name, () => {
   test("success", () => {
     expect(use(parseNumericInstr)("i32.const 0")).toMatchObject(f.int32NumericInstr("i32.const", [f.int32(0)]));
   });
@@ -84,7 +84,7 @@ describe(parseNumericInstr, () => {
   });
 });
 
-describe(parseMemoryInstr, () => {
+describe(parseMemoryInstr.name, () => {
   test("success", () => {
     expect(use(parseMemoryInstr)("i32.load")).toMatchObject(f.memoryInstr("i32.load"));
     expect(use(parseMemoryInstr)("i32.load offset=0")).toMatchObject(f.memoryInstr("i32.load", f.uint32(0)));
@@ -92,7 +92,7 @@ describe(parseMemoryInstr, () => {
   });
 });
 
-describe(parseType, () => {
+describe(parseType.name, () => {
   test("success", () => {
     expect(use(parseType)("(type (func))")).toMatchObject(f.typedef(f.funcType([], [])));
     expect(use(parseType)("(type (func (param i32)))")).toMatchObject(
@@ -126,7 +126,7 @@ describe(parseType, () => {
   });
 });
 
-describe(parseFunc, () => {
+describe(parseFunc.name, () => {
   test("success", () => {
     expect(use(parseFunc)("(func)")).toMatchObject(f.func(f.funcSig([], []), [], []));
     expect(use(parseFunc)("(func (result i64))")).toMatchObject(f.func(f.funcSig([], [f.valueType("i64")]), [], []));
@@ -162,7 +162,7 @@ describe(parseFunc, () => {
   });
 });
 
-describe(parseTable, () => {
+describe(parseTable.name, () => {
   test("success", () => {
     expect(use(parseTable)("(table funcref (elem 1))")).toMatchObject(
       f.tableWithElemList(f.functionIndexList([f.uint32(1)])),
@@ -179,7 +179,7 @@ describe(parseTable, () => {
   });
 });
 
-describe(parseMemory, () => {
+describe(parseMemory.name, () => {
   test("success", () => {
     expect(use(parseMemory)("(memory 1)")).toMatchObject(f.memory(f.limits(f.uint32(1))));
     expect(use(parseMemory)("(memory 1 2)")).toMatchObject(f.memory(f.limits(f.uint32(1), f.uint32(2))));
@@ -190,7 +190,7 @@ describe(parseMemory, () => {
   });
 });
 
-describe(parseGlobal, () => {
+describe(parseGlobal.name, () => {
   test("success", () => {
     expect(use(parseGlobal)("(global i32 i32.const 0)")).toMatchObject(
       f.globalNode(f.valueType("i32"), [f.int32NumericInstr("i32.const", [f.int32(0)])]),
@@ -205,7 +205,7 @@ describe(parseGlobal, () => {
   });
 });
 
-describe(parseExport, () => {
+describe(parseExport.name, () => {
   test("success", () => {
     expect(use(parseExport)('(export "main" (func $main))')).toMatchObject(
       f.exportNode("main", f.exportedFunc(f.identifier("main"))),
@@ -222,7 +222,7 @@ describe(parseExport, () => {
   });
 });
 
-describe(parseElem, () => {
+describe(parseElem.name, () => {
   test("success", () => {
     expect(use(parseElem)("(elem (offset i32.const 0) func 0)")).toMatchObject(
       f.elem(f.functionIndexList([f.uint32(0)]), [f.int32NumericInstr("i32.const", [f.int32(0)])]),
@@ -230,7 +230,7 @@ describe(parseElem, () => {
   });
 });
 
-describe(parseModule, () => {
+describe(parseModule.name, () => {
   const mem = f.memory(f.limits(f.uint32(1)));
   const typedef = f.typedef(f.funcType([], []));
   test("success", () => {
