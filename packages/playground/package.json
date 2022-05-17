@@ -1,13 +1,13 @@
 {
   "private": true,
-  "name": "picoml-playground",
+  "name": "@pico-ml/playground",
   "sideEffects": [
     "./src/index.tsx",
     "src/ace-config.js",
     "*.css"
   ],
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf dist \"*.tsbuildinfo\"",
     "compile": "tsc -p .",
     "tcm": "tcm --watch src/components",
     "start": "webpack-cli serve --mode development",

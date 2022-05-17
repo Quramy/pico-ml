@@ -13,7 +13,7 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".json"],
     alias: {
-      "pico-ml": path.resolve(__dirname, "../src/index.ts"),
+      "pico-ml": path.resolve(__dirname, "../core/src/index.ts"),
     },
   },
   module: {
