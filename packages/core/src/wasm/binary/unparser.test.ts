@@ -67,19 +67,25 @@ describe(unparse, () => {
       expect((instance.exports["main"] as Function)(2)).toBe(4);
     });
 
-    // Node v14 can't compile this case
-    test.skip("Int64 function example", async () => {
+    test("Int64 function example", async () => {
       const source = `
         (module
-          (func $twice (result i64)
-            i64.const 1
+          (func $add (param $a i64) (param $b i64) (result i64)
+            local.get $a
+            local.get $b
+            i64.add
+          )
+          (func $twice (param $x i64) (result i64)
+            local.get $x
+            local.get $x
+            call $add
           )
           (export "main" (func $twice))
         )
       `;
       const buf = parse(source).mapValue(convertModule).map(unparse).unwrap();
       const { instance } = await WebAssembly.instantiate(buf, {});
-      expect((instance.exports["main"] as Function)(2)).toBe(4);
+      expect((instance.exports["main"] as Function)(2n)).toBe(4n);
     });
 
     test("Float32 function example", async () => {
