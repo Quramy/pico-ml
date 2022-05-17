@@ -7,7 +7,7 @@
     "compile": "npm run compile --workspaces",
     "build": "npm run build --workspaces",
     "test": "jest",
-    "test:ci": "jest --corverages",
+    "test:ci": "jest --coverage",
     "prettier": "prettier \"packages/*/src/**/*\" \"*.{js,mjs,cjs,json,md}\"",
     "format": "npm run prettier -- --write",
     "lint": "npm run prettier -- --check",
