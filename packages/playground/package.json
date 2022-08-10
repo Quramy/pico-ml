@@ -34,7 +34,7 @@
     "webpack-dev-server": "4.10.0"
   },
   "dependencies": {
-    "ace-builds": "1.9.4",
+    "ace-builds": "1.9.5",
     "classnames": "2.3.1",
     "lz-string": "1.4.4",
     "prismjs": "1.28.0",
