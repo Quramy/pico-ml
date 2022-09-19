@@ -16,7 +16,7 @@
   "devDependencies": {
     "@types/jest": "29.0.0",
     "@types/node": "16.11.58",
-    "dependency-cruiser": "11.15.0",
+    "dependency-cruiser": "11.16.0",
     "husky": "8.0.1",
     "jest": "29.0.2",
     "pinst": "3.0.0",
