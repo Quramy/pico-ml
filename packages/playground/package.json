@@ -42,6 +42,6 @@
     "react-dom": "18.2.0",
     "react-json-view": "1.21.3",
     "react-split-pane": "0.1.92",
-    "rxjs": "7.6.0"
+    "rxjs": "7.8.0"
   }
 }
