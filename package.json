@@ -14,11 +14,11 @@
     "postinstall": "husky install"
   },
   "devDependencies": {
-    "@types/jest": "29.2.4",
+    "@types/jest": "29.4.0",
     "@types/node": "18.11.19",
     "dependency-cruiser": "12.4.0",
     "husky": "8.0.2",
-    "jest": "29.3.1",
+    "jest": "29.4.1",
     "pinst": "3.0.0",
     "prettier": "2.8.1",
     "pretty-quick": "3.1.3",
