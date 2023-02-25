@@ -180,26 +180,26 @@ export const numberInstructions = {
 } as const;
 
 export type ControlInstructionKind = keyof typeof controlInstructions;
-export type ControlInstructionParamKind = typeof controlInstructions[ControlInstructionKind]["args"][number];
+export type ControlInstructionParamKind = (typeof controlInstructions)[ControlInstructionKind]["args"][number];
 
 export type VariableInstructionKind = keyof typeof variableInstructions;
-export type VariableInstructionParamKind = typeof variableInstructions[VariableInstructionKind]["args"][number];
+export type VariableInstructionParamKind = (typeof variableInstructions)[VariableInstructionKind]["args"][number];
 
 export type Int32NumericInstructionKind = keyof typeof i32NumberInstructions;
 export type Int32NumericInstructionParamKind =
-  typeof i32NumberInstructions[Int32NumericInstructionKind]["args"][number];
+  (typeof i32NumberInstructions)[Int32NumericInstructionKind]["args"][number];
 
 export type Int64NumericInstructionKind = keyof typeof i64NumberInstructions;
 export type Int64NumericInstructionParamKind =
-  typeof i64NumberInstructions[Int64NumericInstructionKind]["args"][number];
+  (typeof i64NumberInstructions)[Int64NumericInstructionKind]["args"][number];
 
 export type Float32NumericInstructionKind = keyof typeof f32NumberInstructions;
 export type Float32NumericInstructionParamKind =
-  typeof f32NumberInstructions[Float32NumericInstructionKind]["args"][number];
+  (typeof f32NumberInstructions)[Float32NumericInstructionKind]["args"][number];
 
 export type Float64NumericInstructionKind = keyof typeof f64NumberInstructions;
 export type Float64NumericInstructionParamKind =
-  typeof f64NumberInstructions[Float64NumericInstructionKind]["args"][number];
+  (typeof f64NumberInstructions)[Float64NumericInstructionKind]["args"][number];
 
 export type NumericInstructionKind =
   | Int32NumericInstructionKind
