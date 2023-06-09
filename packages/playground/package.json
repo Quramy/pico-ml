@@ -22,7 +22,7 @@
     "css-loader": "6.8.1",
     "cssnano": "5.1.15",
     "file-loader": "6.2.0",
-    "html-webpack-plugin": "5.5.1",
+    "html-webpack-plugin": "5.5.2",
     "mini-css-extract-plugin": "2.7.5",
     "postcss-loader": "7.0.2",
     "rimraf": "5.0.1",
