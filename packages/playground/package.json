@@ -27,7 +27,7 @@
     "postcss-loader": "7.0.2",
     "rimraf": "5.0.1",
     "ts-loader": "9.4.4",
-    "typed-css-modules": "0.7.2",
+    "typed-css-modules": "0.8.0",
     "typescript": "5.0.4",
     "webpack": "5.88.2",
     "webpack-cli": "5.1.4",
