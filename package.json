@@ -14,7 +14,7 @@
     "postinstall": "husky install"
   },
   "devDependencies": {
-    "@types/jest": "29.5.5",
+    "@types/jest": "29.5.6",
     "@types/node": "18.18.5",
     "dependency-cruiser": "14.1.2",
     "husky": "8.0.3",
