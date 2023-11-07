@@ -1,6 +1,6 @@
 declare const styles: {
-  readonly root: string;
   readonly inner: string;
+  readonly root: string;
   readonly sectionName: string;
 };
 export = styles;

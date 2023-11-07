@@ -1,16 +1,16 @@
 declare const styles: {
-  readonly root: string;
-  readonly buttonsArea: string;
-  readonly logList: string;
-  readonly logItem: string;
-  readonly logHeader: string;
-  readonly logBody: string;
-  readonly error: string;
-  readonly intNode: string;
   readonly boolNode: string;
-  readonly lpToken: string;
-  readonly rpToken: string;
+  readonly buttonsArea: string;
   readonly commaToken: string;
+  readonly error: string;
   readonly functionNode: string;
+  readonly intNode: string;
+  readonly logBody: string;
+  readonly logHeader: string;
+  readonly logItem: string;
+  readonly logList: string;
+  readonly lpToken: string;
+  readonly root: string;
+  readonly rpToken: string;
 };
 export = styles;
