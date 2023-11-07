@@ -15,7 +15,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "exclude": ["lib", "lib-esm"],
+  "exclude": ["lib"],
   "ts-node": {
     "transpileOnly": true
   }
