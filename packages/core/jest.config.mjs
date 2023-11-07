@@ -1,11 +1,11 @@
 export default {
-  globals: {
-    "ts-jest": {
-      diagnostics: false,
-    },
-  },
   transform: {
-    "^.+\\.ts$": "ts-jest",
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        diagnostics: false,
+      },
+    ],
   },
   testRegex: "(src/.*\\.test)\\.ts$",
   testPathIgnorePatterns: ["/node_modules/", "\\.d\\.ts$", "lib/.*", "lib-esm/.*"],
