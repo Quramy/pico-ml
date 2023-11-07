@@ -24,7 +24,7 @@
     "file-loader": "6.2.0",
     "html-webpack-plugin": "5.5.3",
     "mini-css-extract-plugin": "2.7.6",
-    "postcss-loader": "7.0.2",
+    "postcss-loader": "7.3.3",
     "rimraf": "5.0.5",
     "ts-loader": "9.5.0",
     "typed-css-modules": "0.8.0",
