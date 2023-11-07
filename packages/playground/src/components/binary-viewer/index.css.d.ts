@@ -1,8 +1,8 @@
 declare const styles: {
+  readonly addressCell: string;
+  readonly asciiCell: string;
+  readonly cell: string;
   readonly root: string;
   readonly table: string;
-  readonly addressCell: string;
-  readonly cell: string;
-  readonly asciiCell: string;
 };
 export = styles;
