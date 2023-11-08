@@ -12,23 +12,23 @@
     "pmlc": "./bin/compiler.js"
   },
   "files": [
-    "lib",
-    "lib-esm"
+    "index.mjs",
+    "bin",
+    "lib"
   ],
   "exports": {
     ".": {
+      "import": "./index.mjs",
       "require": "./lib/index.js",
-      "browser": "./lib-esm/index.js",
+      "browser": "./index.mjs",
       "default": "./lib/index.js"
     }
   },
   "sideEffects": false,
   "scripts": {
-    "clean": "rimraf \"*.tsbuildinfo\" lib lib-esm README.md",
+    "clean": "rimraf -g \"*.tsbuildinfo\" lib README.md",
     "compile": "tsc --noEmit",
-    "build": "npm run build:cjs && npm run build:esm",
-    "build:cjs": "tsc -p .",
-    "build:esm": "tsc -p tsconfig.esm.json",
+    "build": "tsc -p .",
     "test": "jest",
     "start": "ts-node src/cli/repl.ts",
     "prepare": "cp ../../README.md .",
