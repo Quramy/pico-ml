@@ -14,7 +14,7 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@types/jest": "29.5.10",
+    "@types/jest": "29.5.12",
     "@types/node": "20.11.24",
     "dependency-cruiser": "16.2.2",
     "husky": "9.0.11",
