@@ -33,13 +33,13 @@ const num = (value: number) =>
   ({
     kind: "IntLiteral",
     value,
-  } as IntLiteralNode);
+  }) as IntLiteralNode;
 
 const float = (value: number) =>
   ({
     kind: "FloatLiteral",
     value,
-  } as FloatLiteralNode);
+  }) as FloatLiteralNode;
 
 const minus: MinusOperation = {
   kind: "Minus",
@@ -203,15 +203,15 @@ const pne: PNEOperation = {
 const empty = () =>
   ({
     kind: "EmptyList",
-  } as EmptyListNode);
+  }) as EmptyListNode;
 
 const bool = (value: boolean) =>
   ({
     kind: "BoolLiteral",
     value,
-  } as BoolLiteralNode);
+  }) as BoolLiteralNode;
 
-const id = (name: string) => ({ kind: "Identifier", name } as IdentifierNode);
+const id = (name: string) => ({ kind: "Identifier", name }) as IdentifierNode;
 
 const expr = <T extends ExpressionNode = ExpressionNode>(node: T) => node;
 

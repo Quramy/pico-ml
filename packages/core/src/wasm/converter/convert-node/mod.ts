@@ -91,7 +91,7 @@ function names(refCtx: RefereneceContext): Names {
           kind: "NameAssociation",
           idx,
           name,
-        } as const),
+        }) as const,
     );
   return {
     kind: "Names",

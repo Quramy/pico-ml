@@ -62,7 +62,7 @@ const controlInstruction: ConvertInstrFn<"ControlInstruction"> = (node, { refCtx
         kind: "ControlInstruction",
         instructionKind: node.instructionKind,
         parameters,
-      } as Instruction),
+      }) as Instruction,
   );
 };
 
@@ -79,7 +79,7 @@ const variableInstruction: ConvertInstrFn<"VariableInstruction"> = (node, { refC
         kind: "VariableInstruction",
         instructionKind: node.instructionKind,
         parameters,
-      } as Instruction),
+      }) as Instruction,
   );
 };
 
@@ -98,7 +98,7 @@ const numericInstruction: ConvertInstrFn<
         kind: "NumericInstruction",
         instructionKind: node.instructionKind,
         parameters,
-      } as Instruction),
+      }) as Instruction,
   );
 };
 
@@ -196,13 +196,13 @@ export function convertFunc(node: FuncNode, idx: number, prev: State, refCtx: Re
           type: typeidx,
           locals: mapToValTypeListFrom(node.locals),
           body,
-        } as Func),
+        }) as Func,
     )
     .map(
       func =>
         ({
           types: mutTypes,
           funcs: [...prev.funcs, func],
-        } as State),
+        }) as State,
     );
 }
