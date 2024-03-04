@@ -298,20 +298,20 @@ const comp: Parser<ExpressionNode> = leftAssociate(use(() => cons))(
       token.symbol === "<"
         ? "LessThan"
         : token.symbol === ">"
-        ? "GreaterThan"
-        : token.symbol === "<="
-        ? "LessEqualThan"
-        : token.symbol === ">="
-        ? "GreaterEqualThan"
-        : token.symbol === "="
-        ? "Equal"
-        : token.symbol === "<>"
-        ? "NotEqual"
-        : token.symbol === "=="
-        ? "PEqual"
-        : token.symbol === "!="
-        ? "PNotEqual"
-        : (undefined as never),
+          ? "GreaterThan"
+          : token.symbol === "<="
+            ? "LessEqualThan"
+            : token.symbol === ">="
+              ? "GreaterEqualThan"
+              : token.symbol === "="
+                ? "Equal"
+                : token.symbol === "<>"
+                  ? "NotEqual"
+                  : token.symbol === "=="
+                    ? "PEqual"
+                    : token.symbol === "!="
+                      ? "PNotEqual"
+                      : (undefined as never),
     token,
   },
   left,
@@ -350,12 +350,12 @@ const add: Parser<ExpressionNode> = leftAssociate(use(() => mul))(
     token.symbol === "+"
       ? { kind: "Add", token }
       : token.symbol === "+."
-      ? { kind: "FAdd", token }
-      : token.symbol === "-"
-      ? { kind: "Sub", token }
-      : token.symbol === "-."
-      ? { kind: "FSub", token }
-      : (null as never),
+        ? { kind: "FAdd", token }
+        : token.symbol === "-"
+          ? { kind: "Sub", token }
+          : token.symbol === "-."
+            ? { kind: "FSub", token }
+            : (null as never),
   left,
   right,
   ...loc(left, token, right),
@@ -377,12 +377,12 @@ const mul: Parser<ExpressionNode> = leftAssociate(use(() => prfx))(
       token.symbol === "*"
         ? "Multiply"
         : token.symbol === "*."
-        ? "FMultiply"
-        : token.symbol === "/"
-        ? "Div"
-        : token.symbol === "/."
-        ? "FDiv"
-        : (null as never),
+          ? "FMultiply"
+          : token.symbol === "/"
+            ? "Div"
+            : token.symbol === "/."
+              ? "FDiv"
+              : (null as never),
     token,
   },
   left,

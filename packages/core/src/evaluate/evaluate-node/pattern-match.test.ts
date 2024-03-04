@@ -3,7 +3,7 @@ import { isMatch } from "./pattern-match";
 import { EvaluationValue } from "../types";
 import { createRootEnvironment } from "../environment";
 
-const id = (name: string) => ({ kind: "Identifier", name } as const);
+const id = (name: string) => ({ kind: "Identifier", name }) as const;
 
 describe(isMatch, () => {
   const getEnv = (input: string, value: EvaluationValue) =>

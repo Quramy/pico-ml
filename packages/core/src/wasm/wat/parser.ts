@@ -580,10 +580,10 @@ const exportSec: Parser<ExportedSecNode> = tryWith(
         tKeyword.keyword === "func"
           ? "ExportedFunc"
           : tKeyword.keyword === "memory"
-          ? "ExportedMemory"
-          : tKeyword.keyword === "table"
-          ? "ExportedTable"
-          : "ExportedGlobal",
+            ? "ExportedMemory"
+            : tKeyword.keyword === "table"
+              ? "ExportedTable"
+              : "ExportedGlobal",
       index,
       ...loc(tLp, tKeyword, index, tRp),
     }),

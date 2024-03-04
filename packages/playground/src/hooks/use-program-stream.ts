@@ -52,15 +52,15 @@ export function useProgramStream<
         error: null,
       }
     : state.ok
-    ? {
-        ready: true,
-        data: state.value,
-        error: null,
-      }
-    : {
-        ready: true,
-        data: null,
-        error: state.value,
-      };
+      ? {
+          ready: true,
+          data: state.value,
+          error: null,
+        }
+      : {
+          ready: true,
+          data: null,
+          error: state.value,
+        };
   return ret;
 }

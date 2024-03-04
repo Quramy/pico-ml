@@ -84,10 +84,13 @@ export function createTypePrinter(opts: TypePrinterOptions = {}) {
   const solvedVariables = opts.remapWithSubstitutions && getResolvedTypeVariables(opts.remapWithSubstitutions);
   const solvedIds =
     solvedVariables &&
-    solvedVariables.reduce((acc, v) => {
-      acc[v.id] = true;
-      return acc;
-    }, [] as (boolean | undefined)[]);
+    solvedVariables.reduce(
+      (acc, v) => {
+        acc[v.id] = true;
+        return acc;
+      },
+      [] as (boolean | undefined)[],
+    );
   const ctx: Context = {
     idMap(id) {
       if (!solvedIds) return id - this.baseId;

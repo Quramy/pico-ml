@@ -19,7 +19,10 @@ export type ErrorContent = {
 };
 
 export class ErrorReporter {
-  constructor(private readonly _currentDirectory: string, private readonly _output: (msg: string) => void = () => {}) {}
+  constructor(
+    private readonly _currentDirectory: string,
+    private readonly _output: (msg: string) => void = () => {},
+  ) {}
 
   outputError(error: ErrorContent) {
     if (!error.occurence?.loc) {
