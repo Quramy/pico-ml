@@ -2,6 +2,7 @@
 
 [![github actions](https://github.com/Quramy/pico-ml/workflows/build/badge.svg)](https://github.com/Quramy/pico-ml/actions)
 [![npm version](https://badge.fury.io/js/pico-ml.svg)](https://badge.fury.io/js/pico-ml)
+[![codecov](https://codecov.io/gh/Quramy/pico-ml/graph/badge.svg?token=ZZN2OX50UX)](https://codecov.io/gh/Quramy/pico-ml)
 
 A toy programming language which is a subset of OCaml.
 
