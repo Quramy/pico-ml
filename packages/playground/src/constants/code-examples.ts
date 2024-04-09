@@ -14,7 +14,7 @@ export const CODE_EXAMPLES = [
   {
     name: "If expression",
     code: `
-1 = 2 then true else false
+if 1 = 2 then true else false
     `,
   },
   {
