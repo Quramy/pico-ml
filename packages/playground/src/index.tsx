@@ -1,8 +1,8 @@
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
 import "./ace-config";
 import "./styles/base.css";
 import { App } from "./components/app";
 
 const elem = document.getElementById("app")!;
 
-render(<App />, elem);
+createRoot(elem).render(<App />);
