@@ -32,5 +32,7 @@ jobs:
           npm ci
           npm run build
       - name: Publish Package
-        run: npm publish --access=public --workspaces
+        run: |
+          npm whoami
+          npm publish --workspaces
         if: contains(github.ref, 'tags/v')
