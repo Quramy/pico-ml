@@ -17,14 +17,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
+      - name: Update npm
+        run: npm install -g npm@latest
       - name: npm publish
         run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
-          npm whoami
           npm ci
           npm run build
           npm publish
         if: contains(github.ref, 'tags/v')
-        env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-          CI: true
