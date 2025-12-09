@@ -19,9 +19,10 @@ jobs:
           cache: npm
       - name: Update npm
         run: npm install -g npm@latest
-      - name: npm publish
+      - name: Build
         run: |
           npm ci
           npm run build
-          npm publish
+      - name: Publish Package
+        run: npm publish
         if: contains(github.ref, 'tags/v')
