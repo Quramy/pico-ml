@@ -20,7 +20,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "css-loader": "7.1.4",
-    "cssnano": "7.1.7",
+    "cssnano": "8.0.0",
     "file-loader": "6.2.0",
     "html-webpack-plugin": "5.6.7",
     "mini-css-extract-plugin": "2.10.2",
