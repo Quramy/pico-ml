@@ -31,7 +31,7 @@
     "typescript": "5.5.4",
     "webpack": "5.109.2",
     "webpack-cli": "6.0.1",
-    "webpack-dev-server": "5.2.4"
+    "webpack-dev-server": "5.2.6"
   },
   "dependencies": {
     "ace-builds": "1.44.0",
